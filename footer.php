@@ -5,10 +5,10 @@
     <div>Theme <a href="https://github.com/solstice23/argon-theme"
                   target="_blank"><strong>Argon</strong></a><?php if ( get_option( 'argon_hide_footer_author' ) != 'true' ) {
 			echo " By solstice23";
-		} ?>, Modified By HikariLan
+		} ?>, Enhanced By HikariLan
     </div>
     <div><?php if ( $_SERVER['HTTP_X_PROVIDED_BY'] != null )
-			echo "Current CDN Service provided by ".$_SERVER['HTTP_X_PROVIDED_BY'] ?></div>
+			echo "您本次会话的 CDN 提供商为 ".$_SERVER['HTTP_X_PROVIDED_BY'] ?></div>
 </footer>
 </main>
 </div>
