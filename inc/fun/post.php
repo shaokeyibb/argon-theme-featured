@@ -239,9 +239,9 @@ function get_article_meta($type){
 	}
 	if ($type == 'views'){
 		if ( get_option( "argon_view_counter" ) == 'wp-statistics' && function_exists( 'wp_statistics_pages' ) ) {
-			$views = wp_statistics_pages( 'total', "", get_the_ID() );
+			$views = wp_statistics_pages( 'total', "", get_the_ID() ) . " " . __( "人看过", 'argon' );
 		} else if ( get_option( "argon_view_counter" ) == 'post-views-counter' && function_exists( 'pvc_get_post_views' ) ) {
-			$views = pvc_get_post_views( get_the_ID() );
+			$views = pvc_get_post_views( get_the_ID() ) . "" . __( "人看过", 'argon' );
 		} else {
 			$views = get_post_views( get_the_ID() );
 		}
