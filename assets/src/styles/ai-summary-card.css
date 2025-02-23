@@ -2,8 +2,11 @@
     padding: 25px 30px;
     margin-bottom: 25px;
 
-    border: 1px solid;
+    border: 1px solid #7889e8;
     border-radius: 5px;
+
+    color: #fff;
+    background-color: #7889e8;
 }
 
 .post-ai-summary_title {
