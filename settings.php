@@ -932,14 +932,14 @@ function themeoptions_page(){
 						<style> input[name='argon_openai_api_key']:invalid { background-color: lightpink; } </style>
                     </tr>
                     <tr>
-                        <th><label><?php _e('替换首页文章摘要', 'argon');?></label></th>
+                        <th><label><?php _e('替换文章摘要', 'argon');?></label></th>
                         <td>
                             <select name="argon_ai_show_post_summary_in_home">
 			                    <?php $argon_ai_show_post_summary_in_home = get_option('argon_ai_show_post_summary_in_home', true); ?>
                                 <option value="true" <?php if ($argon_ai_show_post_summary_in_home=='true'){echo 'selected';} ?>><?php _e('替换', 'argon');?></option>
                                 <option value="false" <?php if ($argon_ai_show_post_summary_in_home=='false'){echo 'selected';} ?>><?php _e('不替换', 'argon');?></option>
                             </select>
-                            <p class="description"><?php _e('替换后，首页文章摘要将会显示 AI 摘要，而不是文章开头内容。', 'argon');?></p>
+                            <p class="description"><?php _e('替换后，首页文章摘要/SEO 描述将会显示 AI 摘要，而不是文章开头内容。', 'argon');?></p>
                         </td>
                     </tr>
                     <tr>
