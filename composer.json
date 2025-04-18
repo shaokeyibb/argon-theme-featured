@@ -10,5 +10,10 @@
         {
             "name": "solstice23"
         }
-    ]
+    ],
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        }
+    }
 }
