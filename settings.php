@@ -985,6 +985,32 @@ function themeoptions_page(){
                             <p class="description"><?php _e('发送给 ChatGPT 的最大正文长度，超出部分将会被截断，避免因正文过长产生高额的 API 调用开销。设为 0 以发送全文。', 'argon');?></p>
                         </td>
                     </tr>
+                    <tr><th class="subtitle"><h3><?php _e('Discourse 嵌入式评论区', 'argon');?></h3></th></tr>
+                    <tr>
+                        <th><label><?php _e('启用 Discourse 嵌入式评论区', 'argon');?></label></th>
+                        <td>
+                            <select name="argon_enable_discourse_comments">
+                                <?php $argon_enable_discourse_comments = get_option('argon_enable_discourse_comments', false); ?>
+                                <option value="false" <?php if ($argon_enable_discourse_comments=='false'){echo 'selected';} ?>><?php _e('不启用', 'argon');?></option>
+                                <option value="true" <?php if ($argon_enable_discourse_comments=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
+                            </select>
+                            <p class="description"><?php _e('启用 Discourse 提供的嵌入式评论区，这将在您的基础评论区下方显示一个 Discourse 嵌入式评论区。', 'argon');?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label><?php _e('Discourse 用户 ID', 'argon');?></label></th>
+                        <td>
+                            <input type="text" class="regular-text" name="argon_discourse_comments_author" placeholder="..." value="<?php echo get_option('argon_discourse_comments_author', ''); ?>"/>
+                            <p class="description">输入您 Discourse 论坛中的唯一用户 ID，正常情况下应该是一段英文字符。</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label><?php _e('Discourse 地址', 'argon');?></label></th>
+                        <td>
+                            <input type="text" class="regular-text" name="argon_discourse_comments_url" placeholder="..." value="<?php echo get_option('argon_discourse_comments_url', ''); ?>"/>
+                            <p class="description">输入您 Discourse 论坛中的地址，一般来说应该是您的首页地址。</p>
+                        </td>
+                    </tr>
 					<tr><th class="subtitle"><h3><?php _e('其他', 'argon');?></h3></th></tr>
 					<tr>
 						<th><label><?php _e('文章过时信息显示', 'argon');?></label></th>
@@ -2382,6 +2408,11 @@ function argon_update_themeoptions(){
         argon_update_option('argon_ai_extra_prompt');
         argon_update_option('argon_ai_max_content_length');
         argon_update_option('argon_ai_async_generate');
+
+        // Discourse 嵌入式评论区集成
+        argon_update_option('argon_enable_discourse_comments');
+        argon_update_option('argon_discourse_comments_url');
+        argon_update_option('argon_discourse_comments_author');
 
 		// 集成
 		argon_update_option('argon_view_counter');

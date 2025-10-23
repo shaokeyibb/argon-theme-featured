@@ -94,7 +94,18 @@ function argon_meta_box_1(){
                 })
                 mode.dispatchEvent(new Event('change'))
             </script>
-	    <?php } ?>
+        <h4><?php _e("启用 Discourse 嵌入式评论", 'argon');?></h4>
+        <?php $argon_enable_discourse_comments = get_post_meta($post->ID, "argon_enable_discourse_comments", true);?>
+        <select name="argon_enable_discourse_comments" id="argon_enable_discourse_comments">
+            <option value="true" <?php if ($argon_enable_discourse_comments=='true'){echo 'selected';} ?>><?php _e("启用", 'argon');?></option>
+            <option value="false" <?php if ($argon_enable_discourse_comments!='true'){echo 'selected';} ?>><?php _e("不启用", 'argon');?></option>
+        </select>
+        <p style="margin-top: 15px;"><?php _e("当且仅当该选项和全局选项同时启用时才会有效。这将在您的基础评论区下方显示一个 Discourse 嵌入式评论区。", 'argon');?></p>
+        <h4><?php _e(" 自定义 Discourse 主题 ID", 'argon');?></h4>
+        <?php $argon_discourse_comments_topic_id = get_post_meta($post->ID, "argon_discourse_comments_topic_id", true);?>
+        <input type="text" class="regular-text" name="argon_discourse_comments_topic_id" id="argon_discourse_comments_topic_id" value="<?php if (!empty($argon_discourse_comments_topic_id)){echo $argon_discourse_comments_topic_id;} ?>">
+        <p style="margin-top: 15px;"><?php _e("输入你想关联到的 Discourse 主题 ID，不输入则会在 Discourse 创建一个新的主题以绑定到此文章上。", 'argon');?></p>
+    <?php } ?>
 
 		<script>$ = window.jQuery;</script>
 		<script>
@@ -215,6 +226,8 @@ function argon_save_meta_data($post_id){
     update_post_meta($post_id,'argon_ai_no_update_post_summary', $_POST['argon_ai_no_update_post_summary']);
 	update_post_meta($post_id,'argon_ai_extra_prompt_mode', $_POST['argon_ai_extra_prompt_mode']);
 	update_post_meta($post_id,'argon_ai_extra_prompt', $_POST['argon_ai_extra_prompt']);
+    update_post_meta($post_id, 'argon_enable_discourse_comments', $_POST['argon_enable_discourse_comments']);
+    update_post_meta($post_id, 'argon_discourse_comments_topic_id', $_POST['argon_discourse_comments_topic_id']);
 }
 add_action('save_post', 'argon_save_meta_data');
 function update_post_meta_ajax(){

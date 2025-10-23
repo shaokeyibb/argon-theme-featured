@@ -10,6 +10,7 @@
 
 - AI 文章摘要
 - WP Statistics 阅读量支持
+- Discourse 内嵌评论区集成
 - 更多...
 
 ## 安装

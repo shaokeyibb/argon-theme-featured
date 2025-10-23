@@ -184,3 +184,8 @@ html.darkmode #post_comment.post-comment-force-privatemode-off .comment-post-pri
 #post_comment.editing .comment-post-mailnotice {
 	display: none;
 }
+
+#discourse-comments {
+    margin-bottom: 25px;
+    padding: 1rem;
+}

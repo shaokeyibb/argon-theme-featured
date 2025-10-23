@@ -265,3 +265,28 @@
 	</div>
 </div>
 <?php } ?>
+
+<?php
+global $post;
+if ( get_option( "argon_enable_discourse_comments", false ) == "true" && get_post_meta( $post->ID, "argon_enable_discourse_comments", true ) == 'true' ) { ?>
+    <div id='discourse-comments' class="comments-area card shadow-sm"></div>
+    <meta name='discourse-username' content='<?php echo get_option( "argon_discourse_comments_author" ) ?>'>
+
+    <script type="text/javascript">
+        <?php $topicId = get_post_meta( $post->ID, "argon_discourse_comments_topic_id", true ); ?>
+        DiscourseEmbed = {
+            discourseUrl: '<?php echo get_option( "argon_discourse_comments_url" ); ?>',
+            <?php if( empty( $topicId ) ) { ?>discourseEmbedUrl: '<?php echo get_permalink( $post->ID ); ?>', <?php } ?>
+            <?php if(! empty( $topicId )) { ?>topicId: '<?php echo $topicId ?>', <?php } ?>
+            // className: 'CLASS_NAME',
+        };
+
+        (function () {
+            var d = document.createElement('script');
+            d.type = 'text/javascript';
+            d.async = true;
+            d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+        })();
+    </script>
+<?php } ?>
