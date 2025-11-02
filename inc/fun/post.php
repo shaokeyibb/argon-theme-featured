@@ -347,6 +347,12 @@ function get_banner_background_url(){
 }
 //Lazyload 对 <img> 标签预处理以加载 Lazyload
 function argon_lazyload($content){
+	// 如果启用了 fancybox，lazyload 的处理会在 argon_fancybox 中一起完成
+	// 这样可以避免 DOM 操作冲突
+	if (get_option('argon_enable_fancybox') != 'false' && get_option('argon_enable_zoomify') == 'false'){
+		return $content;
+	}
+	
 	$lazyload_loading_style = get_option('argon_lazyload_loading_style');
 	if ($lazyload_loading_style == ''){
 		$lazyload_loading_style = 'none';
@@ -362,11 +368,101 @@ function argon_lazyload($content){
 }
 function argon_fancybox($content){
 	if(!is_feed() && !is_robots() && !is_home()){
-		if (get_option('argon_enable_lazyload') != 'false'){
-			$content = preg_replace('/<img(.*?)data-original=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i',"<div class='fancybox-wrapper lazyload-container-unload' data-fancybox='post-images' href='$2'>$0</div>" , $content);
-		}else{
-			$content = preg_replace('/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i',"<div class='fancybox-wrapper' data-fancybox='post-images' href='$2'>$0</div>" , $content);
+		// 使用 DOMDocument 来更精确地处理 HTML 结构
+		libxml_use_internal_errors(true); // 忽略HTML5标签的警告
+		$dom = new DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		libxml_clear_errors();
+		
+		$images = $dom->getElementsByTagName('img');
+		$is_lazyload = (get_option('argon_enable_lazyload') != 'false');
+		
+		// 获取 lazyload 加载样式
+		$lazyload_loading_style = '';
+		if ($is_lazyload) {
+			$lazyload_loading_style = get_option('argon_lazyload_loading_style');
+			if ($lazyload_loading_style == ''){
+				$lazyload_loading_style = 'none';
+			}
+			$lazyload_loading_style = "lazyload-style-" . $lazyload_loading_style;
 		}
+		
+		// 需要从后向前处理，避免修改DOM时索引变化
+		$images_array = array();
+		foreach ($images as $img) {
+			$images_array[] = $img;
+		}
+		
+		foreach ($images_array as $img) {
+			// 检查图片是否已经被 fancybox-wrapper 包裹
+			if ($img->parentNode && $img->parentNode->getAttribute('class') && 
+			    strpos($img->parentNode->getAttribute('class'), 'fancybox-wrapper') !== false) {
+				continue;
+			}
+			
+			// 获取图片URL
+			$img_url = $img->getAttribute('src');
+			
+			// 处理 data-full-url 属性（高清图）
+			if ($img->hasAttribute('data-full-url')) {
+				$data_full_url = $img->getAttribute('data-full-url');
+				if (!empty($data_full_url)) {
+					if ($is_lazyload && !$img->hasAttribute('data-original')) {
+						$img->setAttribute('data-original', $data_full_url);
+					}
+				}
+			}
+			
+			if (!empty($img_url) && strpos($img_url, 'data:image') === false) {
+				// 如果启用了 lazyload，处理图片属性
+				if ($is_lazyload) {
+					// 获取现有的 class 属性
+					$existing_classes = $img->getAttribute('class');
+					$classes_array = array_filter(explode(' ', $existing_classes));
+					
+					// 添加 lazyload 相关的类（如果还没有）
+					if (!in_array('lazyload', $classes_array)) {
+						$classes_array[] = 'lazyload';
+					}
+					if (!in_array($lazyload_loading_style, $classes_array)) {
+						$classes_array[] = $lazyload_loading_style;
+					}
+					
+					// 设置新的 class 属性
+					$img->setAttribute('class', implode(' ', $classes_array));
+					
+					// 设置 data-original 属性
+					if (!$img->hasAttribute('data-original')) {
+						$img->setAttribute('data-original', $img_url);
+					}
+					
+					// 替换 src 为占位图（使用 SVG 占位图以触发 CSS 动画）
+					$img->setAttribute('src', 'data:image/svg+xml;base64,PCEtLUFyZ29uTG9hZGluZy0tPgo8c3ZnIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmZmZmMDAiPjxnPjwvZz4KPC9zdmc+');
+					
+					// 移除 srcset 属性（如果有）
+					if ($img->hasAttribute('srcset')) {
+						$img->removeAttribute('srcset');
+					}
+				}
+				
+				// 获取图片URL（用于 fancybox）
+				$fancybox_url = $is_lazyload ? $img->getAttribute('data-original') : $img_url;
+				
+				// 创建 fancybox wrapper div
+				$wrapper = $dom->createElement('div');
+				$wrapper_class = $is_lazyload ? 'fancybox-wrapper lazyload-container-unload' : 'fancybox-wrapper';
+				$wrapper->setAttribute('class', $wrapper_class);
+				$wrapper->setAttribute('data-fancybox', 'post-images');
+				$wrapper->setAttribute('href', $fancybox_url);
+				
+				// 将图片插入到wrapper中
+				$img->parentNode->insertBefore($wrapper, $img);
+				$wrapper->appendChild($img);
+			}
+		}
+		
+		$content = $dom->saveHTML();
+		libxml_use_internal_errors(false);
 	}
 	return $content;
 }
