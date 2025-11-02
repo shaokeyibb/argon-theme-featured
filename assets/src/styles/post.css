@@ -208,3 +208,7 @@ article.post-preview-layout-3 .post-header.post-header-with-thumbnail {
 article.post-preview-layout-3 .post-thumbnail {
 	max-height: 20vh;
 }
+
+#post_content img {
+    padding: 0 10vw;
+}

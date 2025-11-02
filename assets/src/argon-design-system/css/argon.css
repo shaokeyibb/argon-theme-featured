@@ -20324,9 +20324,3 @@ html:not([dir='rtl']) .noUi-horizontal .noUi-handle
     right: 10px;
     left: auto;
 }
-
-article figcaption {
-    text-align: center;
-    font-size: small;
-    color: var(--gray);
-}
