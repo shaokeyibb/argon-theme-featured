@@ -5,11 +5,48 @@ function argon_get_first_image_of_article(){
 	if (post_password_required()){
 		return false;
 	}
-	$post_content_full = apply_filters('the_content', preg_replace( '<!--more(.*?)-->', '', $post -> post_content));
-	preg_match('/<img(.*?)(src|data-original)=[\"\']((http:|https:)?\/\/(.*?))[\"\'](.*?)\/?>/', $post_content_full, $match);
-	if (isset($match[3])){
-		return $match[3];
+	
+	// 方法1：尝试从文章内容中查找附件ID（最佳实践）
+	// 这样可以使用 WordPress 标准函数获取优化后的图片
+	$content = $post -> post_content;
+	
+	// 查找 WordPress 图片块或附件 ID
+	if (preg_match('/<!-- wp:image {"id":(\d+)}/i', $content, $block_match)) {
+		// Gutenberg 图片块
+		$attachment_id = intval($block_match[1]);
+		if ($attachment_id) {
+			$image_data = wp_get_attachment_image_src($attachment_id, 'full');
+			if ($image_data) {
+				return $image_data[0];
+			}
+		}
 	}
+	
+	// 查找经典编辑器中的 wp-image-{id} class
+	if (preg_match('/<img[^>]+class=["\'][^"\']*wp-image-(\d+)[^"\']*["\'][^>]*>/i', $content, $class_match)) {
+		$attachment_id = intval($class_match[1]);
+		if ($attachment_id) {
+			$image_data = wp_get_attachment_image_src($attachment_id, 'full');
+			if ($image_data) {
+				return $image_data[0];
+			}
+		}
+	}
+	
+	// 方法2：如果无法获取附件ID，使用处理后的内容提取URL
+	// 注意：这里使用 'the_content' 过滤器，会触发图片优化插件
+	$post_content_full = apply_filters('the_content', preg_replace( '<!--more(.*?)-->', '', $content));
+	
+	// 优先查找 data-original 属性（lazyload 场景）
+	if (preg_match('/<img[^>]+data-original=["\']([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
+		return $match[1];
+	}
+	
+	// 然后查找普通 src 属性，但排除 data: 和占位符
+	if (preg_match('/<img[^>]+src=["\'](?!data:)([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
+		return $match[1];
+	}
+	
 	return false;
 }
 function argon_has_post_thumbnail($postID = 0){
@@ -37,9 +74,46 @@ function argon_get_post_thumbnail($postID = 0){
 		$postID = $post -> ID;
 	}
 	if (has_post_thumbnail()){
-		return apply_filters("argon_post_thumbnail", wp_get_attachment_image_src(get_post_thumbnail_id($postID), "full")[0]);
+		// 获取附件 ID
+		$attachment_id = get_post_thumbnail_id($postID);
+		// 使用 wp_get_attachment_image_src 获取图片信息，这会触发相关的过滤器
+		$image_data = wp_get_attachment_image_src($attachment_id, "full");
+		// 返回 URL（已经过 wp_get_attachment_image_src 过滤器处理）
+		$url = $image_data ? $image_data[0] : '';
+		return apply_filters("argon_post_thumbnail", $url, $postID, $attachment_id);
 	}
 	return apply_filters("argon_post_thumbnail", argon_get_first_image_of_article());
+}
+// 获取文章缩略图的完整 <img> 标签（推荐使用，支持 WebP 等现代图片格式插件）
+function argon_get_post_thumbnail_image($postID = 0, $size = 'full', $attr = array()){
+	if ($postID == 0){
+		global $post;
+		$postID = $post -> ID;
+	}
+	
+	// 设置默认属性
+	$default_attr = array(
+		'class' => 'post-thumbnail',
+		'alt' => get_the_title($postID)
+	);
+	$attr = array_merge($default_attr, $attr);
+	
+	if (has_post_thumbnail($postID)){
+		// 使用 WordPress 标准函数，支持所有图片过滤器和插件
+		$thumbnail = wp_get_attachment_image(get_post_thumbnail_id($postID), $size, false, $attr);
+		return apply_filters("argon_post_thumbnail_image", $thumbnail, $postID, $size, $attr);
+	}
+	
+	// 如果没有特色图片，尝试获取文章中的第一张图片
+	$first_image_url = argon_get_first_image_of_article();
+	if ($first_image_url){
+		$class = isset($attr['class']) ? esc_attr($attr['class']) : 'post-thumbnail';
+		$alt = isset($attr['alt']) ? esc_attr($attr['alt']) : get_the_title($postID);
+		$img_html = '<img src="' . esc_url($first_image_url) . '" class="' . $class . '" alt="' . $alt . '">';
+		return apply_filters("argon_post_thumbnail_image", $img_html, $postID, $size, $attr);
+	}
+	
+	return '';
 }
 //文末附加内容
 function get_additional_content_after_post(){

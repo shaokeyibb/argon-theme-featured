@@ -57,7 +57,25 @@
                     <i class="related-post-arrow fa fa-chevron-right" aria-hidden="true"></i>
                     </div>';
                 if ($hasThumbnail){
-                    echo '<img class="related-post-thumbnail lazyload" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABBJREFUeNpi+P//PwNAgAEACPwC/tuiTRYAAAAASUVORK5CYII=" data-original="' .  argon_get_post_thumbnail(get_the_ID()) . '"/>';
+                    // 使用新的函数获取完整的 <img> 标签，支持 WebP 等现代图片格式
+                    $thumbnail_attr = array(
+                        'class' => 'related-post-thumbnail lazyload'
+                    );
+                    $thumbnail_html = argon_get_post_thumbnail_image(get_the_ID(), 'medium', $thumbnail_attr);
+                    
+                    // 将 src 替换为占位符，原 src 移到 data-original（用于 lazyload）
+                    $thumbnail_html = preg_replace_callback(
+                        '/<img(.*)src=["\']([^"\']+)["\'](.*)>/i',
+                        function($matches) {
+                            return '<img' . $matches[1] . 
+                                   'src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABBJREFUeNpi+P//PwNAgAEACPwC/tuiTRYAAAAASUVORK5CYII=" ' .
+                                   'data-original="' . $matches[2] . '"' . $matches[3] . '>';
+                        },
+                        $thumbnail_html
+                    );
+                    // 移除 srcset 属性
+                    $thumbnail_html = preg_replace('/\s*srcset=["\'][^"\']*["\']/', '', $thumbnail_html);
+                    echo $thumbnail_html;
                 }
                 echo '</a>';
             }
