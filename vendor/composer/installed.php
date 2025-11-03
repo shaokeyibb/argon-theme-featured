@@ -3,7 +3,7 @@
         'name' => 'solstice23/argon-theme',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '7eb5cbecedfa894c78591250128ffdc8248ee8b9',
+        'reference' => '24e655c68a3334fa5fa1509ecc7fec916a7a81df',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -136,7 +136,7 @@
         'solstice23/argon-theme' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '7eb5cbecedfa894c78591250128ffdc8248ee8b9',
+            'reference' => '24e655c68a3334fa5fa1509ecc7fec916a7a81df',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
