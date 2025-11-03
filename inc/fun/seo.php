@@ -7,7 +7,7 @@ function get_seo_description(){
 			return preg_replace( '/ \[&hellip;]$/', '&hellip;', $post->post_excerpt );
 		}
 		if ( ! post_password_required() && get_option( 'argon_ai_post_summary', false ) && get_post_meta( get_post()->ID, "argon_ai_post_summary", true ) !== false && get_option( 'argon_ai_show_post_summary_in_home', true ) && get_post_meta( get_post()->ID, "argon_ai_summary", true ) != "") {
-			return mb_substr( get_post_meta( get_post()->ID, "argon_ai_summary", true ), 0, 160 ) . "...";
+			return htmlspecialchars( mb_substr( get_post_meta( get_post()->ID, "argon_ai_summary", true ), 0, 160 ) ) . "...";
 		}
 		if ( get_the_excerpt() != "" ) {
 			return preg_replace( '/ \[&hellip;]$/', '&hellip;', get_the_excerpt() );
