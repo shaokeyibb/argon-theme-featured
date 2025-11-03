@@ -1,0 +1,29 @@
+/* 
+ * Font Awesome 字体加载优化
+ * 
+ * PageSpeed Insights 优化：添加 font-display: swap
+ * - 确保文本在字体加载期间始终可见
+ * - 避免 FOIT (Flash of Invisible Text) 问题
+ * - 提升首屏渲染性能和 LCP (Largest Contentful Paint) 指标
+ * 
+ * 实现方式：
+ * 1. 导入 Font Awesome 的完整样式
+ * 2. 覆盖 @font-face 定义，添加 font-display: swap
+ */
+
+/* 导入 Font Awesome 完整样式 */
+@import '../../node_modules/fontawesome-4.7/css/font-awesome.css';
+
+/* 覆盖字体定义，添加 font-display: swap 优化 */
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.eot?v=4.7.0');
+  src: url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'), 
+       url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), 
+       url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'), 
+       url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'), 
+       url('../../node_modules/fontawesome-4.7/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* PageSpeed Insights 优化 */
+}

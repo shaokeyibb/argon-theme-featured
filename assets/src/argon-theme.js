@@ -11,7 +11,8 @@ window['$'].fn.headIndex = require("./libs/headindex/headindex.js").default;
 require('./js/main.js');
 
 import './argon-design-system/css/argon.css';
-import 'fontawesome-4.7/css/font-awesome.css';
+// Font Awesome - 使用优化后的版本，包含 font-display: swap
+import './styles/font-awesome-optimize.css';
 
 require('./style.scss');
 

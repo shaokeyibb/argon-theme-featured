@@ -11,9 +11,6 @@ importers:
       '@fancyapps/ui':
         specifier: ^4.0.31
         version: 4.0.31
-      '@fortawesome/fontawesome-free':
-        specifier: ^6.6.0
-        version: 6.7.2
       '@popperjs/core':
         specifier: ^2.11.8
         version: 2.11.8
@@ -47,9 +44,6 @@ importers:
       jquery:
         specifier: ^3.7.1
         version: 3.7.1
-      jquery-ui-dist:
-        specifier: ^1.13.3
-        version: 1.13.3
       jquery.easing:
         specifier: ^1.4.1
         version: 1.4.1
@@ -62,9 +56,6 @@ importers:
       pangu:
         specifier: ^4.0.7
         version: 4.0.7
-      popper.js:
-        specifier: ^1.16.1
-        version: 1.16.1
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -98,10 +89,6 @@ packages:
 
   '@fancyapps/ui@4.0.31':
     resolution: {integrity: sha512-D7+PMIloxSOFJyY+lXcNlVDhmssOmDT6PT5fqQUIiws2hT7PH29r0EKZxERmACSQpm6qrFkP7rSguzXWvRJduQ==}
-
-  '@fortawesome/fontawesome-free@6.7.2':
-    resolution: {integrity: sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==}
-    engines: {node: '>=6'}
 
   '@fullhuman/postcss-purgecss@7.0.2':
     resolution: {integrity: sha512-U4zAXNaVztbDxO9EdcLp51F3UxxYsb/7DN89rFxFJhfk2Wua2pvw2Kf3HdspbPhW/wpHjSjsxWYoIlbTgRSjbQ==}
@@ -868,9 +855,6 @@ packages:
     resolution: {integrity: sha512-zptv57P3GpL+O0I7VdMJNBZCu+BPHVQUk55Ft8/QCJjTVxrnJHuVuX/0Bl2A6/+2oyR/ZMEuFKwmzqqZ/U5nPQ==}
     engines: {node: 20 || >=22}
 
-  jquery-ui-dist@1.13.3:
-    resolution: {integrity: sha512-qeTR3SOSQ0jgxaNXSFU6+JtxdzNUSJKgp8LCzVrVKntM25+2YBJW1Ea8B2AwjmmSHfPLy2dSlZxJQN06OfVFhg==}
-
   jquery.easing@1.4.1:
     resolution: {integrity: sha512-BVpRacWCbNfo/ALWxnLkIY/WRa4Ydg/LtwzIJZvDm7vrhV8Txv+ACi6EGnU11zT19sTc3KEPathWx6CtjWLD1w==}
 
@@ -1243,8 +1227,6 @@ packages:
 snapshots:
 
   '@fancyapps/ui@4.0.31': {}
-
-  '@fortawesome/fontawesome-free@6.7.2': {}
 
   '@fullhuman/postcss-purgecss@7.0.2(postcss@8.5.6)':
     dependencies:
@@ -2216,10 +2198,6 @@ snapshots:
   jackspeak@4.1.1:
     dependencies:
       '@isaacs/cliui': 8.0.2
-
-  jquery-ui-dist@1.13.3:
-    dependencies:
-      jquery: 3.7.1
 
   jquery.easing@1.4.1: {}
 
