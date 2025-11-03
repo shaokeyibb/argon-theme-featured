@@ -221,12 +221,14 @@
 						<span class="btn-inner--icon"><i class="fa fa-close"></i></span>
 						<span class="btn-inner--text"><?php _e('取消', 'argon');?></span>
 					</button>
-					<?php if (get_option("argon_comment_emotion_keyboard", "true") != "false"){ ?>
-						<button id="comment_emotion_btn" class="btn btn-icon btn-primary float-right" type="button" title="<?php _e('表情', 'argon');?>">
+				<?php if (get_option("argon_comment_emotion_keyboard", "true") != "false"){ ?>
+					<div class="comment-emotion-btn-wrapper float-right">
+						<button id="comment_emotion_btn" class="btn btn-icon btn-primary" type="button" title="<?php _e('表情', 'argon');?>">
 							<i class="fa fa-regular fa-smile fa-smile-o" aria-hidden="true"></i>
 						</button>
 						<?php get_template_part( 'template-parts/emotion-keyboard' ); ?>
-					<?php } ?>
+					</div>
+				<?php } ?>
 				</div>
 			</div>
 			<input id="post_comment_captcha_seed" value="<?php echo $commentCaptchaSeed;?>" style="display: none;"></input>

@@ -1,3 +1,8 @@
+.comment-emotion-btn-wrapper {
+	position: relative;
+	display: inline-block;
+}
+
 #comment_emotion_btn {
 	border-radius: 100px;
 	width: 42px;
@@ -27,24 +32,26 @@
 .emotion-keyboard {
 	max-width: min(500px, calc(100vw - 40px));
 	min-width: min(300px, calc(100vw - 40px));
-	display: flex;
+	display: none !important;
 	height: 300px;
 	flex-direction: column;
 	overflow: hidden;
 	position: absolute;
-	z-index: 2;
+	z-index: 1000;
 	right: 0;
-	bottom: -10px;
-	transform: translateY(100%) scale(0.9);
-	transform-origin: top;
+	top: 100%;
+	margin-top: 10px;
+	transform: scale(0.9);
+	transform-origin: top right;
 	transition: all 0.3s ease;
 	opacity: 0;
 	pointer-events: none;
 }
 
 #comment_emotion_btn.comment-emotion-keyboard-open + .emotion-keyboard {
+	display: flex !important;
 	opacity: 1;
-	transform: translateY(100%);
+	transform: scale(1);
 	pointer-events: all;
 }
 
