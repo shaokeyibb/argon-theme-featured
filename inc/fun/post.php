@@ -441,6 +441,11 @@ function argon_lazyload($content){
 	return $content;
 }
 function argon_fancybox($content){
+	// 如果内容为空，直接返回，避免 DOMDocument::loadHTML() 报错
+	if (empty(trim($content))) {
+		return $content;
+	}
+	
 	if(!is_feed() && !is_robots() && !is_home()){
 		// 使用 DOMDocument 来更精确地处理 HTML 结构
 		libxml_use_internal_errors(true); // 忽略HTML5标签的警告
