@@ -1,5 +1,118 @@
-node_modules
-.vscode
-.idea
+# ============================================
+# WordPress Theme .gitignore
+# ============================================
 
+# ============================================
+# 依赖目录
+# ============================================
+# Node.js 依赖
+node_modules/
+**/node_modules/
+
+# Composer 依赖
+/vendor/
+# 但保留 assets/vendor（手动管理的第三方库）
+!/assets/vendor/
+
+# ============================================
+# 构建输出和缓存
+# ============================================
+# Parcel 构建缓存
+.parcel-cache/
+**/.parcel-cache/
+parcel-bundle-reports/
+**/parcel-bundle-reports/
+
+# 编译输出（可选，根据项目需求取消注释）
+# /assets/dist/
+# /gutenberg/dist/
+
+# ============================================
+# 系统文件
+# ============================================
+# macOS
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# 编辑器配置
+# ============================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PhpStorm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================
+# 日志和临时文件
+# ============================================
+*.log
+*.tmp
+*.temp
+*.cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# 环境配置
+# ============================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ============================================
+# 备份文件
+# ============================================
+*.bak
+*.backup
+*.old
+*.orig
+
+# ============================================
+# 测试覆盖率
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+
+# ============================================
+# 其他
+# ============================================
+# Composer vendor 中的 .git 目录
 /vendor/**/.git/
+# 但保留 assets/vendor
+!/assets/vendor/**/.git/
+
+# 临时上传文件（如果有）
+uploads/
+temp/
