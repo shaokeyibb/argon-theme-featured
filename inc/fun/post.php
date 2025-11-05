@@ -450,7 +450,12 @@ function argon_fancybox($content){
 		// 使用 DOMDocument 来更精确地处理 HTML 结构
 		libxml_use_internal_errors(true); // 忽略HTML5标签的警告
 		$dom = new DOMDocument();
-		$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		
+		// 将内容包装在一个临时容器中，避免 DOMDocument 将第一个元素作为根节点
+		// 这样可以保持原有的 HTML 结构层次
+		$wrapped_content = '<div class="argon-temp-wrapper">' . $content . '</div>';
+		
+		$dom->loadHTML(mb_convert_encoding($wrapped_content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 		libxml_clear_errors();
 		
 		$images = $dom->getElementsByTagName('img');
@@ -540,7 +545,30 @@ function argon_fancybox($content){
 			}
 		}
 		
-		$content = $dom->saveHTML();
+		// 提取包装容器内的内容，移除临时包装 div
+		// 使用 XPath 查找包装容器，更精确
+		$xpath = new DOMXPath($dom);
+		$wrapper = $xpath->query("//div[@class='argon-temp-wrapper']")->item(0);
+		
+		if ($wrapper) {
+			$content = '';
+			foreach ($wrapper->childNodes as $child) {
+				$content .= $dom->saveHTML($child);
+			}
+		} else {
+			// 如果找不到包装容器，尝试从文档根元素提取（向后兼容）
+			$body = $dom->documentElement;
+			if ($body) {
+				$content = '';
+				foreach ($body->childNodes as $child) {
+					$content .= $dom->saveHTML($child);
+				}
+			} else {
+				// 最后的回退方案
+				$content = $dom->saveHTML();
+			}
+		}
+		
 		libxml_use_internal_errors(false);
 	}
 	return $content;
