@@ -483,6 +483,50 @@ function argon_fancybox($content){
 			    strpos($img->parentNode->getAttribute('class'), 'fancybox-wrapper') !== false) {
 				continue;
 			}
+
+			$should_skip_fancybox = false;
+			$skip_keywords = array('friend-link-avatar', 'no-fancybox');
+			$parent_skip_keywords = array('friend-links', 'friend-links-simple', 'friend-link-container', 'friend-link-avatar', 'friend-link-content');
+
+			if ($img->hasAttribute('data-no-fancybox') && $img->getAttribute('data-no-fancybox') !== 'false') {
+				$should_skip_fancybox = true;
+			}
+
+			if (!$should_skip_fancybox) {
+				$img_class_attr = $img->getAttribute('class');
+				if (!empty($img_class_attr)) {
+					foreach ($skip_keywords as $keyword) {
+						if (strpos(' ' . $img_class_attr . ' ', ' ' . $keyword . ' ') !== false) {
+							$should_skip_fancybox = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (!$should_skip_fancybox) {
+				$ancestor = $img->parentNode;
+				while ($ancestor && $ancestor->nodeType === XML_ELEMENT_NODE) {
+					if ($ancestor->hasAttribute('data-no-fancybox') && $ancestor->getAttribute('data-no-fancybox') !== 'false') {
+						$should_skip_fancybox = true;
+						break;
+					}
+					$ancestor_class_attr = $ancestor->getAttribute('class');
+					if (!empty($ancestor_class_attr)) {
+						foreach ($parent_skip_keywords as $keyword) {
+							if (strpos(' ' . $ancestor_class_attr . ' ', ' ' . $keyword . ' ') !== false) {
+								$should_skip_fancybox = true;
+								break 2;
+							}
+						}
+					}
+					$ancestor = $ancestor->parentNode;
+				}
+			}
+
+			if ($should_skip_fancybox) {
+				continue;
+			}
 			
 			// 获取图片URL
 			$img_url = $img->getAttribute('src');

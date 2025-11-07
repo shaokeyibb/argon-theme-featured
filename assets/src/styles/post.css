@@ -212,3 +212,9 @@ article.post-preview-layout-3 .post-thumbnail {
 #post_content img {
     padding: 0 10vw;
 }
+
+#post_content .friend-links img,
+#post_content .friend-links-simple img,
+#post_content .friend-link-avatar img {
+    padding: 0;
+}
