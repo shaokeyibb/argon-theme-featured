@@ -12,6 +12,5 @@ figure > a > .fancybox-wrapper {
 
 .fancybox-wrapper > img {
 	cursor: pointer;
-	cursor: -webkit-zoom-in;
 	cursor: zoom-in;
 }

@@ -82,7 +82,6 @@
 	transform: translateY(5px);
 	opacity: 0;
 	width: max-content;
-	width: -moz-max-content;
 }
 .post-comment-link-container:hover:before,
 .post-comment-link-container.active:before,

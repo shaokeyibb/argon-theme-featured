@@ -7,7 +7,7 @@ html.using-safari #post_comment_toggle_extra_input:before,
 html.using-safari .comment-post-checkbox:before,
 html.using-safari .comment-time-details,
 html.using-safari #share .icon-wechat .wechat-qrcode {
-	-webkit-transform: translate3d(0, 0, 0) !important;
+	transform: translate3d(0, 0, 0) !important;
 	width: unset !important;
 	white-space: nowrap;
 }
@@ -21,7 +21,7 @@ html.using-safari .post-donate .donate-btn:hover ~ .donate-qrcode {
 	opacity: 1;
 }
 html.using-safari #fabtn_blog_settings_popup {
-	-webkit-transform: translate3d(0, 0, 0) !important;
+	transform: translate3d(0, 0, 0) !important;
 }
 html.using-safari #blog_setting_toggle_darkmode_and_amoledarkmode:before,
 html.using-safari #blog_setting_card_radius_to_default:before {

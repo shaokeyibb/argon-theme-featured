@@ -2,8 +2,6 @@
 	position: fixed !important;
 	width: max-content !important;
 	height: max-content !important;
-	width: -moz-max-content !important;
-	height: -moz-max-content !important;
 	min-height: 55px;
 	max-width: 100vw;
 	background: var(--themecolor) !important;

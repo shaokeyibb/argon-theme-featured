@@ -32,7 +32,6 @@
 	#leftbar_part2_inner {
 		max-height: unset;
 		height: max-content;
-		height: -moz-max-content;
 	}
 	#leftbar_part2_inner:before {
 		content: "";
@@ -308,7 +307,6 @@
 		bottom: unset;
 		right: unset;
 		width: max-content;
-		width: -moz-max-content;
 		background: var(--color-foreground);
 		box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 		text-align: center;

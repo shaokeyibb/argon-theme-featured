@@ -3,7 +3,6 @@
 	bottom: 35px;
 	right: 20px;
 	height: max-content;
-	height: -moz-max-content;
 	z-index: 1000;
 	transition: all 0.3s ease;
 }
@@ -88,7 +87,6 @@ html.is-home.banner-as-cover #float_action_buttons.hidden {
 	transform: translateX(5px);
 	opacity: 0;
 	width: max-content;
-	width: -moz-max-content;
 	text-transform: none;
 }
 #float_action_buttons .fabtn.fabtn-hidden:before {
@@ -161,7 +159,6 @@ html.darkmode #fabtn_toggle_darkmode i.fa-lightbulb {
 	padding: 10px 25px;
 	opacity: 0;
 	width: max-content;
-	width: -moz-max-content;
 	min-width: 350px;
 	max-width: calc(100vw - 170px);
 	max-height: calc(100vh - 70px);
@@ -230,7 +227,6 @@ html.amoled-dark #blog_setting_toggle_darkmode_and_amoledarkmode span:first-of-t
 	transform: translateX(-50%) translateY(5px);
 	opacity: 0;
 	width: max-content;
-	width: -moz-max-content;
 	pointer-events: none;
 }
 html.amoled-dark #blog_setting_toggle_darkmode_and_amoledarkmode:before {
@@ -359,7 +355,6 @@ html.filter-grayscale {
 	transform: translateX(-50%) translateY(5px);
 	opacity: 0;
 	width: max-content;
-	width: -moz-max-content;
 	pointer-events: none;
 }
 #blog_setting_card_radius_to_default:hover:before {

@@ -21,8 +21,6 @@ body.leftbar-can-headroom.headroom---unpinned #nprogress .bar {
 	height: 100%;
 	box-shadow: 0 0 10px rgba(255, 255, 255, 0.67), 0 0 5px rgba(255, 255, 255, 0.67);
 	opacity: 1;
-	-webkit-transform: rotate(3deg) translate(0px, -4px);
-	-ms-transform: rotate(3deg) translate(0px, -4px);
 	transform: rotate(3deg) translate(0px, -4px);
 }
 #nprogress .spinner {
@@ -40,7 +38,6 @@ body.leftbar-can-headroom.headroom---unpinned #nprogress .bar {
 	border-top-color: rgba(255, 255, 255, 0.67);
 	border-left-color: rgba(255, 255, 255, 0.67);
 	border-radius: 50%;
-	-webkit-animation: nprogress-spinner 400ms linear infinite;
 	animation: nprogress-spinner 400ms linear infinite;
 }
 .nprogress-custom-parent {
@@ -50,14 +47,6 @@ body.leftbar-can-headroom.headroom---unpinned #nprogress .bar {
 .nprogress-custom-parent #nprogress .spinner,
 .nprogress-custom-parent #nprogress .bar {
 	position: absolute;
-}
-@-webkit-keyframes nprogress-spinner {
-	0% {
-		-webkit-transform: rotate(0deg);
-	}
-	100% {
-		-webkit-transform: rotate(360deg);
-	}
 }
 @keyframes nprogress-spinner {
 	0% {

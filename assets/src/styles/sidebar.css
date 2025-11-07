@@ -102,8 +102,7 @@
 	font: normal normal normal 14px/1 FontAwesome;
 	font-size: 14px;
 	text-rendering: auto;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+	font-smoothing: antialiased;
 	position: absolute;
 	right: 16px;
 	top: 0;

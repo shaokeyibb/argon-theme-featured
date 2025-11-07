@@ -39,7 +39,6 @@
     }
     &.opened{
         height: max-content;
-        height: -moa-max-content;
         margin-bottom: 10px;
         min-height: 38px;
         #share {
@@ -61,7 +60,6 @@
 	opacity: 0;
 	pointer-events: none;
 	width: max-content;
-	width: -moz-max-content;
 	transition: all 0.3s ease;
     > a {
         position: relative;
@@ -76,13 +74,11 @@
 	top: 0;
 	opacity: 1;
 	width: max-content;
-	width: -moz-max-content;
 	transition: all 0.3s ease;
     &:before {
         content: attr(tooltip);
         top: -40px;
         height: max-content;
-        height: -moz-max-content;
         text-transform: none;
     }
 }
@@ -95,7 +91,6 @@
         right: 0px;
         line-height: 25px;
         width: max-content;
-        width: -moz-max-content;
         text-align: center;
         font-weight: normal;
         color: #fff;

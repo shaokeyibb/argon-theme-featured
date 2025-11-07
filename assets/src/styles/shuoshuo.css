@@ -6,7 +6,6 @@
 	background: var(--color-foreground);
 	border-radius: 5px 5px 0 0;
 	width: max-content;
-	width: -moz-max-content;
 	padding: 3px 15px;
 	font-size: 15px;
 	opacity: 0.95;
@@ -28,7 +27,6 @@
 	font-weight: bold;
 	margin-bottom: 10px;
 	width: max-content;
-	width: -moz-max-content;
 	max-width: 100%;
 }
 .shuoshuo-content {
@@ -73,7 +71,6 @@ html.darkmode .shuoshuo-content pre{
 	margin-top: 5px;
 	margin-left: auto;
 	width: max-content;
-	width: -moz-max-content;
 }
 .shuoshuo-operations button {
 	margin-left: 3px;

@@ -199,7 +199,6 @@ article .wp-block-gallery.is-cropped .blocks-gallery-image .fancybox-wrapper,
 article .wp-block-gallery.is-cropped .blocks-gallery-item .fancybox-wrapper {
 	height: 100%;
 	flex: 1;
-	-o-object-fit: cover;
 	object-fit: cover;
 }
 article .wp-block-cover,
@@ -263,19 +262,7 @@ article .wp-block-separator {
 *::selection {
 	background-color: var(--color-selection);
 }
-*::-moz-selection {
-	background-color: var(--color-selection);
-}
-*::-webkit-selection {
-	background-color: var(--color-selection);
-}
 html.darkmode *::selection {
-	background-color: var(--color-selection);
-}
-html.darkmode *::-moz-selection {
-	background-color: var(--color-selection);
-}
-html.darkmode *::-webkit-selection {
 	background-color: var(--color-selection);
 }
 html.use-serif body {

@@ -9,7 +9,6 @@
 }
 .post-donate .donate-qrcode {
 	width: max-content;
-	width: -moz-max-content;
 	position: absolute;
 	left: 50%;
 	bottom: 100px;

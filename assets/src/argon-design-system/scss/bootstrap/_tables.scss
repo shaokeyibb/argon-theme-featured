@@ -173,7 +173,6 @@
         display: block;
         width: 100%;
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
 
         // Prevent double border on horizontal scroll due to use of `display: block;`
         > .table-bordered {
