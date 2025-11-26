@@ -162,6 +162,14 @@ article.post-preview-layout-2 .post-header.post-header-with-thumbnail {
 	text-align: left;
 	width: min(33%, 500px);
 }
+article.post-preview-layout-2 .post-header.post-header-with-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
 article.post-preview-layout-2 .post-thumbnail {
 	width: 100%;
 	height: 100%;
@@ -196,6 +204,7 @@ article.post-preview-layout-2 .loading-css-animation {
         border-radius: var(--card-radius);
         text-align: left;
         width: 100%;
+        height: min(250px, 30vh);
     }
 }
 /* 文章预览样式 3 */
