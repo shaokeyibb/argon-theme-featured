@@ -17,7 +17,12 @@ function parse_ua_and_icon($userAgent){
 		return "";
 	}
 	$parsed = argon_parse_user_agent($userAgent);
-	$out = "<div class='comment-useragent'>";
+	// 如果是管理员，添加 title 属性显示完整 UA 字符串
+	$title_attr = "";
+	if (current_user_can("manage_options")){
+		$title_attr = " title='" . esc_attr($userAgent) . "'";
+	}
+	$out = "<div class='comment-useragent'" . $title_attr . ">";
 	if (isset($argon_comment_show_ua['platform']) && $argon_comment_show_ua['platform'] == true){
 		if (isset($GLOBALS['UA_ICON'][$parsed['platform']])){
 			$out .= $GLOBALS['UA_ICON'][$parsed['platform']] . " ";
