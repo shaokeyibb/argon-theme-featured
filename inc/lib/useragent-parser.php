@@ -25,10 +25,11 @@ function argon_parse_user_agent( $u_agent = null ) {
 	}
 
 	$platform = null;
+	$platform_version = null;
 	$browser  = null;
 	$version  = null;
 
-	$empty = array( 'platform' => $platform, 'browser' => $browser, 'version' => $version );
+	$empty = array( 'platform' => $platform, 'platform_version' => $platform_version, 'browser' => $browser, 'version' => $version );
 
 	if ( ! $u_agent ) {
 		return $empty;
@@ -96,6 +97,142 @@ function argon_parse_user_agent( $u_agent = null ) {
 		}
 	}
 
+	// 检测操作系统版本
+	if ( $platform ) {
+		// Windows 版本检测 (Windows NT 10.0, Windows NT 6.1, etc.)
+		if ( strpos( $platform, 'Windows' ) === 0 ) {
+			if ( preg_match( '/Windows\s+NT\s+(\d+\.\d+)/i', $u_agent, $win_match ) ) {
+				$nt_version = $win_match[1];
+				// 将 Windows NT 版本号转换为友好的版本名称
+				$windows_versions = array(
+					'10.0' => '10/11',
+					'6.3'  => '8.1',
+					'6.2'  => '8',
+					'6.1'  => '7',
+					'6.0'  => 'Vista',
+					'5.2'  => 'Server 2003',
+					'5.1'  => 'XP',
+					'5.0'  => '2000'
+				);
+				$platform_version = isset( $windows_versions[ $nt_version ] ) ? $windows_versions[ $nt_version ] : $nt_version;
+			} elseif ( preg_match( '/Windows\s+Phone\s+OS\s+([0-9.]+)/i', $u_agent, $wp_match ) ) {
+				$platform_version = $wp_match[1];
+			}
+		}
+		// macOS 版本检测 (Mac OS X 10_15_7, macOS 12.0, etc.)
+		elseif ( $platform == 'Macintosh' || strpos( $platform, 'Mac' ) === 0 ) {
+			$mac_version = null;
+			if ( preg_match( '/Mac\s+OS\s+X\s+(\d+)[._](\d+)(?:[._](\d+))?/i', $u_agent, $mac_match ) ) {
+				$major = $mac_match[1];
+				$minor = $mac_match[2];
+				$patch = isset( $mac_match[3] ) ? $mac_match[3] : '0';
+				// macOS 10.16+ 实际上是 macOS 11+
+				if ( $major == '10' && intval( $minor ) >= 16 ) {
+					$mac_version = ( intval( $minor ) - 6 ) . '.' . $patch;
+				} else {
+					$mac_version = $major . '.' . $minor . ( $patch != '0' ? '.' . $patch : '' );
+				}
+			} elseif ( preg_match( '/macOS\s+([0-9.]+)/i', $u_agent, $macos_match ) ) {
+				$mac_version = $macos_match[1];
+			}
+			
+			if ( $mac_version ) {
+				// 如果版本是 10.15.7，则不显示任何名称和版本号
+				if ( $mac_version == '10.15.7' ) {
+					$platform_version = null;
+				} else {
+					// macOS 版本号到名称的映射
+					$macos_version_names = array(
+						'10.12' => 'Sierra',
+						'10.13' => 'High Sierra',
+						'10.14' => 'Mojave',
+						'10.15' => 'Catalina',
+						'11'    => 'Big Sur',
+						'12'    => 'Monterey',
+						'13'    => 'Ventura',
+						'14'    => 'Sonoma',
+						'15'    => 'Sequoia',
+						'26'    => 'Tahoe'
+					);
+					
+					// 先尝试精确匹配（如 10.12, 11, 12 等）
+					if ( isset( $macos_version_names[ $mac_version ] ) ) {
+						$platform_version = $macos_version_names[ $mac_version ];
+					} else {
+						// 尝试匹配主版本号（如 10.12.6 → 10.12 → Sierra）
+						$version_parts = explode( '.', $mac_version );
+						if ( count( $version_parts ) >= 2 ) {
+							$major_minor = $version_parts[0] . '.' . $version_parts[1];
+							if ( isset( $macos_version_names[ $major_minor ] ) ) {
+								$platform_version = $macos_version_names[ $major_minor ];
+							} elseif ( isset( $macos_version_names[ $version_parts[0] ] ) ) {
+								// 对于 macOS 11+，只匹配主版本号
+								$platform_version = $macos_version_names[ $version_parts[0] ];
+							} else {
+								// 没有对应名称，显示版本号
+								$platform_version = $mac_version;
+							}
+						} else {
+							// 单版本号（如 11, 12）
+							if ( isset( $macos_version_names[ $mac_version ] ) ) {
+								$platform_version = $macos_version_names[ $mac_version ];
+							} else {
+								$platform_version = $mac_version;
+							}
+						}
+					}
+				}
+			}
+		}
+		// iOS 版本检测 (OS 14_0, OS 15_0, etc.)
+		elseif ( $platform == 'iPhone' || $platform == 'iPad' || $platform == 'iPod Touch' ) {
+			if ( preg_match( '/OS\s+(\d+)[._](\d+)(?:[._](\d+))?/i', $u_agent, $ios_match ) ) {
+				$platform_version = $ios_match[1] . '.' . $ios_match[2];
+				if ( isset( $ios_match[3] ) && $ios_match[3] != '0' ) {
+					$platform_version .= '.' . $ios_match[3];
+				}
+			}
+		}
+		// Android 版本检测
+		elseif ( $platform == 'Android' ) {
+			if ( preg_match( '/Android\s+([0-9.]+)/i', $u_agent, $android_match ) ) {
+				$android_version = $android_match[1];
+				// 如果检测到 Android 10; K 这样的 UA，则不显示版本号
+				// 当 Model 为 K 时，版本始终为 10，不显示版本号
+				if ( $android_version == '10' && preg_match( '/;\s*K(?:\s|;|\)|$)/i', $u_agent ) ) {
+					$platform_version = null;
+				} else {
+					$platform_version = $android_version;
+				}
+			}
+		}
+		// Linux 发行版版本检测
+		elseif ( $platform == 'Linux' || in_array( $platform, array( 'Ubuntu', 'Debian', 'Fedora', 'CentOS', 'Arch Linux', 'openSUSE', 'Manjaro', 'Linux Mint', 'Red Hat', 'Gentoo' ) ) ) {
+			// Ubuntu 版本检测
+			if ( $platform == 'Ubuntu' && preg_match( '/Ubuntu[\/\s]+([0-9.]+)/i', $u_agent, $ubuntu_match ) ) {
+				$platform_version = $ubuntu_match[1];
+			}
+			// Debian 版本检测
+			elseif ( $platform == 'Debian' && preg_match( '/Debian[\/\s]+([0-9.]+)/i', $u_agent, $debian_match ) ) {
+				$platform_version = $debian_match[1];
+			}
+			// Fedora 版本检测
+			elseif ( $platform == 'Fedora' && preg_match( '/Fedora[\/\s]+([0-9]+)/i', $u_agent, $fedora_match ) ) {
+				$platform_version = $fedora_match[1];
+			}
+			// CentOS 版本检测
+			elseif ( $platform == 'CentOS' && preg_match( '/CentOS[\/\s]+([0-9.]+)/i', $u_agent, $centos_match ) ) {
+				$platform_version = $centos_match[1];
+			}
+		}
+		// Chrome OS 版本检测
+		elseif ( $platform == 'Chrome OS' ) {
+			if ( preg_match( '/CrOS\s+[^\s]+\s+([0-9.]+)/i', $u_agent, $cros_match ) ) {
+				$platform_version = $cros_match[1];
+			}
+		}
+	}
+
 	preg_match_all( '%(?P<browser>Camino|Kindle(\ Fire)?|Firefox|Iceweasel|IceCat|Safari|MSIE|Trident|AppleWebKit|
 				TizenBrowser|(?:Headless)?Chrome|YaBrowser|Vivaldi|IEMobile|Opera|OPR|Silk|Midori|Edge|Edg|EdgA|CriOS|UCBrowser|Puffin|OculusBrowser|SamsungBrowser|
 				MicroMessenger|QQEX|QQ(?=/|\s)|ZhihuHybrid|Quark|XiaoMi/MiuiBrowser|HuaweiBrowser|Lark|MaiMai|QQBrowser|SLBrowser|
@@ -111,6 +248,7 @@ function argon_parse_user_agent( $u_agent = null ) {
 		if ( preg_match( '%^(?!Mozilla)(?P<browser>[A-Z0-9\-]+)(/(?P<version>[0-9A-Z.]+))?%ix', $u_agent, $result ) ) {
 			return array(
 				'platform' => $platform ?: null,
+				'platform_version' => $platform_version ?: null,
 				'browser'  => $result['browser'],
 				'version'  => isset( $result['version'] ) ? $result['version'] ?: null : null
 			);
@@ -263,7 +401,7 @@ function argon_parse_user_agent( $u_agent = null ) {
 		$browser  = 'NetFront';
 	}
 
-	return array( 'platform' => $platform ?: null, 'browser' => $browser ?: null, 'version' => $version ?: null );
+	return array( 'platform' => $platform ?: null, 'platform_version' => $platform_version ?: null, 'browser' => $browser ?: null, 'version' => $version ?: null );
 }
 
 //图标

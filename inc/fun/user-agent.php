@@ -30,6 +30,10 @@ function parse_ua_and_icon($userAgent){
 			$out .= $GLOBALS['UA_ICON']['Unknown'] . " ";
 		}
 		$out .= $parsed['platform'];
+		// 如果存在操作系统版本，则显示
+		if (isset($parsed['platform_version']) && $parsed['platform_version'] !== null){
+			$out .= " " . $parsed['platform_version'];
+		}
 	}
 	if (isset($argon_comment_show_ua['browser']) && $argon_comment_show_ua['browser'] == true){
 		if (isset($GLOBALS['UA_ICON'][$parsed['browser']])){
