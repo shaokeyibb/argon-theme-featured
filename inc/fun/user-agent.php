@@ -10,17 +10,31 @@ if (strpos($argon_comment_ua, 'browser') !== false){
 if (strpos($argon_comment_ua, 'version') !== false){
 	$argon_comment_show_ua['version'] = true;
 }
-function parse_ua_and_icon($userAgent){
+function parse_ua_and_icon($userAgent, $comment_id = null){
 	global $argon_comment_ua;
 	global $argon_comment_show_ua;
 	if ($argon_comment_ua == "" || $argon_comment_ua == "hidden"){
 		return "";
 	}
-	$parsed = argon_parse_user_agent($userAgent);
+	
+	// 尝试从 comment meta 读取 Sec-CH-UA 系列 Header
+	$sec_ch_ua = null;
+	$sec_ch_ua_platform = null;
+	$sec_ch_ua_platform_version = null;
+	$sec_ch_ua_full_version_list = null;
+	
+	if ($comment_id !== null){
+		$sec_ch_ua = get_comment_meta($comment_id, "sec_ch_ua", true);
+		$sec_ch_ua_platform = get_comment_meta($comment_id, "sec_ch_ua_platform", true);
+		$sec_ch_ua_platform_version = get_comment_meta($comment_id, "sec_ch_ua_platform_version", true);
+		$sec_ch_ua_full_version_list = get_comment_meta($comment_id, "sec_ch_ua_full_version_list", true);
+	}
+	
+	$parsed = argon_parse_user_agent($userAgent, $sec_ch_ua, $sec_ch_ua_platform, $sec_ch_ua_platform_version, $sec_ch_ua_full_version_list);
 	// 如果是管理员，添加 title 属性显示完整 UA 字符串
 	$title_attr = "";
 	if (current_user_can("manage_options")){
-		$title_attr = " title='" . esc_attr($userAgent) . "'";
+		$title_attr = " title='" . ($sec_ch_ua == null ? esc_attr($userAgent) : esc_attr($sec_ch_ua)) . "'";
 	}
 	$out = "<div class='comment-useragent'" . $title_attr . ">";
 	if (isset($argon_comment_show_ua['platform']) && $argon_comment_show_ua['platform'] == true){

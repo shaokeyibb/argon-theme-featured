@@ -1,6 +1,270 @@
 <?php
 
 /**
+ * Parses Sec-CH-UA series headers into structured data
+ *
+ * @param string $sec_ch_ua Sec-CH-UA header value
+ * @param string|null $sec_ch_ua_platform Sec-CH-UA-Platform header value
+ * @param string|null $sec_ch_ua_platform_version Sec-CH-UA-Platform-Version header value
+ * @param string|null $sec_ch_ua_full_version_list Sec-CH-UA-Full-Version-List header value
+ * @param string|null $user_agent User-Agent string for fallback device type detection (e.g., iOS device type)
+ *
+ * @return array|null Parsed data array or null if parsing fails
+ */
+function argon_parse_sec_ch_ua( $sec_ch_ua, $sec_ch_ua_platform = null, $sec_ch_ua_platform_version = null, $sec_ch_ua_full_version_list = null, $user_agent = null ) {
+	$platform = null;
+	$platform_version = null;
+	$browser = null;
+	$version = null;
+
+	// 解析平台信息
+	if ( $sec_ch_ua_platform !== null ) {
+		// 移除引号
+		$platform = trim( $sec_ch_ua_platform, '"' );
+		
+		// 标准化平台名称
+		$platform_mapping = array(
+			'Windows' => 'Windows',
+			'macOS' => 'Macintosh',
+			'Linux' => 'Linux',
+			'Android' => 'Android',
+			'iOS' => 'iPhone', // 需要根据设备类型进一步判断
+			'Chrome OS' => 'Chrome OS',
+			'CrOS' => 'Chrome OS',
+		);
+		
+		if ( isset( $platform_mapping[ $platform ] ) ) {
+			$platform = $platform_mapping[ $platform ];
+		}
+		
+		// 处理 iOS 平台（需要根据 User-Agent 或其他信息判断设备类型）
+		if ( $platform === 'iPhone' ) {
+			$ua = $user_agent;
+			if ( $ua === null && isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+				$ua = $_SERVER['HTTP_USER_AGENT'];
+			}
+			if ( $ua !== null ) {
+				if ( strpos( $ua, 'iPad' ) !== false ) {
+					$platform = 'iPad';
+				} elseif ( strpos( $ua, 'iPod' ) !== false ) {
+					$platform = 'iPod Touch';
+				}
+			}
+		}
+	}
+
+	// 解析平台版本
+	if ( $sec_ch_ua_platform_version !== null ) {
+		$platform_version = trim( $sec_ch_ua_platform_version, '"' );
+		
+		// 处理 Windows 版本映射
+		if ( $platform === 'Windows' ) {
+			// 根据 sec_ch_ua_platform_version 映射到 Windows 版本
+			// https://github.com/WICG/ua-client-hints/issues/220#issuecomment-870858413
+			$windows_versions = array(
+				'0' => '7/8/8.1',
+				'1' => '10 1507',
+				'2' => '10 1511',
+				'3' => '10 1607',
+				'4' => '10 1703',
+				'5' => '10 1709',
+				'6' => '10 1803',
+				'7' => '10 1809',
+				'8' => '10 1903/1909',
+				'10' => '10 2004/20H2/21H1/21H2',
+			);
+			
+			// 提取主版本号（整数部分）
+			if ( preg_match( '/^(\d+)/', $platform_version, $matches ) ) {
+				$major_version = $matches[1];
+				
+				// 先尝试完整版本号匹配（如 "1.0.0"）
+				if ( isset( $windows_versions[ $platform_version ] ) ) {
+					$platform_version = $windows_versions[ $platform_version ];
+				}
+				// 再尝试主版本号匹配（如 "1"）
+				elseif ( isset( $windows_versions[ $major_version ] ) ) {
+					$platform_version = $windows_versions[ $major_version ];
+				}
+				// 对于 13 及以上的版本，映射到 Win11
+				elseif ( intval( $major_version ) >= 13 ) {
+					$platform_version = '11';
+				}
+			}
+		}
+		
+		// 处理 macOS 版本映射
+		if ( $platform === 'Macintosh' || strpos( $platform, 'Mac' ) === 0 ) {
+			$macos_version_names = array(
+				'10.12' => 'Sierra',
+				'10.13' => 'High Sierra',
+				'10.14' => 'Mojave',
+				'10.15' => 'Catalina',
+				'11' => 'Big Sur',
+				'12' => 'Monterey',
+				'13' => 'Ventura',
+				'14' => 'Sonoma',
+				'15' => 'Sequoia',
+				'26' => 'Tahoe'
+			);
+			
+			// 保存原始版本号
+			$original_version = $platform_version;
+			
+			// 提取主版本号
+			if ( preg_match( '/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $platform_version, $matches ) ) {
+				$major = $matches[1];
+				$minor = isset( $matches[2] ) ? $matches[2] : '0';
+				$patch = isset( $matches[3] ) ? $matches[3] : '0';
+				
+				// macOS 10.16+ 实际上是 macOS 11+
+				if ( $major == '10' && intval( $minor ) >= 16 ) {
+					$major = ( intval( $minor ) - 6 );
+					$minor = '0';
+					// 重新构建版本号
+					$original_version = $major . '.' . $minor . ( $patch != '0' ? '.' . $patch : '' );
+				}
+				
+				$version_key = $major . ( $minor != '0' ? '.' . $minor : '' );
+				$version_name = null;
+				
+				if ( isset( $macos_version_names[ $version_key ] ) ) {
+					$version_name = $macos_version_names[ $version_key ];
+				} elseif ( isset( $macos_version_names[ $major ] ) ) {
+					$version_name = $macos_version_names[ $major ];
+				}
+				
+				// 格式化：macOS + 版本名称 + 版本号
+				if ( $version_name !== null ) {
+					$platform_version = 'macOS ' . $version_name . ' ' . $original_version;
+				} else {
+					$platform_version = 'macOS ' . $original_version;
+				}
+			}
+		}
+		
+		// 处理 iOS/iPadOS 版本映射
+		if ( $platform === 'iPhone' || $platform === 'iPad' || $platform === 'iPod Touch' ) {
+			$ios_version_names = array(
+				'9' => '9',
+				'10' => '10',
+				'11' => '11',
+				'12' => '12',
+				'13' => '13',
+				'14' => '14',
+				'15' => '15',
+				'16' => '16',
+				'17' => '17',
+				'18' => '18'
+			);
+			
+			// 保存原始版本号
+			$original_version = $platform_version;
+			
+			// 提取主版本号
+			if ( preg_match( '/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $platform_version, $matches ) ) {
+				$major = $matches[1];
+				$minor = isset( $matches[2] ) ? $matches[2] : '0';
+				$patch = isset( $matches[3] ) ? $matches[3] : '0';
+				
+				// 构建完整版本号
+				$full_version = $major . '.' . $minor . ( $patch != '0' ? '.' . $patch : '' );
+				
+				// 判断是 iOS 还是 iPadOS
+				// iPadOS 13+ 才有名称，之前统一使用 iOS
+				$os_name = 'iOS';
+				if ( $platform === 'iPad' && intval( $major ) >= 13 ) {
+					$os_name = 'iPadOS';
+				}
+				
+				// 格式化：iOS/iPadOS + 版本号
+				$platform_version = $os_name . ' ' . $full_version;
+			}
+		}
+	}
+
+	// 解析浏览器信息
+	if ( $sec_ch_ua !== null ) {
+		// Sec-CH-UA 格式: "Chromium";v="116", "Google Chrome";v="116", "Not=A?Brand";v="8"
+		// 优先使用 Sec-CH-UA-Full-Version-List（如果存在）
+		$ua_string = $sec_ch_ua_full_version_list !== null ? $sec_ch_ua_full_version_list : $sec_ch_ua;
+		
+		// 解析浏览器品牌和版本
+		// 匹配格式: "Brand";v="Version"
+		if ( preg_match_all( '/"([^"]+)";v="([^"]+)"/', $ua_string, $matches, PREG_SET_ORDER ) ) {
+			$chromium_brand = null;
+			$chromium_version = null;
+			
+			// 首先尝试找到非 "Not A Brand" 变体的品牌
+			foreach ( $matches as $match ) {
+				$brand = $match[1];
+				$ver = $match[2];
+				
+				// 检测是否为 "Not A Brand" 变体
+				// 检查 brand 中是否同时包含 "Not"、"A" 和 "Brand"（不区分大小写，不关心顺序和中间内容）
+				$is_not_a_brand = (
+					stripos( $brand, 'Not' ) !== false &&
+					stripos( $brand, 'A' ) !== false &&
+					stripos( $brand, 'Brand' ) !== false
+				);
+				
+				// 跳过 "Not A Brand" 变体
+				if ( $is_not_a_brand ) {
+					continue;
+				}
+				
+				// 如果是 Chromium，先保存起来（作为备选）
+				if ( $brand === 'Chromium' ) {
+					$chromium_brand = $brand;
+					$chromium_version = $ver;
+					continue;
+				}
+				
+				// 找到第一个有效品牌（非 Not 且非 Chromium），使用它
+				$browser = $brand;
+				$version = $ver;
+				break;
+			}
+			
+			// 如果没有找到其他品牌，但有 Chromium，则使用 Chromium
+			if ( $browser === null && $chromium_brand !== null ) {
+				$browser = $chromium_brand;
+				$version = $chromium_version;
+			}
+		}
+		
+		// 标准化浏览器名称
+		if ( $browser !== null ) {
+			$browser_mapping = array(
+				'Google Chrome' => 'Chrome',
+				'Microsoft Edge' => 'Edge',
+				'Opera' => 'Opera',
+				'Brave' => 'Brave',
+				'Vivaldi' => 'Vivaldi',
+				'Yandex' => 'Yandex',
+			);
+			
+			if ( isset( $browser_mapping[ $browser ] ) ) {
+				$browser = $browser_mapping[ $browser ];
+			}
+		}
+	}
+
+	// 如果成功解析到浏览器信息，返回结果
+	if ( $browser !== null ) {
+		return array(
+			'platform' => $platform ?: null,
+			'platform_version' => $platform_version ?: null,
+			'browser' => $browser,
+			'version' => $version ?: null
+		);
+	}
+
+	// 解析失败，返回 null
+	return null;
+}
+
+/**
  * Parses a user agent string into its important parts
  *
  * @param string|null $u_agent User agent string to parse or null. Uses $_SERVER['HTTP_USER_AGENT'] on NULL
@@ -15,7 +279,7 @@
  *
  * @license MIT
  */
-function argon_parse_user_agent( $u_agent = null ) {
+function argon_parse_user_agent( $u_agent = null, $sec_ch_ua = null, $sec_ch_ua_platform = null, $sec_ch_ua_platform_version = null, $sec_ch_ua_full_version_list = null ) {
 	if ( $u_agent === null && isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 		$u_agent = $_SERVER['HTTP_USER_AGENT'];
 	}
@@ -34,6 +298,16 @@ function argon_parse_user_agent( $u_agent = null ) {
 	if ( ! $u_agent ) {
 		return $empty;
 	}
+
+	// 如果传入了 Sec-CH-UA 系列 Header，优先使用它们进行解析
+	if ( $sec_ch_ua !== null && $sec_ch_ua !== '' ) {
+		$parsed_from_sec_ch = argon_parse_sec_ch_ua( $sec_ch_ua, $sec_ch_ua_platform, $sec_ch_ua_platform_version, $sec_ch_ua_full_version_list, $u_agent );
+		if ( $parsed_from_sec_ch !== null ) {
+			return $parsed_from_sec_ch;
+		}
+	}
+
+	// 如果 Sec-CH-UA 解析失败或不存在，回退到使用 User-Agent Header
 
 	if ( preg_match( '/\((.*?)\)/m', $u_agent, $parent_matches ) ) {
 		preg_match_all( '/(?P<platform>BB\d+;|Android|CrOS|Tizen|iPhone|iPad|iPod|Linux|(Open|Net|Free)BSD|Macintosh|Windows(\ Phone)?|Silk|linux-gnu|BlackBerry|PlayBook|X11|(New\ )?Nintendo\ (WiiU?|3?DS|Switch)|Xbox(\ One)?)
@@ -79,7 +353,7 @@ function argon_parse_user_agent( $u_agent = null ) {
 			'Debian'     => array( '/Debian/i', '/X11; Debian/i' ),
 			'Fedora'     => array( '/Fedora/i' ),
 			'CentOS'     => array( '/CentOS/i' ),
-			'Arch Linux' => array( '/Arch Linux/i', '/X11; Arch/i', '/Arch/i' ),
+			'Arch Linux' => array( '/Arch Linux/i', '/X11; Arch/i', '/\bArch\b/i' ),
 			'openSUSE'   => array( '/openSUSE/i', '/SUSE/i' ),
 			'Manjaro'    => array( '/Manjaro/i' ),
 			'Linux Mint' => array( '/Linux Mint/i', '/Mint/i' ),
@@ -155,42 +429,63 @@ function argon_parse_user_agent( $u_agent = null ) {
 						'26'    => 'Tahoe'
 					);
 					
+					// 保存原始版本号
+					$original_version = $mac_version;
+					
 					// 先尝试精确匹配（如 10.12, 11, 12 等）
+					$version_name = null;
 					if ( isset( $macos_version_names[ $mac_version ] ) ) {
-						$platform_version = $macos_version_names[ $mac_version ];
+						$version_name = $macos_version_names[ $mac_version ];
 					} else {
 						// 尝试匹配主版本号（如 10.12.6 → 10.12 → Sierra）
 						$version_parts = explode( '.', $mac_version );
 						if ( count( $version_parts ) >= 2 ) {
 							$major_minor = $version_parts[0] . '.' . $version_parts[1];
 							if ( isset( $macos_version_names[ $major_minor ] ) ) {
-								$platform_version = $macos_version_names[ $major_minor ];
+								$version_name = $macos_version_names[ $major_minor ];
 							} elseif ( isset( $macos_version_names[ $version_parts[0] ] ) ) {
 								// 对于 macOS 11+，只匹配主版本号
-								$platform_version = $macos_version_names[ $version_parts[0] ];
-							} else {
-								// 没有对应名称，显示版本号
-								$platform_version = $mac_version;
+								$version_name = $macos_version_names[ $version_parts[0] ];
 							}
 						} else {
 							// 单版本号（如 11, 12）
 							if ( isset( $macos_version_names[ $mac_version ] ) ) {
-								$platform_version = $macos_version_names[ $mac_version ];
-							} else {
-								$platform_version = $mac_version;
+								$version_name = $macos_version_names[ $mac_version ];
 							}
 						}
+					}
+					
+					// 格式化：macOS + 版本名称 + 版本号
+					if ( $version_name !== null ) {
+						$platform_version = 'macOS ' . $version_name . ' ' . $original_version;
+					} else {
+						$platform_version = 'macOS ' . $original_version;
 					}
 				}
 			}
 		}
-		// iOS 版本检测 (OS 14_0, OS 15_0, etc.)
+		// iOS/iPadOS 版本检测 (OS 14_0, OS 15_0, etc.)
 		elseif ( $platform == 'iPhone' || $platform == 'iPad' || $platform == 'iPod Touch' ) {
 			if ( preg_match( '/OS\s+(\d+)[._](\d+)(?:[._](\d+))?/i', $u_agent, $ios_match ) ) {
-				$platform_version = $ios_match[1] . '.' . $ios_match[2];
-				if ( isset( $ios_match[3] ) && $ios_match[3] != '0' ) {
-					$platform_version .= '.' . $ios_match[3];
+				$major = $ios_match[1];
+				$minor = $ios_match[2];
+				$patch = isset( $ios_match[3] ) && $ios_match[3] != '0' ? $ios_match[3] : null;
+				
+				// 构建完整版本号
+				$full_version = $major . '.' . $minor;
+				if ( $patch !== null ) {
+					$full_version .= '.' . $patch;
 				}
+				
+				// 判断是 iOS 还是 iPadOS
+				// iPadOS 13+ 才有名称，之前统一使用 iOS
+				$os_name = 'iOS';
+				if ( $platform === 'iPad' && intval( $major ) >= 13 ) {
+					$os_name = 'iPadOS';
+				}
+				
+				// 格式化：iOS/iPadOS + 版本号
+				$platform_version = $os_name . ' ' . $full_version;
 			}
 		}
 		// Android 版本检测
@@ -381,6 +676,7 @@ function argon_parse_user_agent( $u_agent = null ) {
 		$browser = 'MSIE';
 		$version = $rv_result;
 	} elseif ( $browser == 'AppleWebKit' ) {
+		$safari_key = null;
 		if ( $platform == 'Android' ) {
 			$browser = 'Android Browser';
 		} elseif ( strpos( $platform, 'BB' ) === 0 ) {
@@ -389,11 +685,19 @@ function argon_parse_user_agent( $u_agent = null ) {
 		} elseif ( $platform == 'BlackBerry' || $platform == 'PlayBook' ) {
 			$browser = 'BlackBerry Browser';
 		} else {
-			$find( 'Safari', $key, $browser ) || $find( 'TizenBrowser', $key, $browser );
+			$safari_found = $find( 'Safari', $safari_key, $browser );
+			if ( ! $safari_found ) {
+				$find( 'TizenBrowser', $key, $browser );
+			}
 		}
 
-		$find( 'Version', $key );
-		$version = $result['version'][ $key ];
+		// 如果是 Safari，优先使用 Safari 的版本号，否则使用 Version 的版本号
+		if ( $browser == 'Safari' && $safari_key !== null && isset( $result['version'][ $safari_key ] ) ) {
+			$version = $result['version'][ $safari_key ];
+		} else {
+			$find( 'Version', $key );
+			$version = $result['version'][ $key ];
+		}
 	} elseif ( $pKey = preg_grep( '/playstation \d/i', $result['browser'] ) ) {
 		$pKey = reset( $pKey );
 
@@ -419,4 +723,5 @@ $GLOBALS['UA_ICON']['Zhihu']            = '<svg width="88px" height="88px" viewB
 $GLOBALS['UA_ICON']['Quark']            = '<svg height="2487" viewBox="40.722 40.484 943.271 938.508" width="2500" xmlns="http://www.w3.org/2000/svg"><path d="m469.135 976.134c-110.259-9.764-215.516-59.535-290.768-137.168-75.49-78.11-113.831-154.553-132.168-263.859-4.763-28.339-5.477-95.97-1.19-123.833 10.24-68.822 33.1-134.072 64.297-184.32 88.35-142.407 236.71-226.47 399.598-226.47 69.537 0 132.168 12.621 192.417 39.055 52.629 23.1 110.497 64.297 149.313 106.448 60.726 65.965 91.922 122.166 114.784 206.943 18.098 66.917 18.575 160.983 1.429 227.423-19.29 73.586-45.485 126.214-92.637 184.559-40.96 50.961-84.063 86.92-140.74 117.402-59.535 32.15-114.545 48.105-184.082 53.82-34.054 2.858-47.152 2.858-80.253 0zm84.063-238.616c11.669-5 20.718-19.051 20.718-32.625 0-23.338 4.525-49.771 10.478-61.44 12.146-23.814 28.339-32.149 77.396-39.77 19.05-2.857 38.578-6.905 43.341-8.81 13.574-5.954 24.767-17.385 32.149-33.34 6.668-14.526 6.906-15.955 6.906-53.105-.238-41.198-1.667-50.248-15.955-87.16-21.195-55.486-76.92-110.734-132.168-130.738-11.43-4.048-33.577-9.525-49.295-12.383-26.195-4.287-31.196-4.525-53.82-1.905-44.77 5.239-72.394 14.05-103.352 32.625-19.527 11.907-20.956 13.098-44.532 36.435-34.53 34.054-52.39 67.156-63.345 116.689-19.051 86.92 15.48 178.604 87.874 233.853 30.243 23.1 74.537 41.674 106.686 44.77 27.624 2.858 66.68 1.19 76.92-3.096z" fill="#3a25dd"/></svg>';
 $GLOBALS['UA_ICON']['Lark']             = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32"><path fill="#00d6b9" d="M273.46,264.31l1.01-1.01c.65-.65,1.36-1.36,2.06-2.01l1.41-1.36,4.17-4.12,5.73-5.58,4.88-4.83,4.57-4.52,4.78-4.73,4.37-4.32,6.13-6.03c1.16-1.16,2.36-2.26,3.57-3.37,2.21-2.01,4.52-3.97,6.84-5.88,2.16-1.71,4.37-3.37,6.64-4.98,3.17-2.26,6.43-4.32,9.75-6.33,3.27-1.91,6.64-3.72,10.05-5.43,3.22-1.56,6.54-3.02,9.9-4.32,1.86-.75,3.77-1.41,5.68-2.06,.96-.3,1.91-.65,2.92-.96h0c-8.5-33.43-24.03-64.6-45.6-91.5-4.17-5.18-10.51-8.19-17.14-8.19H128.97c-1.81,0-3.32,1.46-3.32,3.32,0,1.06,.5,2.01,1.36,2.66,60.13,44.09,110,100.75,146.04,166l.4-.45Z"/><path fill="#133c9a" d="M203.43,419.4c90.99,0,170.27-50.22,211.6-124.43,1.46-2.61,2.87-5.23,4.22-7.89h0c-2.06,3.97-4.37,7.79-6.94,11.41-.9,1.26-1.81,2.51-2.77,3.77-1.21,1.56-2.41,3.02-3.67,4.47-1.01,1.16-2.01,2.26-3.07,3.37-2.11,2.21-4.32,4.32-6.64,6.28-1.31,1.11-2.56,2.16-3.92,3.17-1.56,1.21-3.17,2.36-4.78,3.42-1.01,.7-2.06,1.36-3.12,2.01-1.06,.65-2.16,1.31-3.32,1.96-2.26,1.26-4.63,2.46-6.99,3.52-2.06,.9-4.17,1.76-6.28,2.56-2.31,.85-4.63,1.61-7.04,2.26-3.57,1.01-7.14,1.76-10.81,2.31-2.61,.4-5.33,.7-7.99,.9-2.82,.2-5.68,.25-8.55,.25-3.17-.05-6.33-.25-9.55-.6-2.36-.25-4.73-.6-7.09-1.01-2.06-.35-4.12-.8-6.18-1.31-1.11-.25-2.16-.55-3.27-.85-3.02-.8-6.03-1.66-9.05-2.51-1.51-.45-3.02-.85-4.47-1.31-2.26-.65-4.47-1.36-6.69-2.06-1.81-.55-3.62-1.16-5.43-1.76-1.71-.55-3.47-1.11-5.18-1.71l-3.52-1.21c-1.41-.5-2.87-1.01-4.27-1.51l-3.02-1.11c-2.01-.7-4.02-1.46-5.98-2.21-1.16-.45-2.31-.85-3.47-1.31-1.56-.6-3.07-1.21-4.63-1.81-1.61-.65-3.27-1.31-4.88-1.96l-3.17-1.31-3.92-1.61-3.02-1.26-3.12-1.36-2.71-1.21-2.46-1.11-2.51-1.16-2.56-1.21-3.27-1.51-3.42-1.61c-1.21-.6-2.41-1.16-3.62-1.76l-3.07-1.51c-54.09-27-102.91-63.39-144.23-107.53-1.26-1.31-3.32-1.41-4.68-.15-.65,.6-1.06,1.51-1.06,2.41l.1,155.49v12.62c0,7.34,3.62,14.18,9.7,18.25,39.56,26.44,86.12,40.47,133.73,40.37"/><path fill="#3370ff" d="M470.83,200.21c-30.72-15.03-65.86-18.25-98.79-9-1.41,.4-2.77,.8-4.12,1.21-.96,.3-1.91,.6-2.92,.96-1.91,.65-3.82,1.36-5.68,2.06-3.37,1.31-6.64,2.77-9.9,4.32-3.42,1.66-6.79,3.47-10.05,5.38-3.37,1.96-6.59,4.07-9.75,6.33-2.26,1.61-4.47,3.27-6.64,4.98-2.36,1.91-4.63,3.82-6.84,5.88-1.21,1.11-2.36,2.21-3.57,3.37l-6.13,6.03-4.37,4.32-4.78,4.73-4.57,4.52-4.88,4.83-5.68,5.63-4.17,4.12-1.41,1.36c-.65,.65-1.36,1.36-2.06,2.01l-1.01,1.01-1.56,1.46c-.6,.55-1.16,1.06-1.76,1.61-15.13,13.93-32.02,25.84-50.17,35.54l3.27,1.51,2.56,1.21,2.51,1.16,2.46,1.11,2.71,1.21,3.12,1.36,3.02,1.26,3.92,1.61,3.17,1.31c1.61,.65,3.27,1.31,4.88,1.96,1.51,.6,3.07,1.21,4.63,1.81,1.16,.45,2.31,.85,3.47,1.31,2.01,.75,4.02,1.46,5.98,2.21l3.02,1.11c1.41,.5,2.82,1.01,4.27,1.51l3.52,1.21c1.71,.55,3.42,1.16,5.18,1.71,1.81,.6,3.62,1.16,5.43,1.76,2.21,.7,4.47,1.36,6.69,2.06,1.51,.45,3.02,.9,4.47,1.31,3.02,.85,6.03,1.71,9.05,2.51,1.11,.3,2.16,.55,3.27,.85,2.06,.5,4.12,.9,6.18,1.31,2.36,.4,4.73,.75,7.09,1.01,3.22,.35,6.38,.55,9.55,.6,2.87,.05,5.73-.05,8.55-.25,2.71-.2,5.38-.5,7.99-.9,3.62-.55,7.24-1.36,10.81-2.31,2.36-.65,4.73-1.41,7.04-2.26,2.11-.75,4.22-1.61,6.28-2.56,2.36-1.06,4.73-2.26,6.99-3.52,1.11-.6,2.21-1.26,3.32-1.96,1.11-.65,2.11-1.36,3.12-2.01,1.61-1.11,3.22-2.21,4.78-3.42,1.36-1.01,2.66-2.06,3.92-3.17,2.26-1.96,4.47-4.07,6.59-6.28,1.06-1.11,2.06-2.21,3.07-3.37,1.26-1.46,2.51-2.97,3.67-4.47,.96-1.21,1.86-2.46,2.77-3.77,2.51-3.62,4.83-7.39,6.89-11.31l2.36-4.68,21.01-41.88,.25-.5c6.94-14.98,16.39-28.45,28-39.97Z"/></svg>';
 $GLOBALS['UA_ICON']['Samsung Internet'] = '<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" version="1.1" viewBox="0 0 55.8 55.8"> <defs id="defs22"> <style id="style2"> .st0 { mask: url(#mask); } .st1 { fill: url(#_무제_그라디언트_4); } .st1, .st2, .st3, .st4 { fill-rule: evenodd; } .st2 { fill: url(#_무제_그라디언트_3); } .st3 { fill: url(#_무제_그라디언트_2); } .st4, .st5 { fill: #fff; } </style> <linearGradient id="_무제_그라디언트_4" data-name="무제 그라디언트 4" x1="-783.3" y1="565.5" x2="-783.3" y2="565.1" gradientTransform="matrix(144,0,0,-144,112827,81425)" gradientUnits="userSpaceOnUse"> <stop offset="0" stop-color="#7043ef" id="stop4" /> <stop offset="1" stop-color="#3e14d8" id="stop6" /> </linearGradient> <mask id="mask" x="0" y=".2" width="55.8" height="55.8" maskUnits="userSpaceOnUse"> <g id="mask-3"> <path id="path-21" data-name="path-2" class="st4" d="M 49.2,6.4 C 44.1,1.2 36.4,0.2 27.8,0.2 19.2,0.2 11.6,1.2 6.4,6.4 2.4,10.5 0,17.2 0,28.1 0,39 2.5,45.7 6.5,49.8 11.6,55 19.3,56 27.9,56 36.5,56 44.1,55 49.3,49.8 53.4,45.7 55.8,39 55.8,28.1 55.8,17.2 53.3,10.5 49.3,6.4 Z" /> </g> </mask> <linearGradient id="_무제_그라디언트_2" data-name="무제 그라디언트 2" x1="-789.8" y1="589.7" x2="-790.2" y2="589.7" gradientTransform="matrix(-90.014693,90.014693,28.567114,28.567114,-87924.9,54283.1)" gradientUnits="userSpaceOnUse"> <stop offset="0" stop-color="#8e99ff" id="stop12" /> <stop offset="1" stop-color="#72e3e3" id="stop14" /> </linearGradient> <linearGradient id="_무제_그라디언트_3" data-name="무제 그라디언트 3" x1="-789.8" y1="589.7" x2="-790.2" y2="589.7" gradientTransform="matrix(-90.014693,90.014693,28.567114,28.567114,-87924.9,54283.1)" gradientUnits="userSpaceOnUse"> <stop offset="0" stop-color="#8e99ff" id="stop17" /> <stop offset="1" stop-color="#40efef" id="stop19" /> </linearGradient> </defs> <g id="g54" /> <g id="Page-1" transform="translate(0,-0.2)"> <g id="OneUI7.X"> <g id="Group"> <g id="container"> <path id="path-2" class="st1" d="M 49.2,6.4 C 44.1,1.2 36.4,0.2 27.8,0.2 19.2,0.2 11.6,1.2 6.4,6.4 2.4,10.5 0,17.2 0,28.1 0,39 2.5,45.7 6.5,49.8 11.6,55 19.3,56 27.9,56 36.5,56 44.1,55 49.3,49.8 53.4,45.7 55.8,39 55.8,28.1 55.8,17.2 53.3,10.5 49.3,6.4 Z" /> </g> <g class="st0" mask="url(#mask)" id="g66"> <g id="Group-7"> <g id="g63"> <circle id="Oval" class="st5" cx="27.8" cy="28.1" r="16.4" /> <g id="Combined-Shape"> <path id="path-6" class="st3" d="m 33.3,33.6 c -9.6,9.6 -19.9,15 -23,11.9 -3.1,-3.1 2.3,-13.3 11.9,-23 9.6,-9.7 19.9,-15 23,-11.9 3.1,3.1 -2.3,13.3 -11.9,23 z m -1,-1 c 7.2,-7.2 11.6,-14.4 10,-16.1 -1.6,-1.7 -8.9,2.8 -16.1,10 -7.2,7.2 -11.6,14.4 -10,16.1 1.6,1.7 8.9,-2.8 16.1,-10 z" /> <path id="path-61" data-name="path-6" class="st2" d="m 33.3,33.6 c -9.6,9.6 -19.9,15 -23,11.9 -3.1,-3.1 2.3,-13.3 11.9,-23 9.6,-9.7 19.9,-15 23,-11.9 3.1,3.1 -2.3,13.3 -11.9,23 z m -1,-1 c 7.2,-7.2 11.6,-14.4 10,-16.1 -1.6,-1.7 -8.9,2.8 -16.1,10 -7.2,7.2 -11.6,14.4 -10,16.1 1.6,1.7 8.9,-2.8 16.1,-10 z" /> </g> <path id="Oval1" data-name="Oval" class="st4" d="m 16.2,39.7 c 6.4,6.4 16.8,6.4 23.3,0 6.4,-6.4 6.4,-16.8 0,-23.3 -5.5,1.4 -21.1,17 -23.3,23.3 z" /> </g> </g> </g> </g> </g> </g></svg>';
+$GLOBALS['UA_ICON']['Chromium'] = '<svg version="1.1" id="svg44" width="511.98489" height="511.98489" viewBox="0 0 511.98489 511.98489" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs18"> <linearGradient xlink:href="#linearGradient4975" id="linearGradient4633" gradientUnits="userSpaceOnUse" gradientTransform="matrix(231.62575,0,0,231.62472,111.11013,159.99363)" x2="0.5565635" x1="0.46521288" y1="-0.67390651" y2="0.81129867" /> <linearGradient id="linearGradient4975"> <stop style="stop-color:#1972e7" offset="0" id="stop4971" /> <stop style="stop-color:#1969d5" offset="1" id="stop4973" /> </linearGradient> <linearGradient xlink:href="#3" id="linearGradient1331" x1="101.74381" y1="33.726189" x2="101.59915" y2="135.466" gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.7794235,0,0,3.7794067,0.00151555,0.00377865)" /> <linearGradient id="3" x2="1" gradientTransform="matrix(61.286,0,0,61.286,29.399,42.333)" gradientUnits="userSpaceOnUse"> <stop offset="0" id="stop1397" style="stop-color:#afccfb" /> <stop offset="1" id="stop1399" style="stop-color:#8bb5f8" /> </linearGradient> <linearGradient xlink:href="#1" id="linearGradient2962" gradientUnits="userSpaceOnUse" gradientTransform="matrix(94.931559,164.42687,-164.4276,94.931137,97.555991,173.61083)" x2="1.7695541" x1="0.018202547" y1="-0.51170158" y2="0.4994337" /> <linearGradient id="1" x2="1" gradientTransform="matrix(25.118,43.506,-43.506,25.118,25.812,45.935)" gradientUnits="userSpaceOnUse"> <stop offset="0" id="stop3122" style="stop-color:#659cf6" /> <stop offset="1" id="stop3124" style="stop-color:#4285f4" /> </linearGradient> <linearGradient xlink:href="#2" id="linearGradient2688" x1="67.452377" y1="40.320694" x2="67.733002" y2="95.25" gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.7794235,0,0,3.7794067,0.00150043,0.00377865)" /> <linearGradient id="2"> <stop style="stop-color:#3680f0" offset="0" id="stop2682" /> <stop style="stop-color:#2678ec" offset="1" id="stop2684" /> </linearGradient> </defs> <path d="m 255.99319,255.99433 110.85049,63.99671 -110.85049,191.99385 c 141.38068,0 255.9917,-114.61051 255.9917,-255.99056 0,-46.64165 -12.53559,-90.3316 -34.33115,-127.99716 h -221.6632 z" id="path34-4" style="fill:url(#linearGradient1331)" /> <path d="M 255.99054,0 C 161.2404,0 78.576848,51.513314 34.31224,128.0274 l 110.82781,191.96363 110.85049,-63.9967 V 127.99717 h 221.6632 C 433.38157,51.501975 350.72936,0 255.99054,0 Z" id="path36-1" style="fill:url(#linearGradient4633)" /> <path d="m 0.00151177,255.99433 c 0,141.38005 114.60723823,255.99056 255.99168823,255.99056 L 366.84368,319.99103 255.9932,255.99433 145.14271,319.99103 34.314897,128.0274 C 12.531434,165.68239 0,209.35646 0,255.99056" id="path38-7" style="fill:url(#linearGradient2962)" /> <path d="m 383.99094,255.99433 c 0,70.69003 -57.30741,127.99717 -127.99775,127.99717 -70.69034,0 -127.99773,-57.30714 -127.99773,-127.99717 0,-70.69002 57.30739,-127.99716 127.99773,-127.99716 70.69034,0 127.99775,57.30714 127.99775,127.99716" fill="#ffffff" id="path40" /> <path d="m 359.99158,255.99433 c 0,57.43565 -46.56249,103.99794 -103.99839,103.99794 -57.4359,0 -103.9984,-46.56229 -103.9984,-103.99794 0,-57.43564 46.5625,-103.99793 103.9984,-103.99793 57.4359,0 103.99839,46.56229 103.99839,103.99793" id="path42-5" style="fill:url(#linearGradient2688)" /></svg>';
 $GLOBALS['UA_ICON']['Unknown']          = '<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5005" style="transform: scale(1.05) translateY(-1px);"><path d="M512.49152 511.50848m-504.29952 0a504.29952 504.29952 0 1 0 1008.59904 0 504.29952 504.29952 0 1 0-1008.59904 0Z" fill="#B9C0CB" p-id="5006"></path><path d="M506.92096 682.47552c-21.9136 0-39.64928 18.18624-39.64928 40.59136s17.73568 40.59136 39.64928 40.59136 39.69024-18.18624 39.69024-40.59136-17.77664-40.59136-39.69024-40.59136z m0-423.15776c-85.52448 9.70752-132.99712 47.63648-142.49984 113.74592-1.88416 21.38112 8.56064 33.05472 31.37536 35.0208 11.38688 1.96608 20.8896-6.79936 28.50816-26.25536 11.38688-40.83712 38.912-61.2352 82.65728-61.2352 53.16608 3.8912 81.67424 31.08864 85.52448 81.67424 0 46.65344-30.96576 54.272-47.75936 68.36224-21.2992 17.8176-35.2256 35.92192-52.30592 66.60096-14.336 25.76384-16.7936 80.896-16.7936 80.896 0 23.3472 10.40384 35.0208 31.37536 35.0208 18.96448 0 29.45024-11.6736 31.37536-35.0208 0 0 2.49856-61.8496 26.91072-89.21088 27.648-31.00672 93.75744-52.71552 95.6416-132.46464-7.70048-83.64032-58.9824-129.35168-154.0096-137.13408z" fill="#FFFFFF" p-id="5007"></path></svg>';

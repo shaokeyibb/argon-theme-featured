@@ -299,7 +299,7 @@ function argon_comment_format($comment, $args, $depth){
 						echo '<span class="badge badge-warning badge-unapproved">' . __('待审核', 'argon') . '</span>';}
 					?>
 					<?php
-						echo parse_ua_and_icon($comment -> comment_agent);
+						echo parse_ua_and_icon($comment -> comment_agent, get_comment_ID());
 					?>
 				</div>
 				<div class="comment-info">
@@ -750,6 +750,19 @@ function post_comment_updatemetas($id){
 		if (!empty($_POST['qq'])){
 			update_comment_meta($id, "qq_number", $_POST['qq']);
 		}
+	}
+	//保存 Sec-CH-UA 系列 Header（如果存在）
+	if (isset($_SERVER['HTTP_SEC_CH_UA'])){
+		update_comment_meta($id, "sec_ch_ua", $_SERVER['HTTP_SEC_CH_UA']);
+	}
+	if (isset($_SERVER['HTTP_SEC_CH_UA_PLATFORM'])){
+		update_comment_meta($id, "sec_ch_ua_platform", $_SERVER['HTTP_SEC_CH_UA_PLATFORM']);
+	}
+	if (isset($_SERVER['HTTP_SEC_CH_UA_PLATFORM_VERSION'])){
+		update_comment_meta($id, "sec_ch_ua_platform_version", $_SERVER['HTTP_SEC_CH_UA_PLATFORM_VERSION']);
+	}
+	if (isset($_SERVER['HTTP_SEC_CH_UA_FULL_VERSION_LIST'])){
+		update_comment_meta($id, "sec_ch_ua_full_version_list", $_SERVER['HTTP_SEC_CH_UA_FULL_VERSION_LIST']);
 	}
 }
 add_action('comment_post' , 'post_comment_updatemetas');

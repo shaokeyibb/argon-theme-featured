@@ -115,6 +115,14 @@ session_init();
 require_once( get_template_directory() . '/inc/lib/useragent-parser.php' );
 require_once( get_template_directory() . '/inc/fun/user-agent.php' );
 
+//设置 Accept-CH 响应头以支持 Sec-CH-UA 系列 Header
+function argon_set_accept_ch_header() {
+	if ( ! headers_sent() ) {
+		header( 'Accept-CH: Sec-CH-UA, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version, Sec-CH-UA-Full-Version-List' );
+	}
+}
+add_action( 'send_headers', 'argon_set_accept_ch_header' );
+
 
 //发送邮件
 function send_mail( $to, $subject, $content ) {
