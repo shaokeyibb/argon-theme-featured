@@ -1,0 +1,19 @@
+.external-link-click-wrapper {
+	position: relative;
+	display: inline-block;
+}
+.external-link-click-badge {
+	position: absolute;
+	top: -0.6em;
+	right: -1.2em;
+	background: var(--themecolor);
+	color: #fff;
+	font-size: 0.65em;
+	line-height: 1;
+	padding: 2px 5px;
+	border-radius: 10px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-weight: 600;
+	z-index: 1;
+}

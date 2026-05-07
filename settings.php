@@ -1011,6 +1011,18 @@ function themeoptions_page(){
                             <p class="description">输入您 Discourse 论坛中的地址，一般来说应该是您的首页地址。</p>
                         </td>
                     </tr>
+					<tr><th class="subtitle"><h3><?php _e('外链点击统计', 'argon');?></h3></th></tr>
+					<tr>
+						<th><label><?php _e('显示外链点击量', 'argon');?></label></th>
+						<td>
+							<select name="argon_enable_external_link_clicks">
+								<?php $argon_enable_external_link_clicks = get_option('argon_enable_external_link_clicks', 'true'); ?>
+								<option value="true" <?php if ($argon_enable_external_link_clicks=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
+								<option value="false" <?php if ($argon_enable_external_link_clicks=='false'){echo 'selected';} ?>><?php _e('禁用', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('在文章/页面的外部链接旁显示点击量角标，记录每个外链被点击的次数。数据按文章隔离。', 'argon');?></p>
+						</td>
+					</tr>
 					<tr><th class="subtitle"><h3><?php _e('其他', 'argon');?></h3></th></tr>
 					<tr>
 						<th><label><?php _e('文章过时信息显示', 'argon');?></label></th>
@@ -2344,6 +2356,7 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_enable_login_css');
 		argon_update_option('argon_hide_categories');
 		argon_update_option('argon_article_meta');
+		argon_update_option('argon_enable_external_link_clicks');
 		argon_update_option('argon_fold_long_comments');
 		argon_update_option('argon_fold_long_shuoshuo');
 		argon_update_option('argon_first_image_as_thumbnail_by_default');

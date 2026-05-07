@@ -156,7 +156,12 @@
 				hide_linenumber: <?php echo get_option('argon_code_highlight_hide_linenumber', 'false'); ?>,
 				transparent_linenumber: <?php echo get_option('argon_code_highlight_transparent_linenumber', 'false'); ?>,
 				break_line: <?php echo get_option('argon_code_highlight_break_line', 'false'); ?>
-			}
+			},
+			external_link_clicks: <?php echo (get_option('argon_enable_external_link_clicks', 'true') == 'true' && !is_admin()) ? 'true' : 'false'; ?>,
+			<?php if (is_single() || is_page()) { ?>
+				post_id: <?php echo get_the_ID(); ?>,
+				external_link_clicks_nonce: "<?php echo wp_create_nonce('argon_external_link_clicks'); ?>",
+			<?php } ?>
 		}
 	</script>
 	<script>

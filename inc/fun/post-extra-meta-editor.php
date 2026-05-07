@@ -44,6 +44,14 @@ function argon_meta_box_1(){
 		<?php $argon_custom_css = get_post_meta($post->ID, "argon_custom_css", true);?>
 		<textarea name="argon_custom_css" id="argon_custom_css" rows="5" cols="30" style="width:100%;"><?php if (!empty($argon_custom_css)){echo $argon_custom_css;} ?></textarea>
 		<p style="margin-top: 15px;"><?php _e("给该文章添加单独的 CSS", 'argon');?></p>
+		<h4><?php _e("外链点击统计", 'argon');?></h4>
+		<?php $argon_enable_external_link_clicks = get_post_meta($post->ID, "argon_enable_external_link_clicks", true);?>
+		<select name="argon_enable_external_link_clicks" id="argon_enable_external_link_clicks">
+			<option value="default" <?php if ($argon_enable_external_link_clicks=='default' || $argon_enable_external_link_clicks==''){echo 'selected';} ?>><?php _e("跟随全局设置", 'argon');?></option>
+			<option value="true" <?php if ($argon_enable_external_link_clicks=='true'){echo 'selected';} ?>><?php _e("启用", 'argon');?></option>
+			<option value="false" <?php if ($argon_enable_external_link_clicks=='false'){echo 'selected';} ?>><?php _e("不启用", 'argon');?></option>
+		</select>
+		<p style="margin-top: 15px;"><?php _e("控制该文章是否显示外链点击量角标并记录点击。", 'argon');?></p>
 
         <?php if(get_option('argon_ai_post_summary', false) == 'true'){ ?>
             <h4><?php _e("启用 AI 文章摘要", 'argon');?></h4>
@@ -222,6 +230,7 @@ function argon_save_meta_data($post_id){
 	update_post_meta($post_id, 'argon_show_post_outdated_info', $_POST['argon_show_post_outdated_info']);
 	update_post_meta($post_id, 'argon_after_post', $_POST['argon_after_post']);
 	update_post_meta($post_id, 'argon_custom_css', $_POST['argon_custom_css']);
+	update_post_meta($post_id, 'argon_enable_external_link_clicks', $_POST['argon_enable_external_link_clicks']);
 	update_post_meta($post_id, 'argon_ai_post_summary', $_POST['argon_ai_post_summary'] );
     update_post_meta($post_id,'argon_ai_no_update_post_summary', $_POST['argon_ai_no_update_post_summary']);
 	update_post_meta($post_id,'argon_ai_extra_prompt_mode', $_POST['argon_ai_extra_prompt_mode']);

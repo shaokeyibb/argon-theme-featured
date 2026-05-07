@@ -106,3 +106,6 @@ require('./horizontal-scroll');
 
 //Console Info
 require('./console-info');
+
+//外链点击统计
+require('./external-link-clicks');
