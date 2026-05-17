@@ -459,12 +459,18 @@ function wrong_captcha(){
 	)));
 	//wp_die('验证码错误，评论失败');
 }
-function get_comment_captcha(){
-	$captcha = new captcha_calculation(get_comment_captcha_seed());
+function get_comment_captcha($seed = null){
+	if ($seed === null){
+		$seed = get_comment_captcha_seed();
+	}
+	$captcha = new captcha_calculation($seed);
 	return $captcha -> getChallenge();
 }
-function get_comment_captcha_answer(){
-	$captcha = new captcha_calculation(get_comment_captcha_seed());
+function get_comment_captcha_answer($seed = null){
+	if ($seed === null){
+		$seed = get_comment_captcha_seed();
+	}
+	$captcha = new captcha_calculation($seed);
 	return $captcha -> getAnswer();
 }
 function check_comment_captcha($comment){
@@ -475,7 +481,8 @@ function check_comment_captcha($comment){
 	if(current_user_can('level_7')){
 		return $comment;
 	}
-	$captcha = new captcha_calculation(get_comment_captcha_seed());
+	$seed = isset($_POST['comment_captcha_seed']) && $_POST['comment_captcha_seed'] !== '' ? intval($_POST['comment_captcha_seed']) : get_comment_captcha_seed();
+	$captcha = new captcha_calculation($seed);
 	if (!($captcha -> check($answer))){
 		wrong_captcha();
 	}
@@ -487,7 +494,7 @@ function ajax_get_captcha(){
 	if (get_option('argon_get_captcha_by_ajax', 'false') != 'true') {
 		return;
 	}
-	$seed = get_comment_captcha_seed();
+	$seed = get_comment_captcha_seed(true);
 	exit(json_encode(array(
 		'captcha' => get_comment_captcha($seed),
 		'captchaSeed' => $seed
