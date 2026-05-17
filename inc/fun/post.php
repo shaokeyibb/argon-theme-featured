@@ -631,6 +631,52 @@ function argon_format_click_count($count){
 	}
 	return number_format_i18n($count);
 }
+function argon_external_link_clicks_get_client_key(){
+	if (is_user_logged_in()){
+		return 'user:' . get_current_user_id();
+	}
+	$client_id = isset($_POST['client_id']) ? sanitize_text_field(wp_unslash($_POST['client_id'])) : '';
+	if (!empty($client_id)){
+		return 'client:' . substr($client_id, 0, 128);
+	}
+	$ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+	$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
+	return 'guest:' . $ip . '|' . $user_agent;
+}
+function argon_external_link_clicks_get_page_key(){
+	$page_id = isset($_POST['page_id']) ? sanitize_text_field(wp_unslash($_POST['page_id'])) : '';
+	if (!empty($page_id)){
+		return substr($page_id, 0, 128);
+	}
+	return 'legacy';
+}
+function argon_external_link_clicks_cleanup_locks(){
+	if (mt_rand(1, 100) !== 1){
+		return;
+	}
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND CAST(option_value AS UNSIGNED) <= %d",
+			$wpdb->esc_like('argon_ext_click_lock_') . '%',
+			time()
+		)
+	);
+}
+function argon_external_link_clicks_acquire_lock($post_id, $url){
+	$ttl = 3600;
+	$option_name = 'argon_ext_click_lock_' . md5($post_id . '|' . $url . '|' . argon_external_link_clicks_get_client_key() . '|' . argon_external_link_clicks_get_page_key());
+	$now = time();
+	$expires_at = intval(get_option($option_name, 0));
+	if ($expires_at > $now){
+		return false;
+	}
+	if ($expires_at > 0){
+		delete_option($option_name);
+	}
+	argon_external_link_clicks_cleanup_locks();
+	return add_option($option_name, $now + $ttl, '', 'no');
+}
 function argon_external_link_clicks_is_enabled($post_id = null){
 	if (get_option('argon_enable_external_link_clicks', 'true') == 'false'){
 		return false;
@@ -744,6 +790,10 @@ function argon_click_external_link(){
 	if (!isset($clicks[$url])){
 		$clicks[$url] = 0;
 	}
+	if (!argon_external_link_clicks_acquire_lock($post_id, $url)){
+		wp_send_json(array('status' => 'duplicate', 'count' => $clicks[$url]));
+		return;
+	}
 	$clicks[$url]++;
 	update_post_meta($post_id, 'argon_external_link_clicks', wp_json_encode($clicks));
 	wp_send_json(array('status' => 'success', 'count' => $clicks[$url]));
@@ -821,4 +871,3 @@ function argon_get_ai_post_summary(): string {
 		'$content' => $content,
 	) ) );
 }
-
