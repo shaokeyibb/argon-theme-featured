@@ -22,7 +22,7 @@ html.darkmode #navbar-main {
 		max-width: 100%;
 	}
 }
-@media (min-width: 992px){
+@media (min-width: 900px){
 	.navbar-nav{
 		align-items: center;
 	}

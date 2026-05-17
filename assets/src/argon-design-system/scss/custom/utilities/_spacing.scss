@@ -26,7 +26,7 @@
 
 // Negative margins and paddings
 
-@media(min-width: 992px) {
+@include media-breakpoint-up(lg) {
     [class*="mt--"],
     [class*="mr--"],
     [class*="mb--"],

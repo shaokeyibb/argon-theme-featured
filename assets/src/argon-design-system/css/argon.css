@@ -47,7 +47,7 @@
     --breakpoint-xs: 0;
     --breakpoint-sm: 576px;
     --breakpoint-md: 768px;
-    --breakpoint-lg: 992px;
+    --breakpoint-lg: 900px;
     --breakpoint-xl: 1200px;
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
@@ -763,7 +763,7 @@ pre code
         max-width: 720px;
     }
 }
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .container
     {
@@ -1513,7 +1513,7 @@ pre code
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .col-lg
     {
@@ -2367,7 +2367,7 @@ pre code
     }
 }
 
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .table-responsive-lg
     {
@@ -4211,7 +4211,7 @@ input[type='button'].btn-block
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .dropdown-menu-lg-left
     {
@@ -5661,7 +5661,7 @@ input[type='button'].btn-block
     }
 }
 
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .navbar-expand-lg > .container,
     .navbar-expand-lg > .container-fluid
@@ -5671,7 +5671,7 @@ input[type='button'].btn-block
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .navbar-expand-lg
     {
@@ -7041,7 +7041,7 @@ a.badge:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .list-group-horizontal-lg
     {
@@ -7623,7 +7623,7 @@ a.close.disabled
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .modal-lg,
     .modal-xl
@@ -8742,7 +8742,7 @@ button.bg-darker:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .d-lg-none
     {
@@ -9365,7 +9365,7 @@ button.bg-darker:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .flex-lg-row
     {
@@ -9692,7 +9692,7 @@ button.bg-darker:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .float-lg-left
     {
@@ -12255,7 +12255,7 @@ button.bg-darker:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .m-lg-0
     {
@@ -13778,7 +13778,7 @@ button.bg-darker:focus
     }
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .text-lg-left
     {
@@ -14104,11 +14104,11 @@ a.text-darker:focus
     }
     body
     {
-        min-width: 992px !important;
+        min-width: 900px !important;
     }
     .container
     {
-        min-width: 992px !important;
+        min-width: 900px !important;
     }
     .navbar
     {
@@ -15296,7 +15296,7 @@ button.section-darker:focus
     margin-top: 3rem;
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .row.row-grid > [class*='col-lg-'] + [class*='col-lg-']
     {
@@ -15325,7 +15325,7 @@ button.section-darker:focus
     margin-top: 3rem;
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     [class*='mt--'],
     [class*='mr--'],
@@ -15547,7 +15547,7 @@ button.section-darker:focus
     letter-spacing: .125rem;
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .transform-perspective-right
     {
@@ -16388,7 +16388,7 @@ a.btn-icon-only
         margin-top: 110px;
     }
 }
-@media (min-width: 576px) and (max-width: 991.98px)
+@media (min-width: 576px) and (max-width: 900px)
 {
     .profile-page .card-profile .card-profile-stats
     {
@@ -16978,7 +16978,7 @@ textarea[resize='horizontal']
     color: #fb6340;
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .container-lg
     {
@@ -17755,7 +17755,7 @@ textarea[resize='horizontal']
     margin-bottom: 1.5rem;
 }
 
-@media (min-width: 992px)
+@media (min-width: 900px)
 {
     .navbar-nav .nav-item
     {
@@ -17930,7 +17930,7 @@ textarea[resize='horizontal']
     display: none;
 }
 
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .navbar-nav .nav-link
     {
@@ -18980,7 +18980,7 @@ textarea[resize='horizontal']
 
     background: rgba(255, 255, 255, .05);
 }
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .section-shaped .shape-style-1 span
     {
@@ -19053,7 +19053,7 @@ textarea[resize='horizontal']
 
     width: 33.33333%;
 }
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .section-shaped .shape-style-2 span
     {
@@ -19112,7 +19112,7 @@ textarea[resize='horizontal']
 
     width: 33.33333%;
 }
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .section-shaped .shape-style-3 span
     {
@@ -19220,7 +19220,7 @@ textarea[resize='horizontal']
     background-size: cover;
 }
 
-@media (max-width: 991.98px)
+@media (max-width: 900px)
 {
     .section-profile-cover
     {
@@ -19357,7 +19357,7 @@ textarea[resize='horizontal']
     height: 60px;
 }
 
-@media (max-width: 992px)
+@media (max-width: 900px)
 {
     .separator-skew
     {
