@@ -27,25 +27,52 @@ function argonGetExternalLinkClickKey(postId, url) {
 	return postId + '|' + url;
 }
 
-function argonSendExternalLinkClick(postId, url) {
+function argonBuildExternalLinkClickBody(postId, url) {
 	var nonce = window.argonConfig.external_link_clicks_nonce || '';
-	var ajaxUrl = window.argonConfig.wp_path + 'wp-admin/admin-ajax.php';
 	var clientId = argonGetExternalLinkClickClientId();
-	var body = 'action=argon_click_external_link'
+	return 'action=argon_click_external_link'
 		+ '&post_id=' + encodeURIComponent(postId)
 		+ '&url=' + encodeURIComponent(url)
 		+ '&client_id=' + encodeURIComponent(clientId)
 		+ '&page_id=' + encodeURIComponent(argonExternalLinkClickPageId)
 		+ '&_wpnonce=' + encodeURIComponent(nonce);
+}
 
-	if (navigator.sendBeacon) {
-		var blob = new Blob([body], { type: 'application/x-www-form-urlencoded' });
-		navigator.sendBeacon(ajaxUrl, blob);
+function argonSendExternalLinkClick(postId, url, callback) {
+	var ajaxUrl = window.argonConfig.wp_path + 'wp-admin/admin-ajax.php';
+	var body = argonBuildExternalLinkClickBody(postId, url);
+
+	if (window.fetch) {
+		fetch(ajaxUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: body,
+			keepalive: true,
+			credentials: 'same-origin'
+		}).then(function (response) {
+			return response.json();
+		}).then(callback).catch(function () {});
 	} else {
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', ajaxUrl, false);
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		xhr.send(body);
+		if (xhr.responseText) {
+			try {
+				callback(JSON.parse(xhr.responseText));
+			} catch (e) {}
+		}
+	}
+}
+
+function argonUpdateExternalLinkClickBadge($wrapper, count) {
+	var $badge = $wrapper.find('.external-link-click-badge');
+	if ($badge.length) {
+		$badge.data('count', count).text(argonFormatClickCount(count));
+	} else {
+		$wrapper.append('<span class="external-link-click-badge" data-count="' + count + '">' + argonFormatClickCount(count) + '</span>');
 	}
 }
 
@@ -60,15 +87,11 @@ $(document).on('click', '.external-link-click-wrapper a', function (e) {
 	if (argonClickedExternalLinks[clickKey]) return;
 	argonClickedExternalLinks[clickKey] = true;
 
-	argonSendExternalLinkClick(postId, url);
-
 	var $wrapper = $(this).closest('.external-link-click-wrapper');
-	var $badge = $wrapper.find('.external-link-click-badge');
-	if ($badge.length) {
-		var current = parseInt($badge.data('count'), 10) || 0;
-		var next = current + 1;
-		$badge.data('count', next).text(argonFormatClickCount(next));
-	} else {
-		$wrapper.append('<span class="external-link-click-badge" data-count="1">1</span>');
-	}
+	argonSendExternalLinkClick(postId, url, function (response) {
+		if (!response || response.status !== 'success') return;
+		var count = parseInt(response.count, 10);
+		if (isNaN(count)) return;
+		argonUpdateExternalLinkClickBadge($wrapper, count);
+	});
 });
