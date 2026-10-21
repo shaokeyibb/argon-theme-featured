@@ -43,10 +43,10 @@ function parse_ua_and_icon($userAgent, $comment_id = null){
 		}else{
 			$out .= $GLOBALS['UA_ICON']['Unknown'] . " ";
 		}
-		$out .= $parsed['platform'];
+		$out .= esc_html($parsed['platform']);
 		// 如果存在操作系统版本，则显示
 		if (isset($parsed['platform_version']) && $parsed['platform_version'] !== null){
-			$out .= " " . $parsed['platform_version'];
+			$out .= " " . esc_html($parsed['platform_version']);
 		}
 	}
 	if (isset($argon_comment_show_ua['browser']) && $argon_comment_show_ua['browser'] == true){
@@ -55,9 +55,9 @@ function parse_ua_and_icon($userAgent, $comment_id = null){
 		}else{
 			$out .= " " . $GLOBALS['UA_ICON']['Unknown'];
 		}
-		$out .= " " . $parsed['browser'];
+		$out .= " " . esc_html($parsed['browser']);
 		if (isset($argon_comment_show_ua['version']) && $argon_comment_show_ua['version'] == true){
-			$out .= " " . $parsed['version'];
+			$out .= " " . esc_html($parsed['version']);
 		}
 	}
 	$out .= "</div>";

@@ -27,20 +27,21 @@ function argonGetExternalLinkClickKey(postId, url) {
 	return postId + '|' + url;
 }
 
-function argonBuildExternalLinkClickBody(postId, url) {
+function argonBuildExternalLinkClickBody(postId, url, linkNonce) {
 	var nonce = window.argonConfig.external_link_clicks_nonce || '';
 	var clientId = argonGetExternalLinkClickClientId();
 	return 'action=argon_click_external_link'
 		+ '&post_id=' + encodeURIComponent(postId)
 		+ '&url=' + encodeURIComponent(url)
+		+ '&link_nonce=' + encodeURIComponent(linkNonce)
 		+ '&client_id=' + encodeURIComponent(clientId)
 		+ '&page_id=' + encodeURIComponent(argonExternalLinkClickPageId)
 		+ '&_wpnonce=' + encodeURIComponent(nonce);
 }
 
-function argonSendExternalLinkClick(postId, url, callback) {
+function argonSendExternalLinkClick(postId, url, linkNonce, callback) {
 	var ajaxUrl = window.argonConfig.wp_path + 'wp-admin/admin-ajax.php';
-	var body = argonBuildExternalLinkClickBody(postId, url);
+	var body = argonBuildExternalLinkClickBody(postId, url, linkNonce);
 
 	if (window.fetch) {
 		fetch(ajaxUrl, {
@@ -88,7 +89,7 @@ $(document).on('click', '.external-link-click-wrapper a', function (e) {
 	argonClickedExternalLinks[clickKey] = true;
 
 	var $wrapper = $(this).closest('.external-link-click-wrapper');
-	argonSendExternalLinkClick(postId, url, function (response) {
+	argonSendExternalLinkClick(postId, url, $(this).attr('data-click-nonce') || '', function (response) {
 		if (!response || response.status !== 'success') return;
 		var count = parseInt(response.count, 10);
 		if (isNaN(count)) return;

@@ -1,6 +1,7 @@
 <?php
 
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/inc/fun/security.php';
 
 // 载入主题检测更新、兼容性
 require get_template_directory() . '/inc/argon.php';
@@ -64,6 +65,7 @@ function argon_get_locate() {
 	if ( is_admin() ) {
 		$determined_locale = get_user_locale();
 	}
+	return argon_locate_filter($determined_locale);
 }
 
 function theme_locale_hook( $locate, $domain ) {
@@ -88,28 +90,26 @@ function array_remove( &$arr, $item ) {
 	}
 }
 
-//访问者 Token & Session
+//访问者 Token
 function get_random_token() {
-	return md5( uniqid( microtime( true ), true ) );
+	return bin2hex(random_bytes(16));
 }
 
 function set_user_token_cookie() {
-	if ( ! isset( $_COOKIE["argon_user_token"] ) || strlen( $_COOKIE["argon_user_token"] ) != 32 ) {
+	if (argon_user_token() === '') {
 		$newToken = get_random_token();
-		setcookie( "argon_user_token", $newToken, time() + 10 * 365 * 24 * 60 * 60, "/" );
+		setcookie('argon_user_token', $newToken, array(
+			'expires' => time() + 10 * YEAR_IN_SECONDS,
+			'path' => '/',
+			'secure' => is_ssl(),
+			'httponly' => true,
+			'samesite' => 'Lax'
+		));
 		$_COOKIE["argon_user_token"] = $newToken;
 	}
 }
 
-function session_init() {
-	set_user_token_cookie();
-	if ( ! session_id() ) {
-		session_start();
-	}
-}
-
-session_init();
-//add_action('init', 'session_init');
+set_user_token_cookie();
 
 //解析 UA 和相应图标
 require_once( get_template_directory() . '/inc/lib/useragent-parser.php' );
@@ -130,7 +130,7 @@ function send_mail( $to, $subject, $content ) {
 }
 
 function check_email_address( $email ) {
-	return (bool) preg_match( "/^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+(([.\-])[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/", $email );
+	return is_string($email) && is_email($email) !== false;
 }
 
 //首页隐藏特定分类文章
@@ -157,6 +157,6 @@ if ( get_option( "argon_hide_categories" ) != "" ) {
 /*恢复链接管理器*/
 add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 
-require('inc/fun/nofollow-friendlink.php');
+require __DIR__ . '/inc/fun/nofollow-friendlink.php';
 
-require('inc/fun/chatgpt.php');
+require __DIR__ . '/inc/fun/chatgpt.php';

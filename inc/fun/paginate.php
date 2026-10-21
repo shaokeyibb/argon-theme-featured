@@ -16,7 +16,7 @@ function get_argon_formatted_paginate_links($maxPageNumbers, $extraArgs = array(
 		if (!$multipage) return "";
 		$res = wp_link_pages($args);
 	}else {
-		$res = paginate_links($args);
+		$res = (string) paginate_links($args);
 	}
 	//单引号转双引号 & 去除上一页和下一页按钮
 	$res = preg_replace(

@@ -61,11 +61,11 @@
 	</button>
 </div>
 <script type="text/javascript">
-	var shareInfo = {
-	    title: '<?php echo addslashes(html_entity_decode(get_the_title())); ?>',
-	    description: '<?php echo addslashes(html_entity_decode(wp_trim_words(html_entity_decode(get_the_content()), 50)));?>',
-	    url: '<?php global $post; echo get_permalink($post -> ID); ?>',
-		origin: '<?php echo get_bloginfo('name'); ?>',
-		source: '<?php echo get_site_url();  ?>',
-	};
+	var shareInfo = <?php echo argon_json(array(
+		'title' => html_entity_decode(get_the_title()),
+		'description' => post_password_required() ? '' : html_entity_decode(wp_trim_words(wp_strip_all_tags(get_the_content()), 50)),
+		'url' => get_permalink(),
+		'origin' => get_bloginfo('name'),
+		'source' => get_site_url()
+	)); ?>;
 </script>

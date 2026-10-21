@@ -15,6 +15,7 @@ function toggleCommentPin(commentID, pinned){
 			dataType : "json",
 			data: {
 				action: "pin_comment",
+				_wpnonce: window.argonConfig.ajax_nonce,
 				id: commentID,
 				pinned: pinned ? "false" : "true"
 			},

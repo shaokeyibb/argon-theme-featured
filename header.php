@@ -42,13 +42,17 @@
 		$htmlclasses .= 'toolbar-blur ';
 	}
 	$htmlclasses .= get_option('argon_article_header_style', 'article-header-style-default') . ' ';
-	if(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== false && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') === false){
+	$user_agent = argon_request_string($_SERVER, 'HTTP_USER_AGENT');
+	if(strpos($user_agent, 'Safari') !== false && strpos($user_agent, 'Chrome') === false){
 		$htmlclasses .= ' using-safari';
 	}
 ?>
-<html <?php language_attributes(); ?> class="no-js <?php echo $htmlclasses;?>">
+<html <?php language_attributes(); ?> class="no-js <?php echo esc_attr($htmlclasses);?>">
 <?php
 	$themecolor = get_option("argon_theme_color", "#5e72e4");
+	if (!checkHEX($themecolor)){
+		$themecolor = '#5e72e4';
+	}
 	$themecolor_origin = $themecolor;
 	if (isset($_COOKIE["argon_custom_theme_color"])){
 		if (checkHEX($_COOKIE["argon_custom_theme_color"]) && get_option('argon_show_customize_theme_color_picker') != 'false'){
@@ -60,13 +64,10 @@
 	}
 ?>
 <?php
-	$cardradius = get_option('argon_card_radius');
-	if ($cardradius == ""){
-		$cardradius = "4";
-	}
+	$cardradius = argon_card_radius(get_option('argon_card_radius', 4));
 	$cardradius_origin = $cardradius;
 	if (isset($_COOKIE["argon_card_radius"]) && $_COOKIE["argon_card_radius"] != ""){
-		$cardradius = $_COOKIE["argon_card_radius"];
+		$cardradius = argon_card_radius($_COOKIE["argon_card_radius"]);
 	}
 ?>
 <head>
@@ -76,28 +77,28 @@
 	<?php }else{ ?>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 	<?php } ?>
-	<meta property="og:site_name" content="<?php echo get_bloginfo('name');?>">
-	<meta property="og:title" content="<?php echo wp_get_document_title();?>">
+	<meta property="og:site_name" content="<?php echo esc_attr(get_bloginfo('name'));?>">
+	<meta property="og:title" content="<?php echo esc_attr(wp_get_document_title());?>">
 	<meta property="og:type" content="article">
-	<meta property="og:url" content="<?php echo home_url(add_query_arg(array(),$wp->request));?>">
+	<meta property="og:url" content="<?php echo esc_url(home_url(add_query_arg(array(),$wp->request)));?>">
 	<?php
 		$seo_description = get_seo_description();
 		if ($seo_description != ''){ ?>
-			<meta name="description" content="<?php echo $seo_description?>">
-			<meta property="og:description" content="<?php echo $seo_description?>">
+			<meta name="description" content="<?php echo esc_attr($seo_description); ?>">
+			<meta property="og:description" content="<?php echo esc_attr($seo_description); ?>">
 	<?php } ?>
 
 	<?php
 		$seo_keywords = get_seo_keywords();
 		if ($seo_keywords != ''){ ?>
-			<meta name="keywords" content="<?php echo get_seo_keywords();?>">
+			<meta name="keywords" content="<?php echo esc_attr($seo_keywords);?>">
 	<?php } ?>
 
 	<?php
 		if (is_single() || is_page()){
 			$og_image = get_og_image();
 			if ($og_image != ''){ ?>
-				<meta property="og:image" content="<?php echo $og_image?>" />
+				<meta property="og:image" content="<?php echo esc_url($og_image); ?>" />
 	<?php 	}
 		} ?>
 
@@ -123,49 +124,40 @@
 	<?php $GLOBALS['wp_path'] = get_option('argon_wp_path') == '' ? '/' : get_option('argon_wp_path'); ?>
 	<script>
 		document.documentElement.classList.remove("no-js");
-		var argonConfig = {
-			wp_path: "<?php echo $GLOBALS['wp_path']; ?>",
-			language: "<?php echo argon_get_locate(); ?>",
-			dateFormat: "<?php echo get_option('argon_dateformat', 'YMD'); ?>",
-			<?php if (get_option('argon_enable_zoomify') == 'true'){ ?>
-				zoomify: {
-					duration: <?php echo get_option('argon_zoomify_duration', 200); ?>,
-					easing: "<?php echo get_option('argon_zoomify_easing', 'cubic-bezier(0.4,0,0,1)'); ?>",
-					scale: <?php echo get_option('argon_zoomify_scale', 0.9); ?>
-				},
-			<?php } else { ?>
-				zoomify: false,
-			<?php } ?>
-			pangu: "<?php echo get_option('argon_enable_pangu', 'false'); ?>",
-			<?php if (get_option('argon_enable_lazyload') != 'false'){ ?>
-				lazyload: {
-					threshold: <?php echo get_option('argon_lazyload_threshold', 800); ?>,
-					effect: "<?php echo get_option('argon_lazyload_effect', 'fadeIn'); ?>"
-				},
-			<?php } else { ?>
-				lazyload: false,
-			<?php } ?>
-			fold_long_comments: <?php echo get_option('argon_fold_long_comments', 'false'); ?>,
-			fold_long_shuoshuo: <?php echo get_option('argon_fold_long_shuoshuo', 'false'); ?>,
-			disable_pjax: <?php echo get_option('argon_pjax_disabled', 'false'); ?>,
-			pjax_animation_durtion: <?php echo (get_option("argon_disable_pjax_animation") == 'true' ? '0' : '600'); ?>,
-			headroom: "<?php echo get_option('argon_enable_headroom', 'false'); ?>",
-			waterflow_columns: "<?php echo get_option('argon_article_list_waterflow', '1'); ?>",
-			code_highlight: {
-				enable: <?php echo get_option('argon_enable_code_highlight', 'false'); ?>,
-				hide_linenumber: <?php echo get_option('argon_code_highlight_hide_linenumber', 'false'); ?>,
-				transparent_linenumber: <?php echo get_option('argon_code_highlight_transparent_linenumber', 'false'); ?>,
-				break_line: <?php echo get_option('argon_code_highlight_break_line', 'false'); ?>
-			},
-			external_link_clicks: <?php echo (get_option('argon_enable_external_link_clicks', 'true') == 'true' && !is_admin()) ? 'true' : 'false'; ?>,
-			<?php if (is_single() || is_page()) { ?>
-				post_id: <?php echo get_the_ID(); ?>,
-				external_link_clicks_nonce: "<?php echo wp_create_nonce('argon_external_link_clicks'); ?>",
-			<?php } ?>
-		}
+		var argonConfig = <?php echo argon_json(array(
+			'ajax_nonce' => wp_create_nonce('argon_public_ajax'),
+			'wp_path' => $GLOBALS['wp_path'],
+			'language' => argon_get_locate(),
+			'dateFormat' => get_option('argon_dateformat', 'YMD'),
+			'zoomify' => get_option('argon_enable_zoomify') === 'true' ? array(
+				'duration' => (int) get_option('argon_zoomify_duration', 200),
+				'easing' => get_option('argon_zoomify_easing', 'cubic-bezier(0.4,0,0,1)'),
+				'scale' => (float) get_option('argon_zoomify_scale', 0.9)
+			) : false,
+			'pangu' => get_option('argon_enable_pangu', 'false'),
+			'lazyload' => get_option('argon_enable_lazyload') !== 'false' ? array(
+				'threshold' => (int) get_option('argon_lazyload_threshold', 800),
+				'effect' => get_option('argon_lazyload_effect', 'fadeIn')
+			) : false,
+			'fold_long_comments' => get_option('argon_fold_long_comments', 'false') === 'true',
+			'fold_long_shuoshuo' => get_option('argon_fold_long_shuoshuo', 'false') === 'true',
+			'disable_pjax' => get_option('argon_pjax_disabled', 'false') === 'true',
+			'pjax_animation_durtion' => get_option('argon_disable_pjax_animation') === 'true' ? 0 : 600,
+			'headroom' => get_option('argon_enable_headroom', 'false'),
+			'waterflow_columns' => get_option('argon_article_list_waterflow', '1'),
+			'code_highlight' => array(
+				'enable' => get_option('argon_enable_code_highlight', 'false') === 'true',
+				'hide_linenumber' => get_option('argon_code_highlight_hide_linenumber', 'false') === 'true',
+				'transparent_linenumber' => get_option('argon_code_highlight_transparent_linenumber', 'false') === 'true',
+				'break_line' => get_option('argon_code_highlight_break_line', 'false') === 'true'
+			),
+			'external_link_clicks' => get_option('argon_enable_external_link_clicks', 'true') === 'true' && !is_admin(),
+			'post_id' => is_singular() ? get_the_ID() : 0,
+			'external_link_clicks_nonce' => wp_create_nonce('argon_external_link_clicks')
+		)); ?>;
 	</script>
 	<script>
-		var darkmodeAutoSwitch = "<?php echo (get_option("argon_darkmode_autoswitch") == '' ? 'false' : get_option("argon_darkmode_autoswitch"));?>";
+		var darkmodeAutoSwitch = <?php echo argon_json(get_option('argon_darkmode_autoswitch') ?: 'false'); ?>;
 		function setDarkmode(enable){
 			if (enable){
 				document.documentElement.classList.add("darkmode");
@@ -241,7 +233,7 @@
 		}
 	</script>
 	<?php 
-		wp_enqueue_script("argonjs", $GLOBALS['assets_path'] . "/assets/dist/argon-theme.js", null, $GLOBALS['theme_version']);
+		wp_enqueue_script("argonjs", $GLOBALS['assets_path'] . "/assets/dist/argon-theme.js", array(), (string) filemtime(get_template_directory() . '/assets/dist/argon-theme.js'));
 	?>
 	<?php wp_head(); ?>
 

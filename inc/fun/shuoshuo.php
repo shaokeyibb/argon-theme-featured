@@ -65,9 +65,13 @@ function set_shuoshuo_upvotes($ID){
 	}
 }
 function upvote_shuoshuo(){
+	argon_ajax_nonce();
 	header('Content-Type:application/json; charset=utf-8');
-	$ID = $_POST["shuoshuo_id"];
-	$upvotedList = isset( $_COOKIE['argon_shuoshuo_upvoted'] ) ? $_COOKIE['argon_shuoshuo_upvoted'] : '';
+	$ID = argon_ajax_id('shuoshuo_id');
+	if (get_post_type($ID) !== 'shuoshuo' || !argon_can_view_post($ID)){
+		wp_send_json(array('status' => 'failed', 'msg' => __('说说不存在', 'argon')), 403);
+	}
+	$upvotedList = argon_request_string($_COOKIE, 'argon_shuoshuo_upvoted');
 	if (in_array($ID, explode(',', $upvotedList))){
 		exit(json_encode(array(
 			'status' => 'failed',

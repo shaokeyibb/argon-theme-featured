@@ -11,6 +11,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 		dataType : "json",
 		data : {
 			action: "upvote_shuoshuo",
+			_wpnonce: window.argonConfig.ajax_nonce,
 			shuoshuo_id : ID,
 		},
 		success : function(result){

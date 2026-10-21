@@ -7,8 +7,8 @@
 			echo " By solstice23";
 		} ?>, Enhanced By HikariLan
     </div>
-    <div><?php if ( isset($_SERVER['HTTP_X_PROVIDED_BY']) )
-			echo "您本次会话的 CDN 提供商为 ".$_SERVER['HTTP_X_PROVIDED_BY'] ?></div>
+    <div><?php if (isset($_SERVER['HTTP_X_PROVIDED_BY']) && is_string($_SERVER['HTTP_X_PROVIDED_BY']))
+			echo "您本次会话的 CDN 提供商为 " . esc_html(wp_unslash($_SERVER['HTTP_X_PROVIDED_BY'])); ?></div>
 </footer>
 </main>
 </div>

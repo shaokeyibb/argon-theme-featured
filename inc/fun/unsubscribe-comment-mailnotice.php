@@ -1,9 +1,10 @@
 <?php
 	require(preg_replace('/wp-content(.*?)$/', '', dirname( __FILE__ )) . 'wp-blog-header.php');
 	header('HTTP/1.1 200 OK');
-	$id = intval($_GET['comment'] ?? -1);
-	$token = $_GET['token'] ?? "";
-	if ($id == -1) {
+	$id = filter_var(argon_request_string($_GET, 'comment'), FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)));
+	$token = argon_request_string($_GET, 'token');
+	$stored_token = $id === false ? '' : get_comment_meta($id, 'mailnotice_unsubscribe_key', true);
+	if ($id === false) {
 		$page_title = __('参数错误', 'argon');
 		$title = "<i class='fa fa-close' style='color: #f5365c;margin-right: 12px;'></i>" . __("错误", 'argon');
 		$info = __("提供的参数错误", 'argon');
@@ -18,7 +19,7 @@
 		$title = "<i class='fa fa-info-circle' style='color: #11cdef;margin-right: 12px;'></i>" . __("无需退订", 'argon');
 		$info = __("评论 #", 'argon') . $id . __(" 的邮件通知已被退订或没有开启邮件通知", 'argon');
 	}
-	else if ($token != get_comment_meta($id, "mailnotice_unsubscribe_key", true)){
+	else if (strlen($token) !== 32 || !is_string($stored_token) || strlen($stored_token) !== 32 || !hash_equals($stored_token, $token)){
 		$page_title = __('退订失败', 'argon');
 		$title = "<i class='fa fa-close' style='color: #f5365c;margin-right: 12px;'></i>" . __("退订失败", 'argon');
 		$info = __("Token 不正确", 'argon');

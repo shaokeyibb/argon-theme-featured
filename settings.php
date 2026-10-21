@@ -1,5 +1,8 @@
 <?php
 function themeoptions_page(){
+	if (!current_user_can('edit_theme_options')){
+		wp_die(esc_html__('您没有权限进行此操作', 'argon'), '', array('response' => 403));
+	}
 	/*主题选项*/
 ?>
 <script src="<?php bloginfo('template_url'); ?>/assets/vendor/jquery/jquery.min.js"></script>
@@ -2245,10 +2248,14 @@ window.pjaxLoaded = function(){
 }
 add_action('admin_menu', 'themeoptions_admin_menu');
 function argon_update_option($name){
-	update_option($name, htmlspecialchars(stripslashes($_POST[$name])));
+	if (isset($_POST[$name]) && is_string($_POST[$name])){
+		update_option($name, htmlspecialchars(wp_unslash($_POST[$name]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+	}
 }
 function argon_update_option_allow_tags($name){
-	update_option($name, stripslashes($_POST[$name]));
+	if (current_user_can('unfiltered_html') && isset($_POST[$name]) && is_string($_POST[$name])){
+		update_option($name, wp_unslash($_POST[$name]));
+	}
 }
 function argon_update_option_checkbox($name){
 	if (isset($_POST[$name]) && $_POST[$name] == 'true'){
@@ -2258,14 +2265,17 @@ function argon_update_option_checkbox($name){
 	}
 }
 function argon_update_themeoptions(){
+	if (!current_user_can('edit_theme_options')){
+		return;
+	}
 	if (!isset($_POST['update_themeoptions'])){
 		return;
 	}
 	if ($_POST['update_themeoptions'] == 'true'){
-		if (!isset($_POST['argon_update_themeoptions_nonce'])){
+		if (!isset($_POST['argon_update_themeoptions_nonce']) || !is_string($_POST['argon_update_themeoptions_nonce'])){
 			return;
 		}
-		$nonce = $_POST['argon_update_themeoptions_nonce'];
+		$nonce = wp_unslash($_POST['argon_update_themeoptions_nonce']);
 		if (!wp_verify_nonce($nonce, 'argon_update_themeoptions')){
 			return;
 		}

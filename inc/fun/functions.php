@@ -125,13 +125,7 @@ function hex2gray($hex){
 	return rgb2gray($rgb_array['R'], $rgb_array['G'], $rgb_array['B']);
 }
 function checkHEX($hex){
-	if (strlen($hex) != 7){
-		return False;
-	}
-	if (substr($hex,0,1) != "#"){
-		return False;
-	}
-	return True;
+	return is_string($hex) && preg_match('/^#[a-f0-9]{6}$/iD', $hex) === 1;
 }
 
 //数字格式化

@@ -23,7 +23,7 @@ function argon_blogroll_inner_meta_box($post) {
 
 function argon_blogroll_save_meta_box($link_rel) {
     $rel = trim(str_replace('nofollow', '', $link_rel));
-    if ($_POST['argon_blogroll_nofollow_checkbox'])
+    if (argon_request_string($_POST, 'argon_blogroll_nofollow_checkbox') === '1')
         $rel .= ' nofollow';
     return trim($rel);
 }

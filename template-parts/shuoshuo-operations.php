@@ -19,7 +19,7 @@
 	</a>
 
 	<?php 
-		$upvotedList = isset($_COOKIE['argon_shuoshuo_upvoted']) ? $_COOKIE['argon_shuoshuo_upvoted'] : '';
+		$upvotedList = argon_request_string($_COOKIE, 'argon_shuoshuo_upvoted');
 		$upvoted = in_array(get_the_ID(), explode(',', $upvotedList));
 	?>
 	<button class="shuoshuo-upvote btn btn-icon btn-outline-primary btn-sm<?php if ($upvoted) {?> upvoted<?php } ?>" type="button" data-id="<?php the_ID(); ?>">

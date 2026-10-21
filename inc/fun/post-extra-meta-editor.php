@@ -38,11 +38,11 @@ function argon_meta_box_1(){
 		<p style="margin-top: 15px;"><?php _e("单独控制该文章的过时信息显示。", 'argon');?></p>
 		<h4><?php _e("文末附加内容", 'argon');?></h4>
 		<?php $argon_after_post = get_post_meta($post->ID, "argon_after_post", true);?>
-		<textarea name="argon_after_post" id="argon_after_post" rows="3" cols="30" style="width:100%;"><?php if (!empty($argon_after_post)){echo $argon_after_post;} ?></textarea>
+		<textarea name="argon_after_post" id="argon_after_post" rows="3" cols="30" style="width:100%;"><?php echo esc_textarea($argon_after_post); ?></textarea>
 		<p style="margin-top: 15px;"><?php _e("给该文章设置单独的文末附加内容，留空则跟随全局，设为 <code>--none--</code> 则不显示。", 'argon');?></p>
 		<h4><?php _e("自定义 CSS", 'argon');?></h4>
 		<?php $argon_custom_css = get_post_meta($post->ID, "argon_custom_css", true);?>
-		<textarea name="argon_custom_css" id="argon_custom_css" rows="5" cols="30" style="width:100%;"><?php if (!empty($argon_custom_css)){echo $argon_custom_css;} ?></textarea>
+		<textarea name="argon_custom_css" id="argon_custom_css" rows="5" cols="30" style="width:100%;"><?php echo esc_textarea($argon_custom_css); ?></textarea>
 		<p style="margin-top: 15px;"><?php _e("给该文章添加单独的 CSS", 'argon');?></p>
 		<h4><?php _e("外链点击统计", 'argon');?></h4>
 		<?php $argon_enable_external_link_clicks = get_post_meta($post->ID, "argon_enable_external_link_clicks", true);?>
@@ -84,7 +84,7 @@ function argon_meta_box_1(){
                 <button id="apply_ai_extra_prompt_mode" type="button" class="components-button is-primary" style="height: 22px; display: none;"><?php _e("应用", 'argon');?></button>
             </div>
 	        <?php $argon_ai_extra_prompt = get_post_meta($post->ID, "argon_ai_extra_prompt", true);?>
-            <textarea name="argon_ai_extra_prompt" id="argon_ai_extra_prompt" rows="5" cols="30" style="width:100%;"><?php if (!empty($argon_ai_extra_prompt)){echo $argon_ai_extra_prompt;} ?></textarea>
+            <textarea name="argon_ai_extra_prompt" id="argon_ai_extra_prompt" rows="5" cols="30" style="width:100%;"><?php echo esc_textarea($argon_ai_extra_prompt); ?></textarea>
             <p style="margin-top: 15px;"><?php _e('发送给 ChatGPT 的额外 Prompt，将被以"system"的角色插入在文章信息后。', 'argon');?></p>
             <h4><?php _e( "重新生成 AI 文章摘要", 'argon' ); ?>
                 <button id="regenerate_ai_post_summary" type="button" class="components-button is-primary"
@@ -111,7 +111,7 @@ function argon_meta_box_1(){
         <p style="margin-top: 15px;"><?php _e("当且仅当该选项和全局选项同时启用时才会有效。这将在您的基础评论区下方显示一个 Discourse 嵌入式评论区。", 'argon');?></p>
         <h4><?php _e(" 自定义 Discourse 主题 ID", 'argon');?></h4>
         <?php $argon_discourse_comments_topic_id = get_post_meta($post->ID, "argon_discourse_comments_topic_id", true);?>
-        <input type="text" class="regular-text" name="argon_discourse_comments_topic_id" id="argon_discourse_comments_topic_id" value="<?php if (!empty($argon_discourse_comments_topic_id)){echo $argon_discourse_comments_topic_id;} ?>">
+        <input type="text" class="regular-text" name="argon_discourse_comments_topic_id" id="argon_discourse_comments_topic_id" value="<?php echo esc_attr($argon_discourse_comments_topic_id); ?>">
         <p style="margin-top: 15px;"><?php _e("输入你想关联到的 Discourse 主题 ID，不输入则会在 Discourse 创建一个新的主题以绑定到此文章上。", 'argon');?></p>
     <?php } ?>
 
@@ -203,92 +203,135 @@ function argon_add_meta_boxes(){
 	add_meta_box('argon_meta_box_1', __("文章设置", 'argon'), 'argon_meta_box_1', array('post', 'page'), 'side', 'low');
 }
 add_action('admin_menu', 'argon_add_meta_boxes');
+function argon_authorize_raw_post_meta($allowed, $meta_key, $post_id, $user_id){
+	return user_can($user_id, 'edit_post', $post_id) && user_can($user_id, 'unfiltered_html');
+}
+function argon_register_sensitive_post_meta(){
+	foreach (array('argon_after_post', 'argon_custom_css') as $meta_key){
+		// Apply the same rule to WordPress's own custom-field and REST handlers.
+		register_meta('post', $meta_key, array(
+			'type' => 'string', 'single' => true,
+			'auth_callback' => 'argon_authorize_raw_post_meta', 'show_in_rest' => false
+		));
+	}
+}
+add_action('init', 'argon_register_sensitive_post_meta');
+// Only settings exposed by this meta box may be changed through its save handlers.
+function argon_post_meta_allowed_values(){
+	return array(
+		'argon_hide_readingtime' => array('false', 'true'),
+		'argon_meta_simple' => array('false', 'true'),
+		'argon_first_image_as_thumbnail' => array('default', 'true', 'false'),
+		'argon_show_post_outdated_info' => array('default', 'always', 'never'),
+		'argon_after_post' => null,
+		'argon_custom_css' => null,
+		'argon_enable_external_link_clicks' => array('default', 'true', 'false'),
+		'argon_ai_post_summary' => array('true', 'false'),
+		'argon_ai_no_update_post_summary' => array('default', 'true', 'false'),
+		'argon_ai_extra_prompt_mode' => array('default', 'replace', 'append', 'none'),
+		'argon_ai_extra_prompt' => null,
+		'argon_enable_discourse_comments' => array('true', 'false'),
+		'argon_discourse_comments_topic_id' => null
+	);
+}
+function argon_is_valid_post_meta_value($meta_key, $meta_value){
+	$allowed_values = argon_post_meta_allowed_values();
+	if (!is_string($meta_key) || !is_string($meta_value) || !array_key_exists($meta_key, $allowed_values)){
+		return false;
+	}
+	if ($meta_key === 'argon_discourse_comments_topic_id'){
+		return $meta_value === '' || preg_match('/^[1-9][0-9]*$/D', $meta_value) === 1;
+	}
+	return $allowed_values[$meta_key] === null || in_array($meta_value, $allowed_values[$meta_key], true);
+}
+function argon_can_edit_post_meta($post_id, $meta_key){
+	if (!current_user_can('edit_post_meta', $post_id, $meta_key)){
+		return false;
+	}
+	// These fields are rendered as raw HTML/CSS on the public post.
+	if (in_array($meta_key, array('argon_after_post', 'argon_custom_css'), true)){
+		return current_user_can('unfiltered_html');
+	}
+	return true;
+}
 function argon_save_meta_data($post_id){
-	if (!isset($_POST['argon_meta_box_nonce'])){
+	if (!isset($_POST['argon_meta_box_nonce']) || !is_string($_POST['argon_meta_box_nonce'])){
 		return $post_id;
 	}
-	$nonce = $_POST['argon_meta_box_nonce'];
+	$nonce = wp_unslash($_POST['argon_meta_box_nonce']);
 	if (!wp_verify_nonce($nonce, 'argon_meta_box_nonce_action')){
 		return $post_id;
 	}
 	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE){
 		return $post_id;
 	}
-	if ($_POST['post_type'] == 'post'){
-		if (!current_user_can('edit_post', $post_id)){
-			return $post_id;
-		}
+	$post = get_post($post_id);
+	if (!$post || !in_array($post->post_type, array('post', 'page'), true) || !current_user_can('edit_post', $post_id)){
+		return $post_id;
 	}
-	if ($_POST['post_type'] == 'page'){
-		if (!current_user_can('edit_page', $post_id)){
-			return $post_id;
+	foreach (argon_post_meta_allowed_values() as $meta_key => $allowed_values){
+		$field_name = $meta_key === 'argon_hide_readingtime' ? 'argon_meta_hide_readingtime' : $meta_key;
+		if (!isset($_POST[$field_name]) || !is_string($_POST[$field_name])){
+			continue;
 		}
+		if (!argon_can_edit_post_meta($post_id, $meta_key) || !argon_is_valid_post_meta_value($meta_key, wp_unslash($_POST[$field_name]))){
+			continue;
+		}
+		// WordPress removes request slashes when storing metadata.
+		update_post_meta($post_id, $meta_key, $_POST[$field_name]);
 	}
-	update_post_meta($post_id, 'argon_hide_readingtime', $_POST['argon_meta_hide_readingtime']);
-	update_post_meta($post_id, 'argon_meta_simple', $_POST['argon_meta_simple']);
-	update_post_meta($post_id, 'argon_first_image_as_thumbnail', $_POST['argon_first_image_as_thumbnail']);
-	update_post_meta($post_id, 'argon_show_post_outdated_info', $_POST['argon_show_post_outdated_info']);
-	update_post_meta($post_id, 'argon_after_post', $_POST['argon_after_post']);
-	update_post_meta($post_id, 'argon_custom_css', $_POST['argon_custom_css']);
-	update_post_meta($post_id, 'argon_enable_external_link_clicks', $_POST['argon_enable_external_link_clicks']);
-	update_post_meta($post_id, 'argon_ai_post_summary', $_POST['argon_ai_post_summary'] );
-    update_post_meta($post_id,'argon_ai_no_update_post_summary', $_POST['argon_ai_no_update_post_summary']);
-	update_post_meta($post_id,'argon_ai_extra_prompt_mode', $_POST['argon_ai_extra_prompt_mode']);
-	update_post_meta($post_id,'argon_ai_extra_prompt', $_POST['argon_ai_extra_prompt']);
-    update_post_meta($post_id, 'argon_enable_discourse_comments', $_POST['argon_enable_discourse_comments']);
-    update_post_meta($post_id, 'argon_discourse_comments_topic_id', $_POST['argon_discourse_comments_topic_id']);
 }
 add_action('save_post', 'argon_save_meta_data');
+function argon_get_ajax_editable_post_id(){
+	if (!is_user_logged_in()){
+		wp_send_json(array('status' => 'failed', 'message' => 'forbidden'), 403);
+	}
+	if (!isset($_POST['argon_meta_box_nonce']) || !is_string($_POST['argon_meta_box_nonce']) || !wp_verify_nonce(wp_unslash($_POST['argon_meta_box_nonce']), 'argon_meta_box_nonce_action')){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_nonce'), 403);
+	}
+	if (!isset($_POST['post_id']) || !is_string($_POST['post_id'])){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_request'), 400);
+	}
+	$post_id = filter_var($_POST['post_id'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)));
+	if ($post_id === false){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_request'), 400);
+	}
+	$post = get_post($post_id);
+	if (!$post || !in_array($post->post_type, array('post', 'page'), true)){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_request'), 400);
+	}
+	if (!current_user_can('edit_post', $post_id)){
+		wp_send_json(array('status' => 'failed', 'message' => 'forbidden'), 403);
+	}
+	return $post_id;
+}
 function update_post_meta_ajax(){
-	if (!isset($_POST['argon_meta_box_nonce'])){
-		return;
+	$post_id = argon_get_ajax_editable_post_id();
+	if (!isset($_POST['meta_key'], $_POST['meta_value']) || !is_string($_POST['meta_key']) || !is_string($_POST['meta_value'])){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_request'), 400);
 	}
-	$nonce = $_POST['argon_meta_box_nonce'];
-	if (!wp_verify_nonce($nonce, 'argon_meta_box_nonce_action')){
-		return;
+	$meta_key = wp_unslash($_POST['meta_key']);
+	$meta_value = wp_unslash($_POST['meta_value']);
+	if (!array_key_exists($meta_key, argon_post_meta_allowed_values()) || !argon_can_edit_post_meta($post_id, $meta_key)){
+		wp_send_json(array('status' => 'failed', 'message' => 'forbidden'), 403);
 	}
-	header('Content-Type:application/json; charset=utf-8');
-	$post_id = intval($_POST["post_id"]);
-	$meta_key = $_POST["meta_key"];
-	$meta_value = $_POST["meta_value"];
-
-	if (get_post_meta($post_id, $meta_key, true) == $meta_value){
-		exit(json_encode(array(
-			'status' => 'success'
-		)));
-		return;
+	if (!argon_is_valid_post_meta_value($meta_key, $meta_value)){
+		wp_send_json(array('status' => 'failed', 'message' => 'invalid_meta_value'), 400);
 	}
-
-	$result = update_post_meta($post_id, $meta_key, $meta_value);
-
-	if ($result){
-		exit(json_encode(array(
-			'status' => 'success'
-		)));
-	}else{
-		exit(json_encode(array(
-			'status' => 'failed'
-		)));
+	if (get_post_meta($post_id, $meta_key, true) === $meta_value){
+		wp_send_json(array('status' => 'success'));
 	}
+	$result = update_post_meta($post_id, $meta_key, wp_slash($meta_value));
+	wp_send_json(array('status' => $result ? 'success' : 'failed'), $result ? 200 : 500);
 }
 add_action('wp_ajax_update_post_meta_ajax' , 'update_post_meta_ajax');
-add_action('wp_ajax_nopriv_update_post_meta_ajax' , 'update_post_meta_ajax');
 function regenerate_ai_post_summary(): void {
-	if (!isset($_POST['argon_meta_box_nonce'])){
-		return;
+	$post_id = argon_get_ajax_editable_post_id();
+	if (!current_user_can('edit_post_meta', $post_id, 'argon_ai_summary')){
+		wp_send_json(array('status' => 'failed', 'message' => 'forbidden'), 403);
 	}
-	$nonce = $_POST['argon_meta_box_nonce'];
-	if (!wp_verify_nonce($nonce, 'argon_meta_box_nonce_action')){
-		return;
-	}
-	header('Content-Type:application/json; charset=utf-8');
-	$post_id = intval($_POST["post_id"]);
 
-    argon_update_ai_post_meta( $post_id );
-
-    exit(json_encode(array(
-        'status' => 'success'
-    )));
+	$result = argon_update_ai_post_meta($post_id);
+	wp_send_json(array('status' => $result ? 'success' : 'failed'), $result ? 200 : 500);
 }
 add_action('wp_ajax_regenerate_ai_post_summary', 'regenerate_ai_post_summary');
-add_action('wp_ajax_nopriv_regenerate_ai_post_summary', 'regenerate_ai_post_summary');

@@ -1,14 +1,13 @@
 <?php
 
-use GuzzleHttp\Exception\GuzzleException;
 use HaoZiTeam\ChatGPT\V2 as ChatGPTV2;
 
 function argon_generate_chatgpt_client(): ?ChatGPTV2 {
 
 	$apikey  = get_option( "argon_openai_api_key" );
-	$baseurl = $GLOBALS["openai_baseurl"];
+	$baseurl = $GLOBALS["openai_baseurl"] ?? '';
 
-	if ( ! $apikey || ! isset( $baseurl ) ) {
+	if (!is_string($apikey) || $apikey === '' || !is_string($baseurl) || $baseurl === '') {
 		return null;
 	}
 
@@ -16,17 +15,20 @@ function argon_generate_chatgpt_client(): ?ChatGPTV2 {
 }
 
 /**
- * @throws Exception|GuzzleException
+ * @throws RuntimeException
  */
 function argon_generate_article_summary( int $post_id, WP_Post $post ): string {
 	$client = argon_generate_chatgpt_client();
+	if ($client === null){
+		throw new RuntimeException('AI summary is not configured.');
+	}
 
 	$client->addMessage(
 		"You are an article summary generator, ".
 		"please generate the summary of the given article ".
 		"with provided title and content, ".
 		"the language of the summary must equals to the article's mainly used language, ".
-		"do not write summary in third person.".
+		"do not write summary in third person.",
 		"system" );
 	$client->addMessage( "The title of the article：" . $post->post_title );
 
@@ -34,7 +36,7 @@ function argon_generate_article_summary( int $post_id, WP_Post $post ): string {
 	$content = wp_strip_all_tags(apply_filters('the_content', $content));
 	$max_content_length = get_option( 'argon_ai_max_content_length', 4000 );
 	if ($max_content_length > 0){
-		$content = substr($content, 0, $max_content_length);
+		$content = mb_substr($content, 0, (int) $max_content_length, 'UTF-8');
 	}
 
 	$client->addMessage( "The content of the article：" . $content );
@@ -82,7 +84,7 @@ function argon_on_save_post( int $post_id, WP_Post $post, string $old_status ): 
 		$post_id = $revision_id;
 	}
 
-	if ( get_option( 'argon_ai_post_summary', false ) == 'false' || get_post_meta( $post_id, "argon_ai_post_summary", true ) == 'false' ) {
+	if (get_option('argon_ai_post_summary', 'false') !== 'true' || get_post_meta($post_id, 'argon_ai_post_summary', true) === 'false') {
 		return;
 	}
 	$update                                 = $old_status === $post->post_status;
@@ -93,18 +95,26 @@ function argon_on_save_post( int $post_id, WP_Post $post, string $old_status ): 
 	}
 
 	if ( get_option( 'argon_ai_async_generate', true ) != 'false' ) {
-		wp_schedule_single_event( time() + 1, 'argon_update_ai_post_meta', array( $post_id ) );
+		if (!wp_next_scheduled('argon_update_ai_post_meta', array($post_id))){
+			wp_schedule_single_event(time() + 1, 'argon_update_ai_post_meta', array($post_id));
+		}
 	} else {
 		argon_update_ai_post_meta( $post_id );
 	}
 }
 
-function argon_update_ai_post_meta( $post_id ): void {
+function argon_update_ai_post_meta($post_id): bool {
+	$post = get_post($post_id);
+	if (!$post || get_option('argon_ai_post_summary', 'false') !== 'true'){
+		return false;
+	}
 	try {
-		$summary = argon_generate_article_summary( $post_id, get_post( $post_id ) );
-		update_post_meta( $post_id, "argon_ai_summary", $summary );
-	} catch ( Exception|GuzzleException $e ) {
-		error_log( $e );
+		$summary = argon_generate_article_summary((int) $post_id, $post);
+		return get_post_meta($post_id, 'argon_ai_summary', true) === $summary || (bool) update_post_meta($post_id, 'argon_ai_summary', wp_slash($summary));
+	} catch (Throwable $e) {
+		// SDK exception strings can contain request headers and the API key.
+		error_log('Argon AI summary generation failed (' . get_class($e) . ').');
+		return false;
 	}
 }
 

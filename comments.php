@@ -65,6 +65,7 @@
 <?php $enable_qq_avatar = get_option('argon_comment_enable_qq_avatar'); ?>
 <?php
 	$current_commenter = wp_get_current_commenter();
+	$commentCaptchaSeed = get_comment_captcha_seed();
 	if ($enable_qq_avatar == 'true'){
 		$current_commenter['comment_author_email'] = str_replace("@avatarqq.com", "", $current_commenter['comment_author_email']);
 	}
@@ -143,7 +144,7 @@
 							<div class="input-group-prepend">
 								<span class="input-group-text"><i class="fa fa-key"></i></span>
 							</div>
-							<input id="post_comment_captcha" class="form-control" placeholder="<?php _e('验证码', 'argon');?>" type="text" <?php if (current_user_can('level_7')) {echo('value="' . get_comment_captcha_answer(get_comment_captcha_seed()) . '" disabled');}?>>
+							<input id="post_comment_captcha" class="form-control" placeholder="<?php _e('验证码', 'argon');?>" type="text" <?php if (current_user_can('moderate_comments')) {echo('value="' . get_comment_captcha_answer(get_comment_captcha_seed()) . '" disabled');}?>>
 							<style>
 								.post-comment-captcha-container:before{
 									content: attr(captcha);
@@ -158,10 +159,12 @@
 										dataType : "json",
 										data : {
 											action: "get_captcha",
+											_wpnonce: window.argonConfig.ajax_nonce,
 										},
 										success : function(result){
 											$(".post-comment-captcha-container").attr("captcha", result['captcha']);
 											$("#post_comment_captcha_seed").val(result['captchaSeed']);
+											$("#post_comment_captcha_nonce").val(result['captchaNonce']);
 										},
 										error : function(xhr){
 											$(".post-comment-captcha-container").attr("captcha", "<?php _e('获取验证码失败', 'argon');?>");
@@ -232,6 +235,7 @@
 				</div>
 			</div>
 			<input id="post_comment_captcha_seed" value="<?php echo $commentCaptchaSeed;?>" style="display: none;"></input>
+			<input id="post_comment_captcha_nonce" type="hidden" value="<?php echo esc_attr(wp_create_nonce('argon_captcha_' . $commentCaptchaSeed)); ?>">
 			<input id="post_comment_post_id" value="<?php echo get_the_ID();?>" style="display: none;"></input>
 		</form>
 	</div>
@@ -272,14 +276,14 @@
 global $post;
 if ( get_option( "argon_enable_discourse_comments", false ) == "true" && get_post_meta( $post->ID, "argon_enable_discourse_comments", true ) == 'true' ) { ?>
     <div id='discourse-comments' class="comments-area card shadow-sm"></div>
-    <meta name='discourse-username' content='<?php echo get_option( "argon_discourse_comments_author" ) ?>'>
+    <meta name='discourse-username' content='<?php echo esc_attr(get_option("argon_discourse_comments_author")); ?>'>
 
     <script type="text/javascript">
         <?php $topicId = get_post_meta( $post->ID, "argon_discourse_comments_topic_id", true ); ?>
         DiscourseEmbed = {
-            discourseUrl: '<?php echo get_option( "argon_discourse_comments_url" ); ?>',
-            <?php if( empty( $topicId ) ) { ?>discourseEmbedUrl: '<?php echo get_permalink( $post->ID ); ?>', <?php } ?>
-            <?php if(! empty( $topicId )) { ?>topicId: '<?php echo $topicId ?>', <?php } ?>
+            discourseUrl: <?php echo argon_json(esc_url_raw(get_option("argon_discourse_comments_url"), array('http', 'https'))); ?>,
+            <?php if( empty( $topicId ) ) { ?>discourseEmbedUrl: <?php echo argon_json(get_permalink($post->ID)); ?>, <?php } ?>
+            <?php if(! empty( $topicId )) { ?>topicId: <?php echo argon_json((string) $topicId); ?>, <?php } ?>
             // className: 'CLASS_NAME',
         };
 

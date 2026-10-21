@@ -12,6 +12,7 @@ $(document).on("click" , ".comment-upvote" , function(){
 		dataType : "json",
 		data : {
 			action: "upvote_comment",
+			_wpnonce: window.argonConfig.ajax_nonce,
 			comment_id : ID,
 		},
 		success : function(result){

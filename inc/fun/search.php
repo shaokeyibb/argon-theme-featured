@@ -1,14 +1,14 @@
 <?php
 function argon_get_search_post_type_array(){
 	$search_filters_type = get_option("argon_search_filters_type", "*post,*page,shuoshuo");
-	$search_filters_type = explode(',', $search_filters_type);
+	$search_filters_type = array_values(array_filter(explode(',', $search_filters_type), 'strlen'));
 	if (!isset($_GET['post_type'])) {
 		$default = array_filter($search_filters_type, function ($str) {	return $str[0] == '*'; });
 		$default = array_map(function ($str) { return substr($str, 1) ;}, $default);
 		return $default;
 	}
 	$search_filters_type = array_map(function ($str) { return $str[0] == '*' ? substr($str, 1) : $str; }, $search_filters_type);
-	$post_type = explode(',', $_GET['post_type']);
+	$post_type = explode(',', argon_request_string($_GET, 'post_type'));
 	$arr = array();
 	foreach ($search_filters_type as $type) {
 		if (in_array($type, $post_type)) {

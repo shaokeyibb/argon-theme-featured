@@ -3,6 +3,9 @@
 function get_seo_description(){
 	global $post;
 	if (is_single() || is_page()){
+		if (post_password_required()){
+			return __('这是一个加密页面，需要密码来查看', 'argon');
+		}
 		if ( $post->post_excerpt != "" ) {
 			return preg_replace( '/ \[&hellip;]$/', '&hellip;', $post->post_excerpt );
 		}
@@ -25,7 +28,7 @@ function get_seo_description(){
 function get_seo_keywords(){
 	if (is_single()){
 		global $post;
-		$tags = get_the_tags('', ',', '', $post -> ID);
+		$tags = get_the_tags($post->ID);
 		if ($tags != null){
 			$res = "";
 			foreach ($tags as $tag){

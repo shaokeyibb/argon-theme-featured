@@ -12,6 +12,7 @@ function showCommentEditHistory(id){
 		dataType : "json",
 		data: {
 			action: "get_comment_edit_history",
+			_wpnonce: window.argonConfig.ajax_nonce,
 			id: id
 		},
 		success: function(result){

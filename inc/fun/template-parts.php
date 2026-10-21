@@ -55,7 +55,7 @@ add_action( 'argon_entry_content_no_passwd_required', 'argon_entry_content_no_pa
 function argon_entry_content_no_passwd_required( $name = array() ){
     // 防止直接 get_template_part( 'template-parts/content' ) 导致 name array 为空
     if( empty( $name ) ){ 
-        $name = get_post_type(); 
+        $name = array(get_post_type());
     }
     get_template_part( 'template-parts/entry/no-passwd', $name[0] );
 }

@@ -132,6 +132,7 @@ function postComment(){
 		dataType : "json",
 		data: {
 			action: "ajax_post_comment",
+			_wpnonce: window.argonConfig.ajax_nonce,
 			comment: commentContent,
 			author: commentName,
 			email: commentEmail,
@@ -139,6 +140,7 @@ function postComment(){
 			comment_post_ID: postID,
 			comment_parent: window.replyID,
 			comment_captcha_seed: commentCaptchaSeed,
+			comment_captcha_nonce: $("#post_comment_captcha_nonce").val(),
 			comment_captcha: commentCaptcha,
 			"wp-comment-cookies-consent": "yes",
 			use_markdown: useMarkdown,
@@ -222,6 +224,7 @@ function postComment(){
 			cancelReply();
 			$("#post_comment_content").val("");
 			$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
+			$("#post_comment_captcha_nonce").val(result.newCaptchaNonce);
 			$("#post_comment_captcha + style").html(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
 			$("#post_comment_captcha").val(result.newCaptchaAnswer);
 			$("body,html").animate({
@@ -317,6 +320,7 @@ function editComment(){
 		dataType : "json",
 		data: {
 			action: "user_edit_comment",
+			_wpnonce: window.argonConfig.ajax_nonce,
 			comment: commentContent,
 			id: global.argon_editID
 		},

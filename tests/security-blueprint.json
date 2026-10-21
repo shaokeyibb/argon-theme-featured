@@ -1,0 +1,14 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {"php": "8.3", "wp": "latest"},
+  "steps": [
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; update_option('argon_has_inited', 'true'); update_option('argon_update_source', 'stop'); update_option('argon_ai_post_summary', 'false'); update_option('argon_comment_need_captcha', 'false'); switch_theme('argon-theme');"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php define('ARGON_SECURITY_TESTING', true); define('DOING_AJAX', true); require '/wordpress/wp-load.php'; require '/wordpress/wp-content/themes/argon-theme/tests/security-regression.php';"
+    }
+  ]
+}

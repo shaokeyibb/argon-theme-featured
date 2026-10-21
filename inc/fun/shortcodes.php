@@ -43,8 +43,8 @@ function argon_admin_i18n_info(){
 add_filter('admin_head', 'argon_admin_i18n_info');
 //主题文章短代码解析
 function shortcode_content_preprocess($attr, $content = ""){
-	if ( isset( $attr['nested'] ) ? $attr['nested'] : 'true' != 'false' ){
-		return do_shortcode($content);
+	if (($attr['nested'] ?? 'true') !== 'false'){
+		return do_shortcode((string) $content);
 	}else{
 		return $content;
 	}	
@@ -90,7 +90,7 @@ function shortcode_progressbar($attr,$content=""){
 	if ($content != ""){
 		$out .= "<div class='progress-label'><span>" . $content . "</span></div>";
 	}
-	$progress = isset( $attr['progress'] ) ? $attr['progress'] : 100;
+	$progress = isset($attr['progress']) && is_numeric($attr['progress']) ? max(0, min(100, (float) $attr['progress'])) : 100;
 	$out .= "<div class='progress-percentage'><span>" . $progress . "%</span></div>";
 	$out .= "</div><div class='progress'><div class='progress-bar";
 	$color = isset( $attr['color'] ) ? $attr['color'] : 'indigo';
@@ -121,7 +121,7 @@ add_shortcode('checkbox','shortcode_checkbox');
 function shortcode_checkbox($attr,$content=""){
 	$content = shortcode_content_preprocess($attr, $content);
 	$checked = isset( $attr['checked'] ) ? $attr['checked'] : 'false';
-	$inline = isset($attr['inline']) ? $attr['checked'] : 'false';
+	$inline = $attr['inline'] ?? 'false';
 	$out = "<div class='shortcode-todo custom-control custom-checkbox";
 	if ($inline == 'true'){
 		$out .= " inline";
@@ -164,11 +164,11 @@ function shortcode_alert($attr,$content=""){
 	}
 	$out .= "'>";
 	if (isset($attr['icon'])){
-		$out .= "<span class='alert-inner--icon'><i class='fa fa-" . $attr['icon'] . "'></i></span>";
+		$out .= "<span class='alert-inner--icon'><i class='fa fa-" . esc_attr(sanitize_html_class($attr['icon'])) . "'></i></span>";
 	}
 	$out .= "<span class='alert-inner--text'>";
 	if (isset($attr['title'])){
-		$out .= "<strong>" . $attr['title'] . "</strong> ";
+		$out .= "<strong>" . esc_html($attr['title']) . "</strong> ";
 	}
 	$out .= $content . "</span></div>";
 	return $out;
@@ -208,9 +208,9 @@ function shortcode_admonition($attr,$content=""){
 	if (isset($attr['title'])){
 		$out .= "<div class='admonition-title'>";
 		if (isset($attr['icon'])){
-			$out .= "<i class='fa fa-" . $attr['icon'] . "'></i> ";
+			$out .= "<i class='fa fa-" . esc_attr(sanitize_html_class($attr['icon'])) . "'></i> ";
 		}
-		$out .= $attr['title'] . "</div>";
+		$out .= esc_html($attr['title']) . "</div>";
 	}
 	if ($content != ''){
 		$out .= "<div class='admonition-body'>" . $content . "</div>";
@@ -265,9 +265,9 @@ function shortcode_collapse_block($attr,$content=""){
 
 	$out .= "<div class='collapse-block-title'>";
 	if (isset($attr['icon'])){
-		$out .= "<i class='fa fa-" . $attr['icon'] . "'></i> ";
+		$out .= "<i class='fa fa-" . esc_attr(sanitize_html_class($attr['icon'])) . "'></i> ";
 	}
-	$out .= "<span class='collapse-block-title-inner'>" . $title . "</span><i class='collapse-icon fa fa-angle-down'></i></div>";
+	$out .= "<span class='collapse-block-title-inner'>" . esc_html($title) . "</span><i class='collapse-icon fa fa-angle-down'></i></div>";
 
 	$out .= "<div class='collapse-block-body'";
 	if ($collapsed != 'false'){
@@ -310,11 +310,11 @@ function shortcode_friend_link($attr,$content=""){
 				<div class='card shadow-sm friend-link-container" . ($friendlink -> link_image == "" ? " no-avatar" : "") . "'>";
 		if ($friendlink -> link_image != ''){
 			$out .= "
-					<img src='" . $friendlink -> link_image . "' class='friend-link-avatar bg-gradient-secondary'>";
+					<img src='" . esc_url($friendlink->link_image) . "' class='friend-link-avatar bg-gradient-secondary'>";
 		}
 		$rel = "";
 		if ($friendlink -> link_rel != ''){
-			$rel = "' rel='" . $friendlink -> link_rel;
+			$rel = "' rel='" . esc_attr($friendlink->link_rel);
 		}
 		$out .= "	<div class='friend-link-content'>
 						<div class='friend-link-title title text-primary'>
@@ -324,7 +324,7 @@ function shortcode_friend_link($attr,$content=""){
 		$out .= "		<div class='friend-link-links'>";
 		foreach (explode("\n", $friendlink -> link_notes) as $line){
 			$item = explode("|", trim($line));
-			if(stripos($item[0], "fa-") !== 0){
+			if(count($item) < 2 || stripos($item[0], "fa-") !== 0){
 				continue;
 			}
 			$out .= "<a href='" . esc_url($item[1]) . "' target='_blank'><i class='fa " . sanitize_html_class($item[0]) . "'></i></a>";
@@ -350,11 +350,9 @@ function shortcode_friend_link_simple($attr,$content=""){
 		mt_srand();
 		$group_start = 0;
 		foreach ($entries as $index => $value){
-			$now = explode("|" , $value);
+			$now = array_pad(explode("|", $value), 5, "");
 			if ($now[0] == 'category'){
-				echo ($index-1).",".$group_start." | ";
 				for ($i = $index - 1; $i >= $group_start; $i--){
-					echo $i."#";
 					$tar = mt_rand($group_start , $i);
 					$tmp = $entries[$tar];
 					$entries[$tar] = $entries[$i];
@@ -374,13 +372,13 @@ function shortcode_friend_link_simple($attr,$content=""){
 	$row_tag_open = False;
 	$out = "<div class='friend-links-simple'>";
 	foreach($entries as $index => $value){
-		$now = explode("|" , $value);
+		$now = array_pad(explode("|", $value), 5, "");
 		if ($now[0] == 'category'){
 			if ($row_tag_open == True){
 				$row_tag_open = False;
 				$out .= "</div>";
 			}
-			$out .= "<div class='friend-category-title text-black'>" . $now[1] . "</div>";
+			$out .= "<div class='friend-category-title text-black'>" . esc_html($now[1]) . "</div>";
 		}
 		if ($now[0] == 'link'){
 			if ($row_tag_open == False){
@@ -392,26 +390,26 @@ function shortcode_friend_link_simple($attr,$content=""){
 				<div class='card shadow-sm'>
 					<div class='d-flex'>
 						<div class='friend-link-avatar'>
-							<a target='_blank' href='" . $now[1] . "'>";
+							<a target='_blank' href='" . esc_url($now[1]) . "'>";
 			if (!ctype_space($now[4]) && $now[4] != '' && isset($now[4])){
-				$out .= "<img src='" . $now[4] . "' class='icon bg-gradient-secondary rounded-circle text-white' style='pointer-events: none;'>
+				$out .= "<img src='" . esc_url($now[4]) . "' class='icon bg-gradient-secondary rounded-circle text-white' style='pointer-events: none;'>
 						</img>";
 			}else{
-				$out .= "<div class='icon icon-shape bg-gradient-primary rounded-circle text-white'>" . mb_substr($now[2], 0, 1) . "
+				$out .= "<div class='icon icon-shape bg-gradient-primary rounded-circle text-white'>" . esc_html(mb_substr($now[2], 0, 1)) . "
 						</div>";
 			}
 
 			$out .= "		</a>
 						</div>
 						<div class='pl-3'>
-							<div class='friend-link-title title text-primary'><a target='_blank' href='" . $now[1] . "'>" . $now[2] . "</a>
+							<div class='friend-link-title title text-primary'><a target='_blank' href='" . esc_url($now[1]) . "'>" . esc_html($now[2]) . "</a>
 						</div>";
 			if (!ctype_space($now[3]) && $now[3] != ''  && isset($now[3])){
-				$out .= "<p class='friend-link-description'>" . $now[3] . "</p>";
+				$out .= "<p class='friend-link-description'>" . esc_html($now[3]) . "</p>";
 			}else{
 				/*$out .= "<p class='friend-link-description'>&nbsp;</p>";*/
 			}
-			$out .= "		<a target='_blank' href='" . $now[1] . "' class='text-primary opacity-8'>前往</a>
+			$out .= "		<a target='_blank' href='" . esc_url($now[1]) . "' class='text-primary opacity-8'>前往</a>
 						</div>
 					</div>
 				</div>
@@ -432,13 +430,13 @@ function shortcode_timeline($attr,$content=""){
 	$entries = explode("\n" , $content);
 	$out = "<div class='argon-timeline'>";
 	foreach($entries as $index => $value){
-		$now = explode("|" , $value);
-		$now[0] = str_replace("/" , "</br>" , $now[0]);
+		$now = array_pad(explode("|", $value), 5, "");
+		$now[0] = str_replace("/", "<br>", esc_html($now[0]));
 		$out .= "<div class='argon-timeline-node'>
 					<div class='argon-timeline-time'>" . $now[0] . "</div>
 					<div class='argon-timeline-card card bg-gradient-secondary shadow-sm'>";
 		if ($now[1] != ''){
-			$out .= "	<div class='argon-timeline-title'>" . $now[1] . "</div>";
+			$out .= "	<div class='argon-timeline-title'>" . esc_html($now[1]) . "</div>";
 		}
 		$out .= "		<div class='argon-timeline-content'>";
 		foreach($now as $index => $value){
@@ -448,7 +446,7 @@ function shortcode_timeline($attr,$content=""){
 			if ($index > 2){
 				$out .= "</br>";
 			}
-			$out .= $value;
+			$out .= esc_html($value);
 		}
 		$out .= "		</div>
 					</div>
@@ -471,79 +469,41 @@ function shortcode_hidden($attr,$content=""){
 	}
 	$out .= "'";
 	if ($tip != ''){
-		$out .= " title='" . $tip ."'";
+		$out .= " title='" . esc_attr($tip) ."'";
 	}
 	$out .= ">" . $content . "</span>";
 	return $out;
 }
 add_shortcode('github','shortcode_github');
-function shortcode_github($attr,$content=""){
-	$github_info_card_id = mt_rand(1000000000 , 9999999999);
-	$author = isset( $attr['author'] ) ? $attr['author'] : '';
-	$project = isset( $attr['project'] ) ? $attr['project'] : '';
-	$getdata = isset( $attr['getdata'] ) ? $attr['getdata'] : 'frontend';
-	$size = isset( $attr['size'] ) ? $attr['size'] : 'full';
-
-	$description = "";
-	$stars = "";
-	$forks = "";
-
-	if ($getdata == "backend"){
-		set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
-			if (error_reporting() === 0) {
-				return false;
-			}
-			throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-		});
-		try{
-			$contexts = stream_context_create(
-				array(
-					'http' => array(
-						'method'=>"GET",
-						'header'=>"User-Agent: ArgonTheme\r\n"
-					)
-				)
-			);
-			$json = file_get_contents("https://api.github.com/repos/" . $author . "/" . $project, false, $contexts);
-			if (empty($json)){
-				throw new Exception("");
-			}
-			$json = json_decode($json);
-			$description = esc_html($json -> description);
-			if (!empty($json -> homepage)){
-				$description .= esc_html(" <a href='" . $json -> homepage . "' target='_blank' no-pjax>" . $json -> homepage . "</a>");
-			}
-			$stars = $json -> stargazers_count;
-			$forks = $json -> forks_count;
-		}catch (Exception $e){
-			$getdata = "frontend";
+function shortcode_github($attr, $content = ''){
+	$author = $attr['author'] ?? '';
+	$project = $attr['project'] ?? '';
+	if (!preg_match('/^[a-z0-9-]+$/iD', $author) || !preg_match('/^[a-z0-9_.-]+$/iD', $project)){
+		return '';
+	}
+	$getdata = ($attr['getdata'] ?? '') === 'backend' ? 'backend' : 'frontend';
+	$size = ($attr['size'] ?? '') === 'mini' ? 'mini' : 'full';
+	$description = $homepage = $stars = $forks = '';
+	$repo_path = rawurlencode($author) . '/' . rawurlencode($project);
+	if ($getdata === 'backend'){
+		$response = wp_safe_remote_get('https://api.github.com/repos/' . $repo_path, array(
+			'timeout' => 5, 'redirection' => 2, 'limit_response_size' => 262144,
+			'headers' => array('User-Agent' => 'ArgonTheme')
+		));
+		$data = is_wp_error($response) ? null : json_decode(wp_remote_retrieve_body($response), true);
+		if (!is_array($data) || wp_remote_retrieve_response_code($response) !== 200){
+			$getdata = 'frontend';
+		}else{
+			$description = is_string($data['description'] ?? null) ? $data['description'] : '';
+			$homepage = esc_url_raw($data['homepage'] ?? '', array('http', 'https'));
+			$stars = (int) ($data['stargazers_count'] ?? 0);
+			$forks = (int) ($data['forks_count'] ?? 0);
 		}
-		restore_error_handler();
 	}
-
-	$out = "<div class='github-info-card github-info-card-" . $size . " card shadow-sm' data-author='" . $author . "' data-project='" . $project . "' githubinfo-card-id='" . $github_info_card_id . "' data-getdata='" . $getdata . "' data-description='" . $description . "' data-stars='" . $stars . "' data-forks='" . $forks . "'>";
-	$out .= "<div class='github-info-card-header'><a href='https://github.com/' ref='nofollow' target='_blank' title='Github' no-pjax><span><i class='fa-brands fa-github'></i>";
-	if ($size != "mini"){
-		$out .= " GitHub";
-	}
-	$out .= "</span></a></div>";
-	$out .= "<div class='github-info-card-body'>
-			<div class='github-info-card-name-a'>
-				<a href='https://github.com/" . $author . "/" . $project . "' target='_blank' no-pjax>
-					<span class='github-info-card-name'>" . $author . "/" . $project . "</span>
-				</a>
-				</div>
-			<div class='github-info-card-description'></div>
-		</div>";
-	$out .= "<div class='github-info-card-bottom'>
-				<span class='github-info-card-meta github-info-card-meta-stars'>
-					<i class='fa fa-star'></i> <span class='github-info-card-stars'></span>
-				</span>
-				<span class='github-info-card-meta github-info-card-meta-forks'>
-					<i class='fa fa-code-fork'></i> <span class='github-info-card-forks'></span>
-				</span>
-			</div>";
-	$out .= "</div>";
+	$out = "<div class='github-info-card github-info-card-" . $size . " card shadow-sm' data-author='" . esc_attr($author) . "' data-project='" . esc_attr($project) . "' githubinfo-card-id='" . wp_unique_id('github-') . "' data-getdata='" . $getdata . "' data-description='" . esc_attr($description) . "' data-homepage='" . esc_attr($homepage) . "' data-stars='" . esc_attr($stars) . "' data-forks='" . esc_attr($forks) . "'>";
+	$out .= "<div class='github-info-card-header'><a href='https://github.com/' rel='nofollow noopener' target='_blank' title='GitHub' no-pjax><span><i class='fa-brands fa-github'></i>" . ($size === 'mini' ? '' : ' GitHub') . "</span></a></div>";
+	$out .= "<div class='github-info-card-body'><div class='github-info-card-name-a'><a href='https://github.com/" . $repo_path . "' target='_blank' rel='noopener' no-pjax><span class='github-info-card-name'>" . esc_html($author . '/' . $project) . "</span></a></div><div class='github-info-card-description'></div></div>";
+	$out .= "<div class='github-info-card-bottom'><span class='github-info-card-meta github-info-card-meta-stars'><i class='fa fa-star'></i> <span class='github-info-card-stars'></span></span><span class='github-info-card-meta github-info-card-meta-forks'><i class='fa fa-code-fork'></i> <span class='github-info-card-forks'></span></span></div></div>";
 	return $out;
 }
 add_shortcode('video','shortcode_video');
@@ -555,16 +515,16 @@ function shortcode_video($attr,$content=""){
 	$autoplay = isset( $attr['autoplay'] ) ? $attr['autoplay'] : 'false';
 	$out = "<video";
 	if ($width != ''){
-		$out .= " width='" . $width . "'";
+		$out .= " width='" . esc_attr($width) . "'";
 	}
 	if ($height != ''){
-		$out .= " height='" . $height . "'";
+		$out .= " height='" . esc_attr($height) . "'";
 	}
 	if ($autoplay == 'true'){
 		$out .= " autoplay";
 	}
 	$out .= " controls>";
-	$out .= "<source src='" . $url . "'>";
+	$out .= "<source src='" . esc_url($url) . "'>";
 	$out .= "</video>";
 	return $out;
 }
@@ -575,12 +535,12 @@ function shortcode_hide_reading_time($attr,$content=""){
 add_shortcode('post_time','shortcode_post_time');
 function shortcode_post_time($attr,$content=""){
 	$format = isset( $attr['format'] ) ? $attr['format'] : 'Y-n-d G:i:s';
-	return get_the_time($format);
+	return esc_html(get_the_time($format));
 }
 add_shortcode('post_modified_time','shortcode_post_modified_time');
 function shortcode_post_modified_time($attr,$content=""){
 	$format = isset( $attr['format'] ) ? $attr['format'] : 'Y-n-d G:i:s';
-	return get_the_modified_time($format);
+	return esc_html(get_the_modified_time($format));
 }
 add_shortcode('noshortcode','shortcode_noshortcode');
 function shortcode_noshortcode($attr,$content=""){

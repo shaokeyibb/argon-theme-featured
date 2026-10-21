@@ -133,21 +133,12 @@ switch ($argon_update_source) {
 
 //初次使用时发送安装量统计信息 (数据仅用于统计安装量)
 function post_analytics_info(){
-	if(function_exists('file_get_contents')){
-		$contexts = stream_context_create(
-			array(
-				'http' => array(
-					'method'=>"GET",
-					'header'=>"User-Agent: ArgonTheme\r\n"
-				)
-			)
-		);
-		$result = file_get_contents('http://api.solstice23.top/argon_analytics/index.php?domain=' . urlencode($_SERVER['HTTP_HOST']) . '&version='. urlencode($GLOBALS['theme_version']), false, $contexts);
-		update_option('argon_has_inited', 'true');
-		return $result;
-	}else{
-		update_option('argon_has_inited', 'true');
-	}
+	$result = wp_safe_remote_get(add_query_arg(array(
+		'domain' => wp_parse_url(home_url(), PHP_URL_HOST),
+		'version' => $GLOBALS['theme_version']
+	), 'https://api.solstice23.top/argon_analytics/index.php'), array('timeout' => 3, 'limit_response_size' => 4096));
+	update_option('argon_has_inited', 'true');
+	return is_wp_error($result) ? false : wp_remote_retrieve_body($result);
 }
 if (get_option('argon_has_inited') != 'true'){
 	post_analytics_info();
@@ -160,7 +151,14 @@ function alert_footer_copyright_changed(){ ?>
 	</div>
 <?php }
 function check_footer_copyright(){
-	$footer = file_get_contents(get_theme_root() . "/" . wp_get_theme() -> template . "/footer.php");
+	$footer_path = get_template_directory() . '/footer.php';
+	if (!is_readable($footer_path)){
+		return;
+	}
+	$footer = file_get_contents($footer_path);
+	if ($footer === false){
+		return;
+	}
 	if ((strpos($footer, "github.com/solstice23/argon-theme") === false) && (strpos($footer, "solstice23.top") === false)){
 		add_action('admin_notices', 'alert_footer_copyright_changed');
 	}

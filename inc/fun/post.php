@@ -395,7 +395,8 @@ function is_meta_simple(){
 }
 //根据文章 id 获取标题
 function get_post_title_by_id($id){
-	return get_post($id) -> post_title;
+	$post = get_post($id);
+	return $post ? $post->post_title : '';
 }
 //获取顶部 Banner 背景图（用户指定或必应日图）
 function get_banner_background_url(){
@@ -409,8 +410,12 @@ function get_banner_background_url(){
 		if ($now - $lastUpdated < 3600){
 			return get_option("argon_bing_banner_background_last_updated_url");
 		}else{
-			$data = json_decode(@file_get_contents('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1') , true);
-			$url = "//bing.com" . $data['images'][0]['url'];
+			$response = wp_safe_remote_get('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1', array('timeout' => 5, 'limit_response_size' => 65536));
+			$data = is_wp_error($response) ? null : json_decode(wp_remote_retrieve_body($response), true);
+			if (!isset($data['images'][0]['url']) || !is_string($data['images'][0]['url'])){
+				return get_option('argon_bing_banner_background_last_updated_url', '');
+			}
+			$url = esc_url_raw('https://www.bing.com/' . ltrim($data['images'][0]['url'], '/'));
 			update_option("argon_bing_banner_background_last_updated_time" , $now);
 			update_option("argon_bing_banner_background_last_updated_url" , $url);
 			return $url;
@@ -448,14 +453,14 @@ function argon_fancybox($content){
 	
 	if(!is_feed() && !is_robots() && !is_home()){
 		// 使用 DOMDocument 来更精确地处理 HTML 结构
-		libxml_use_internal_errors(true); // 忽略HTML5标签的警告
+		$previous_libxml_errors = libxml_use_internal_errors(true); // 忽略HTML5标签的警告
 		$dom = new DOMDocument();
 		
 		// 将内容包装在一个临时容器中，避免 DOMDocument 将第一个元素作为根节点
 		// 这样可以保持原有的 HTML 结构层次
 		$wrapped_content = '<div class="argon-temp-wrapper">' . $content . '</div>';
 		
-		$dom->loadHTML(mb_convert_encoding($wrapped_content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		$dom->loadHTML(mb_encode_numericentity($wrapped_content, array(0x80, 0x10ffff, 0, 0x1fffff), 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
 		libxml_clear_errors();
 		
 		$images = $dom->getElementsByTagName('img');
@@ -613,7 +618,7 @@ function argon_fancybox($content){
 			}
 		}
 		
-		libxml_use_internal_errors(false);
+		libxml_use_internal_errors($previous_libxml_errors);
 	}
 	return $content;
 }
@@ -714,10 +719,10 @@ function argon_external_link_clicks_filter($content){
 	if (!is_array($clicks)){
 		$clicks = array();
 	}
-	libxml_use_internal_errors(true);
+	$previous_libxml_errors = libxml_use_internal_errors(true);
 	$dom = new DOMDocument();
 	$wrapped_content = '<div class="argon-temp-wrapper">' . $content . '</div>';
-	$dom->loadHTML(mb_convert_encoding($wrapped_content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+	$dom->loadHTML(mb_encode_numericentity($wrapped_content, array(0x80, 0x10ffff, 0, 0x1fffff), 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
 	libxml_clear_errors();
 	$anchors = $dom->getElementsByTagName('a');
 	$anchors_array = array();
@@ -737,6 +742,7 @@ function argon_external_link_clicks_filter($content){
 		$anchor->parentNode->replaceChild($wrapper, $anchor);
 		$wrapper->appendChild($anchor);
 		$anchor->setAttribute('data-url', $url_key);
+		$anchor->setAttribute('data-click-nonce', wp_create_nonce('argon_external_link_' . $post_id . '_' . md5($url_key)));
 		$anchor->setAttribute('no-pjax', '');
 		if ($count > 0){
 			$badge = $dom->createElement('span', argon_format_click_count($count));
@@ -747,7 +753,7 @@ function argon_external_link_clicks_filter($content){
 		$modified = true;
 	}
 	if (!$modified){
-		libxml_use_internal_errors(false);
+		libxml_use_internal_errors($previous_libxml_errors);
 		return $content;
 	}
 	$xpath = new DOMXPath($dom);
@@ -760,27 +766,30 @@ function argon_external_link_clicks_filter($content){
 	}else{
 		$result = $content;
 	}
-	libxml_use_internal_errors(false);
+	libxml_use_internal_errors($previous_libxml_errors);
 	return $result;
 }
 function argon_click_external_link(){
-	if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'argon_external_link_clicks')){
+	if (!wp_verify_nonce(argon_request_string($_POST, '_wpnonce'), 'argon_external_link_clicks')){
 		wp_send_json(array('status' => 'failed', 'msg' => 'nonce verification failed'), 403);
 		return;
 	}
-	$post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-	$url = isset($_POST['url']) ? esc_url_raw($_POST['url']) : '';
+	$post_id = argon_ajax_id('post_id');
+	$url = esc_url_raw(argon_request_string($_POST, 'url'));
 	if ($post_id <= 0 || empty($url)){
 		wp_send_json(array('status' => 'failed', 'msg' => 'invalid parameters'));
 		return;
 	}
-	if (!get_post($post_id)){
+	if (!argon_can_view_post($post_id)){
 		wp_send_json(array('status' => 'failed', 'msg' => 'post not found'));
 		return;
 	}
 	if (!argon_external_link_clicks_is_enabled($post_id)){
 		wp_send_json(array('status' => 'disabled'));
 		return;
+	}
+	if (strlen($url) > 2048 || !wp_verify_nonce(argon_request_string($_POST, 'link_nonce'), 'argon_external_link_' . $post_id . '_' . md5($url))){
+		wp_send_json(array('status' => 'failed', 'msg' => 'invalid link'), 403);
 	}
 	$clicks_json = get_post_meta($post_id, 'argon_external_link_clicks', true);
 	$clicks = !empty($clicks_json) ? json_decode($clicks_json, true) : array();
