@@ -1,4 +1,6 @@
 export default {
+	"分享失败，请使用复制链接": "Sharing failed. Please copy the link instead.",
+	"用微信扫一扫，或保存二维码后在微信中识别": "Scan with WeChat, or save the QR code and open it in WeChat.",
 	"确定": "OK",
 	"清除": "Clear",
 	"恢复博客默认": "Set To Default",

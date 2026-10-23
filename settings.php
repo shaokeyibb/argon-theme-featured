@@ -709,7 +709,7 @@ function themeoptions_page(){
 								<option value="abroad" <?php if ($argon_show_sharebtn=='abroad'){echo 'selected';} ?>><?php _e('显示国外社交媒体', 'argon');?></option>
 								<option value="false" <?php if ($argon_show_sharebtn=='false'){echo 'selected';} ?>><?php _e('不显示', 'argon');?></option>
 							</select>
-							<p class="description"></p>
+							<p class="description"><?php esc_html_e('国内平台为微博；国外平台为 X、Telegram、WhatsApp、Facebook、Reddit 和 Bluesky。始终提供微信二维码与复制链接，支持的浏览器还会显示系统分享。', 'argon'); ?></p>
 						</td>
 					</tr>
 					<tr><th class="subtitle"><h3><?php _e('左侧栏文章目录', 'argon');?></h3></th></tr>

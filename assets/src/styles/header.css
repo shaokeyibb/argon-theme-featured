@@ -1,5 +1,11 @@
 #navbar-main {
 	--toolbar-color: var(--themecolor-rgbstr);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 100;
+	box-shadow: 0 1px 10px #8282871a;
 }
 .headroom--pinned {
 	z-index: 100;
@@ -140,6 +146,7 @@ html.no-banner.toolbar-blur #navbar-main.navbar-no-blur {
 	background-size: cover;
 }
 .banner-container {
+	position: relative;
 	height: calc(40vh - 120px) !important;
 }
 .banner-title {

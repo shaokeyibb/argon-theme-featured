@@ -1,12 +1,13 @@
 import en from './i18n/en_US.js';
 import ru from './i18n/ru_RU.js';
 import tw from './i18n/zh_TW.js';
+import { reducedMotion, fadeIn, fadeOut } from './motion.js';
+export { reducedMotion } from './motion.js';
 
 export const config = window.argonConfig ?? {};
 export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 export const __ = text => ({ en_US: en, ru_RU: ru, zh_TW: tw }[config.language]?.[text] ?? text);
-export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 export function randomID() {
   // randomUUID is HTTPS-only; getRandomValues also works on ordinary HTTP sites.
   return [...crypto.getRandomValues(new Uint8Array(16))].map(byte => byte.toString(16).padStart(2, '0')).join('');
@@ -42,17 +43,44 @@ export function notify(message, error = false) {
   // Server error strings can include markup. Never interpret them as HTML.
   const parsed = new DOMParser().parseFromString(String(message), 'text/html');
   item.textContent = parsed.body.textContent;
-  item.addEventListener('click', () => item.remove());
+  let dismissing = false;
+  const dismiss = async () => { if (dismissing) return; dismissing = true; await fadeOut(item); item.remove(); };
+  item.addEventListener('click', dismiss);
   region.append(item);
-  setTimeout(() => item.remove(), 7000);
+  fadeIn(item);
+  setTimeout(dismiss, 7000);
+}
+let publicNoncePromise;
+async function publicNonce(force = false) {
+  if (force) publicNoncePromise = undefined;
+  if (!publicNoncePromise) {
+    publicNoncePromise = fetch(config.ajax_url, {
+      method: 'POST', credentials: 'same-origin', cache: 'no-store',
+      headers: { 'X-Argon-Request': 'public-nonce' },
+      body: new URLSearchParams({ action: 'argon_refresh_public_nonce' }),
+      signal: AbortSignal.timeout(30000)
+    }).then(async response => {
+      const result = await response.json();
+      if (!response.ok || typeof result.ajax_nonce !== 'string' || !result.ajax_nonce) throw new Error(result.msg || __('未知错误'));
+      config.ajax_nonce = result.ajax_nonce;
+      return result.ajax_nonce;
+    }).catch(error => { publicNoncePromise = undefined; throw error; });
+  }
+  return publicNoncePromise;
 }
 export async function request(action, data = {}, options = {}) {
-  const response = await fetch(config.ajax_url, {
+  await publicNonce();
+  const send = () => fetch(config.ajax_url, {
     method: 'POST', credentials: 'same-origin',
     body: new URLSearchParams({ action, _wpnonce: config.ajax_nonce, ...data }),
     signal: AbortSignal.timeout(30000), ...options
   });
-  const result = await response.json();
+  let response = await send(), result = await response.json();
+  // This code is returned before any mutation, so one retry cannot duplicate it.
+  if (response.status === 403 && result.code === 'argon_nonce_expired') {
+    await publicNonce(true);
+    response = await send(); result = await response.json();
+  }
   if (!response.ok || result.status === 'failed' || result.success === false) {
     throw new Error(result.msg || result.data?.message || __('未知错误'));
   }

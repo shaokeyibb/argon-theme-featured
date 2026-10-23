@@ -218,5 +218,16 @@ article.post-preview-layout-3 .post-thumbnail {
 	max-height: 20vh;
 }
 
-/* Image width, aspect ratio and crop belong to core blocks / author markup.
-   Viewport padding could consume a small image's entire content box. */
+/* Preserve the inset of classic/Markdown article images without putting
+   viewport-sized padding inside small thumbnails or native image blocks. */
+#post_content > p > img:only-child:not([width]),
+#post_content > p > a:only-child > img:only-child:not([width]) {
+	display: block;
+	max-width: calc(100% - min(20vw, 40%));
+	height: auto;
+	margin-inline: auto;
+}
+#post_content > p:has(> img:only-child:not([width])),
+#post_content > p:has(> a:only-child > img:only-child:not([width])) {
+	margin-bottom: 0;
+}

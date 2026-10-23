@@ -54,17 +54,30 @@ test('gallery uses full image dimensions and leaves core lightbox in control', a
   await expect(page.locator('.wp-lightbox-overlay.active')).toBeVisible();
   await expect(page.locator('.pswp')).toHaveCount(0);
   await page.keyboard.press('Escape');
+  await page.locator('#post_content').evaluate(el => el.insertAdjacentHTML('beforeend', '<p><img id="legacy-image-inset" src="/gallery-full-1.svg" alt="Classic image"></p>'));
+  const inset=page.locator('#legacy-image-inset');
+  await expect.poll(()=>inset.evaluate(el=>el.naturalWidth)).toBe(1200);
+  const box=await inset.boundingBox(), parent=await inset.locator('..').boundingBox();
+  const viewport=page.viewportSize();
+  expect(box.width).toBeCloseTo(parent.width-Math.min(viewport.width*.2,parent.width*.4),0);
+  expect(box.x-parent.x).toBeCloseTo((parent.width-box.width)/2,0);
 });
 
 test('AI regeneration stops after the editor fails to save', async ({page}) => {
+  const welcome = page.getByRole('dialog', {name:'Welcome to the editor'});
+  // Preferences hydrate asynchronously, so the guide can appear after the
+  // editor controls. Dismiss it through its real UI whenever it blocks a click.
+  await page.addLocatorHandler(welcome, dialog => dialog.getByRole('button', {name:'Close', exact:true}).click());
   await page.goto('/wp-login.php', {waitUntil:'domcontentloaded'});
   await page.locator('#user_login').fill('admin'); await page.locator('#user_pass').fill('argon-browser-local-test');
   await Promise.all([page.waitForURL('**/wp-admin/**', {waitUntil:'domcontentloaded'}), page.locator('#wp-submit').click()]);
   await page.goto(`/wp-admin/post.php?post=${fixture().normal}&action=edit`, {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => window.wp?.data?.select('core/editor').getCurrentPostId());
-  const welcome = page.getByRole('dialog', {name:'Welcome to the editor'});
-  if (await welcome.isVisible()) await welcome.getByRole('button', {name:'Close', exact:true}).click();
-  await page.getByRole('button', {name:'Argon 文章设置', exact:true}).click();
+  await page.evaluate(() => wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false));
+  await expect(welcome).toBeHidden();
+  const settings = page.getByRole('button', {name:'Argon 文章设置', exact:true});
+  if (await settings.getAttribute('aria-expanded') !== 'true') await settings.click();
+  await expect(settings).toHaveAttribute('aria-expanded', 'true');
   await page.evaluate(() => wp.data.dispatch('core/editor').editPost({title:'Unsaved review fixture'}));
   let regenerated = false;
   page.on('request', request => { if (request.postData()?.includes('action=regenerate_ai_post_summary')) regenerated = true; });

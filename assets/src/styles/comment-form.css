@@ -41,12 +41,27 @@
 #post_comment_content {
 	transition: height 0.15s ease, box-shadow 0.3s ease;
 	overflow: hidden;
-	min-height: 80px;
+	height: 120px;
+	min-height: 120px;
 	resize: none;
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	margin-bottom: 18px;
 	margin-top: 20px;
+}
+#post_comment .input-group > .form-control {
+	height: 48px;
+	min-height: 48px;
+	padding: 12px 14px;
+}
+#post_comment .input-group-text {
+	padding-inline: 14px;
+}
+@media (max-width: 900px) {
+	body:has(#post_comment:focus-within) #float_action_buttons:not(.blog_settings_opened) {
+		opacity: 0;
+		pointer-events: none;
+	}
 }
 #post_comment_content_hidden {
 	font-family: inherit !important;

@@ -46,3 +46,11 @@ test('bundled fonts are referenced by a deployable stylesheet', () => {
   }
   for (const font of files.filter(name => /\.(?:woff2?|ttf|eot)$/.test(name))) assert(referenced.has(resolve(root, font)), `Orphan font: ${font}`);
 });
+
+test('lazy chunks never import a page entry that cache plugins can version independently', () => {
+  const manifest = JSON.parse(readFileSync(join(root, 'assets/dist/manifest.json'), 'utf8'));
+  const entries = Object.entries(manifest).filter(([, chunk]) => chunk.isEntry).map(([key]) => key);
+  for (const [name, chunk] of Object.entries(manifest)) {
+    for (const dependency of chunk.imports ?? []) assert(!entries.includes(dependency), `${name} imports entry ${dependency}`);
+  }
+});

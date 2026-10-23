@@ -1,13 +1,32 @@
 .pagination {
+	border-radius: .25rem;
 	width: max-content;
 	padding-top: 15px;
 	padding-bottom: 15px;
 	margin: auto;
 	margin-bottom: 25px;
 }
+.page-item:not(:first-child) .page-link { margin-left: 3px; }
+.page-item:first-child .page-link { margin-left: 0; }
 .pagination.pagination-mobile {
 	display: none;
 }
 .page-link {
 	transition: background-color 0.2s ease;
+}
+.page-item .page-link,
+.page-item > span {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 36px;
+	height: 36px;
+	margin: 0 3px;
+	padding: 0;
+	font-size: .875rem;
+	line-height: 1.25;
+	border-radius: 50% !important;
+}
+.page-item.active .page-link {
+	box-shadow: 0 7px 14px #32325d1a, 0 3px 6px #00000014;
 }

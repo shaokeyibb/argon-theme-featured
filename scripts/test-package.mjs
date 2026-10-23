@@ -1,7 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { root } from './release-files.mjs';
+import { root, verifyRelease } from './release-files.mjs';
+
+const {version} = verifyRelease();
 
 const temp = join(root, 'temp');
 mkdirSync(temp, {recursive:true});
@@ -18,7 +20,7 @@ set_error_handler(static function($severity,$message,$file,$line) {
 function package_check($condition,$message) { if (!$condition) throw new RuntimeException($message); }
 package_check(get_template() === 'argon-theme-featured', 'Installed ZIP was not activated');
 $theme = wp_get_theme(); package_check(!$theme->errors(), 'Theme validation failed');
-package_check($theme->get('Version') === '3.0.0', 'Incorrect version');
+package_check($theme->get('Version') === '${version}', 'Incorrect version');
 $root = get_template_directory();
 foreach (array('node_modules','vendor','tests','temp','assets/src') as $path) package_check(!file_exists($root.'/'.$path), 'Development files leaked: '.$path);
 foreach (argon_asset_manifest() as $entry) {

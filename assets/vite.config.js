@@ -17,6 +17,9 @@ export default defineConfig({
     manifest: 'manifest.json',
     sourcemap: false,
     rolldownOptions: {
+      // Cache plugins may append a query to the entry URL. Keep shared exports
+      // in a separate chunk so lazy imports cannot execute that entry twice.
+      preserveEntrySignatures: 'strict',
       input: { theme: 'src/modern/index.js', admin: 'src/modern/admin.js' },
       output: { entryFileNames: '[name]-[hash].js', chunkFileNames: '[name]-[hash].js', assetFileNames: '[name]-[hash][extname]' }
     }

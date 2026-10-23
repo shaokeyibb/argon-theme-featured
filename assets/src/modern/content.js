@@ -1,4 +1,5 @@
 import { $, $$, on, config, __, notify, copyText, button, storage, request, reducedMotion, randomID } from './dom.js';
+import { fadeIn, fadeOut } from './motion.js';
 import { spaceContent } from './typography.js';
 
 export function enhanceContent() {
@@ -91,8 +92,26 @@ function initLightbox() {
 function initShare() {
   const info = window.shareInfo;
   if (!info || !$('#share')) return;
-  on('click', '#share_show', () => $('#share_container')?.classList.add('opened'));
+  const panel = $('#share');
+  if (panel.dataset.initialized === 'true') return;
+  panel.dataset.initialized = 'true';
+  panel.inert = true;
+  on('click', '#share_show', (_, trigger) => {
+    $('#share_container')?.classList.add('opened');
+    trigger.setAttribute('aria-expanded', 'true'); panel.inert = false;
+    $('.share-action', panel)?.focus({ preventScroll: true });
+  });
   on('click', '#share_copy_link', event => { event.preventDefault(); copyText(info.url); });
+  const native = $('#share_native'), shareData = { title: info.title, text: info.title, url: info.url };
+  if (native && typeof navigator.share === 'function' && (!navigator.canShare || navigator.canShare(shareData))) {
+    native.hidden = false;
+    native.addEventListener('click', async () => {
+      native.disabled = true;
+      try { await navigator.share(shareData); }
+      catch (error) { if (error.name !== 'AbortError') notify(__('分享失败，请使用复制链接'), true); }
+      finally { native.disabled = false; }
+    });
+  }
   on('click', '#share_qrcode', async event => {
     event.preventDefault();
     try {
@@ -100,24 +119,15 @@ function initShare() {
       const dialog = document.createElement('dialog'); dialog.className = 'argon-qr-dialog';
       const img = new Image(); img.alt = __('二维码'); img.width = 320; img.height = 320;
       img.src = await QRCode.toDataURL(info.url, { width: 320 });
-      dialog.append(img, button(__('关闭'), 'btn btn-primary', () => dialog.close()));
-      dialog.addEventListener('close', () => dialog.remove(), { once: true }); document.body.append(dialog); dialog.showModal();
+      let closing = false;
+      const close = async () => { if (closing) return; closing = true; await fadeOut(dialog); dialog.close(); };
+      const hint = document.createElement('p'); hint.textContent = __('用微信扫一扫，或保存二维码后在微信中识别');
+      dialog.append(img, hint, button(__('关闭'), 'btn btn-primary', close));
+      dialog.setAttribute('aria-label', __('二维码'));
+      dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
+      dialog.addEventListener('close', () => dialog.remove(), { once: true }); document.body.append(dialog); dialog.showModal(); fadeIn(dialog);
     } catch { notify(__('加载失败'), true); }
   });
-  const image = $('meta[property="og:image"]')?.content || '';
-  const destinations = {
-    telegram: ['https://t.me/share/url', { url: info.url, text: info.title }],
-    twitter: ['https://twitter.com/intent/tweet', { url: info.url, text: info.title }],
-    facebook: ['https://www.facebook.com/sharer/sharer.php', { u: info.url }],
-    weibo: ['https://service.weibo.com/share/share.php', { url: info.url, title: info.title }],
-    qq: ['https://connect.qq.com/widget/shareqq/index.html', { url: info.url, title: info.title, source: info.source, desc: info.description, pics: image }],
-    qzone: ['https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey', { url: info.url, title: info.title, desc: info.description, summary: info.description, site: info.source, pics: image }],
-    douban: ['https://www.douban.com/sharebutton', { href: info.url, name: info.title, text: info.description, image }]
-  };
-  for (const [name, [base, params]] of Object.entries(destinations)) {
-    const link = $(`#share .icon-${name}`); if (!link) continue;
-    link.href = `${base}?${new URLSearchParams(params)}`; link.rel = 'noopener noreferrer';
-  }
 }
 
 function initExternalClicks() {

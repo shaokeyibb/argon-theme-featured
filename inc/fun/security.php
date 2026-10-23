@@ -6,9 +6,31 @@ function argon_request_string(array $input, string $key, string $default = ''): 
 
 function argon_ajax_nonce(): void {
 	if (!wp_verify_nonce(argon_request_string($_POST, '_wpnonce'), 'argon_public_ajax')){
-		wp_send_json(array('status' => 'failed', 'msg' => __('请求已过期，请刷新页面后重试', 'argon')), 403);
+		wp_send_json(array('status' => 'failed', 'code' => 'argon_nonce_expired', 'msg' => __('请求已过期，请刷新页面后重试', 'argon')), 403);
 	}
 }
+
+// Full-page caches can contain an expired nonce or one for a different login
+// state. Obtain the current visitor's nonce through an uncached same-origin
+// request before using public AJAX. Mutation handlers still verify the nonce
+// and their own capability/ownership requirements.
+function argon_refresh_public_nonce(): void {
+	$origin = get_http_origin();
+	$origins = array_map(static function($url) {
+		$parts = wp_parse_url($url);
+		return $parts['scheme'] . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
+	}, array(home_url(), admin_url()));
+	if (argon_request_string($_SERVER, 'REQUEST_METHOD') !== 'POST'
+		|| argon_request_string($_SERVER, 'HTTP_X_ARGON_REQUEST') !== 'public-nonce'
+		|| argon_request_string($_SERVER, 'HTTP_SEC_FETCH_SITE') === 'cross-site'
+		|| ($origin && !in_array($origin, $origins, true))) {
+		wp_send_json(array('status' => 'failed', 'msg' => __('您没有权限进行此操作', 'argon')), 403);
+	}
+	nocache_headers();
+	wp_send_json(array('status' => 'success', 'ajax_nonce' => wp_create_nonce('argon_public_ajax')));
+}
+add_action('wp_ajax_argon_refresh_public_nonce', 'argon_refresh_public_nonce');
+add_action('wp_ajax_nopriv_argon_refresh_public_nonce', 'argon_refresh_public_nonce');
 
 function argon_ajax_id(string $field, bool $allow_zero = false): int {
 	$id = filter_var(argon_request_string($_POST, $field), FILTER_VALIDATE_INT, array('options' => array('min_range' => $allow_zero ? 0 : 1)));

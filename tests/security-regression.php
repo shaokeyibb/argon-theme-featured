@@ -238,6 +238,33 @@ foreach (array('pin_comment', 'user_edit_comment', 'upvote_comment', 'upvote_shu
 		argon_test_assert($status === 403, 'Missing or malformed nonce accepted');
 	});
 }
+foreach (array(0, $admin) as $nonce_user) {
+	argon_test('Uncached public nonce follows visitor ' . $nonce_user, function() use ($nonce_user) {
+		wp_set_current_user($nonce_user);
+		$server = $_SERVER;
+		try {
+			$_SERVER['REQUEST_METHOD'] = 'POST';
+			$_SERVER['HTTP_X_ARGON_REQUEST'] = 'public-nonce';
+			$_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
+			$_SERVER['HTTP_ORIGIN'] = rtrim(home_url(), '/');
+			[$status, $response] = argon_test_ajax('argon_refresh_public_nonce', array());
+			argon_test_assert($status === 200 && wp_verify_nonce($response['ajax_nonce'], 'argon_public_ajax'), 'Fresh visitor nonce rejected');
+		} finally { $_SERVER = $server; }
+	});
+}
+foreach (array('foreign-origin', 'cross-site', 'missing-header', 'get-method') as $nonce_case) {
+	argon_test('Public nonce rejects ' . $nonce_case, function() use ($nonce_case) {
+		$server = $_SERVER;
+		try {
+			$_SERVER['REQUEST_METHOD'] = $nonce_case === 'get-method' ? 'GET' : 'POST';
+			$_SERVER['HTTP_X_ARGON_REQUEST'] = $nonce_case === 'missing-header' ? '' : 'public-nonce';
+			$_SERVER['HTTP_SEC_FETCH_SITE'] = $nonce_case === 'cross-site' ? 'cross-site' : 'same-origin';
+			$_SERVER['HTTP_ORIGIN'] = $nonce_case === 'foreign-origin' ? 'https://attacker.invalid' : rtrim(home_url(), '/');
+			[$status, $response] = argon_test_ajax('argon_refresh_public_nonce', array());
+			argon_test_assert($status === 403 && !isset($response['ajax_nonce']), 'Unsafe nonce request accepted');
+		} finally { $_SERVER = $server; }
+	});
+}
 argon_test('private and pending comment histories stay private', function() use ($private, $pending){
 	wp_set_current_user(0);
 	foreach (array($private, $pending) as $id){

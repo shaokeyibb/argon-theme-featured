@@ -201,7 +201,7 @@
 	height: 18px;
 	line-height: 16px;
 	padding: 0px 4px;
-	border-color: transparent !important;
+	border-color: var(--themecolor) !important;
 	color: var(--themecolor);
 	background-color: rgba(var(--themecolor-rgbstr), 0.15);
 	text-align: center;

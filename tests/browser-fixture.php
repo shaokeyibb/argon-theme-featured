@@ -5,7 +5,9 @@ wp_set_password('argon-browser-local-test', 1);
 update_option('argon_comment_need_captcha', 'false');
 update_option('argon_comment_allow_editing', 'true');
 update_option('argon_enable_comment_pinning', 'true');
+update_option('argon_enable_comment_upvote', 'true');
 update_option('argon_comment_ua', 'platform,browser,version');
+update_option('argon_fab_show_gotocomment_button', 'true');
 update_option('argon_enable_pangu', 'article|comment|shuoshuo');
 foreach (array('argon_disable_googlefont' => 'true', 'argon_enable_lightbox' => 'true', 'argon_enable_code_highlight' => 'true', 'argon_math_render' => 'katex', 'argon_enable_mathjax' => 'true', 'argon_show_sharebtn' => 'true', 'argon_comment_captcha' => 'false', 'argon_comment_edit' => 'true', 'argon_html_enabled' => 'true', 'argon_html_allow_scripts' => 'true', 'argon_ai_post_summary' => 'false', 'comment_moderation' => '', 'comment_previously_approved' => '', 'require_name_email' => '1') as $key => $value) update_option($key, $value);
 $content = '<!-- wp:heading --><h2 class="wp-block-heading">Modern WordPress content</h2><!-- /wp:heading --><!-- wp:paragraph --><p>原生区块、短代码和评论保持可用。Native blocks remain editable.</p><!-- /wp:paragraph -->';
@@ -26,6 +28,20 @@ $posts['normal'] = wp_insert_post(wp_slash(array('post_title' => 'Argon 3 Modern
 $source = file_get_contents(__DIR__ . '/fixtures/html-document.html');
 $posts['html'] = wp_insert_post(wp_slash(array('post_title' => 'HTML Document', 'post_content' => '<!-- wp:argon/html-document {"source":"' . base64_encode($source) . '"} /-->', 'post_status' => 'publish')));
 $posts['comment'] = wp_insert_comment(array('comment_post_ID' => $posts['normal'], 'comment_author' => 'Existing reader', 'comment_content' => 'Existing comment survives the upgrade.', 'comment_approved' => 1));
+$posts['catalog'] = wp_insert_post(wp_slash(array('post_type' => 'page', 'post_title' => 'Nested catalog', 'post_status' => 'publish', 'post_content' => '<h2 id="year-2026">2026</h2><h3 id="month-august">August</h3><div style="height:600px">August entries</div><h4 id="week-one">Week one</h4><div style="height:600px">Week entries</div><h3 id="month-may">May</h3><div style="height:600px">May entries</div><h2 id="year-2025">2025</h2><h3 id="month-december">December</h3><div style="height:600px">December entries</div><h3 id="month-october">October</h3><div style="height:1000px">October entries</div>')));
+// A real home -> page two transition with an image whose dimensions arrive late.
+update_option('posts_per_page', 1);
+update_option('argon_home_show_shuoshuo', 'true');
+update_option('argon_fold_long_shuoshuo', 'true');
+update_option('argon_toolbar_blur', 'true');
+update_option('argon_get_captcha_by_ajax', 'true');
+$posts['folding'] = wp_insert_post(wp_slash(array('post_type' => 'shuoshuo', 'post_title' => 'Delayed image folding', 'post_content' => '<p>Delayed image</p><img src="' . esc_url(home_url('/folding-delayed.svg')) . '" alt="Delayed tall image">', 'post_status' => 'publish', 'post_date' => date('Y-m-d H:i:s', time() - 1))));
+$posts['home'] = wp_insert_post(wp_slash(array('post_title' => 'Pagination cover', 'post_content' => '<p>Navigate to the next page to check image folding.</p>', 'post_status' => 'publish', 'post_date' => date('Y-m-d H:i:s', time()))));
+// Stable dates keep the folding fixture on page two regardless of insert speed.
+foreach (array($posts['normal'], $posts['html']) as $older_id) wp_update_post(array('ID' => $older_id, 'post_date' => date('Y-m-d H:i:s', time() - 3600)));
+$menu = wp_create_nav_menu('Regression categories');
+wp_update_nav_menu_item($menu, 0, array('menu-item-title' => 'Uncategorized', 'menu-item-object' => 'category', 'menu-item-object-id' => 1, 'menu-item-type' => 'taxonomy', 'menu-item-status' => 'publish'));
+set_theme_mod('nav_menu_locations', array('leftbar_menu' => $menu));
 // Enable the panel after publishing fixtures, without ever contacting an AI provider.
 update_option('argon_ai_post_summary', 'true');
 update_option('argon_openai_api_key', '');

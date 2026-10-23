@@ -2,6 +2,7 @@ import { $, $$, on, config, __, request, notify, scrollToElement, button } from 
 import { Modal } from './ui.js';
 import { spaceContent } from './typography.js';
 import { humanTime } from './time.js';
+import { slide, fadeIn } from './motion.js';
 
 let replyID = 0, editID = 0;
 const value = id => $(`#${id}`)?.value ?? '';
@@ -10,7 +11,7 @@ const checked = id => !!$(`#${id}`)?.checked;
 function resetForm(clear = false) {
   replyID = 0; editID = 0;
   $('#post_comment')?.classList.remove('editing', 'post-comment-force-privatemode-on', 'post-comment-force-privatemode-off');
-  if ($('#post_comment_reply_info')) $('#post_comment_reply_info').style.display = 'none';
+  slide($('#post_comment_reply_info'), false);
   if (clear && $('#post_comment_content')) $('#post_comment_content').value = '';
 }
 function setPrivacy(comment) {
@@ -36,7 +37,7 @@ export function initComments() {
     if (!comment || !$('#post_comment')) return;
     $('#post_comment_reply_name').textContent = $('.comment-name', comment)?.textContent || '';
     $('#post_comment_reply_preview').textContent = $('.comment-item-source', comment)?.textContent || $('.comment-item-text', comment)?.textContent || '';
-    $('#post_comment_reply_info').style.display = 'block';
+    slide($('#post_comment_reply_info'), true, { duration: 500 });
     setPrivacy(comment); scrollToElement($('#post_comment')); $('#post_comment_content').focus({ preventScroll: true });
   });
   on('click', '#post_comment_reply_cancel, #post_comment_edit_cancel', () => resetForm(editID !== 0));
@@ -102,9 +103,9 @@ export function initComments() {
   });
   on('click', '#post_comment_toggle_extra_input', () => {
     const show = $('#post_comment').classList.toggle('show-extra-input');
-    $('#post_comment_extra_input').style.display = show ? '' : 'none';
+    slide($('#post_comment_extra_input'), show);
   });
-  on('input', '#post_comment_content', (_, el) => { el.style.height = 'auto'; el.style.height = `${Math.max(100, el.scrollHeight)}px`; });
+  on('input', '#post_comment_content', (_, el) => { el.style.height = 'auto'; el.style.height = `${Math.max(parseFloat(getComputedStyle(el).minHeight) || 0, el.scrollHeight)}px`; });
   on('focusin', '#post_comment_link, #post_comment_captcha', (_, el) => el.closest('.input-group')?.classList.add('active'));
   on('focusout', '#post_comment_link, #post_comment_captcha', (_, el) => el.closest('.input-group')?.classList.remove('active'));
 
@@ -115,7 +116,10 @@ export function initComments() {
     try {
       const result = await request(`upvote_${type}`, { [`${type}_id`]: el.dataset.id });
       if ($(`.${type}-upvote-num`, el)) $(`.${type}-upvote-num`, el).textContent = result.total_upvote ?? '';
-      if (result.status === 'success') el.classList.add('upvoted');
+      if (result.status === 'success') {
+        el.classList.add('upvoted');
+        if (type === 'shuoshuo') el.classList.add('shuoshuo-upvoted-animation');
+      }
       if (result.msg) notify(result.msg, result.status !== 'success');
     } catch (error) { notify(error.message, true); }
     finally { delete el.dataset.busy; el.classList.remove(`${type}-upvoting`); }
@@ -150,8 +154,8 @@ export function initComments() {
     $('.modal-body', dialog).textContent = __('加载中'); Modal.getOrCreateInstance(dialog).show();
     try {
       const result = await request('get_comment_edit_history', { id });
-      if (sequence === historyRequest) $('.modal-body', dialog).innerHTML = result.history;
-    } catch (error) { if (sequence === historyRequest) $('.modal-body', dialog).textContent = error.message; }
+      if (sequence === historyRequest) { $('.modal-body', dialog).innerHTML = result.history; fadeIn($('.modal-body', dialog)); }
+    } catch (error) { if (sequence === historyRequest) { $('.modal-body', dialog).textContent = error.message; fadeIn($('.modal-body', dialog)); } }
   });
   on('click', '#comments_navigation .page-item > div, #comments_more', loadCommentPage);
   on('click', '.comment-parent-info', (_, el) => scrollToElement(document.getElementById(`comment-${el.dataset.parentId}`)));
@@ -182,6 +186,7 @@ async function loadCommentPage(event, el) {
   if (url.origin !== location.origin) return;
   const more = el.id === 'comments_more', comments = $('#comments');
   el.dataset.busy = 'true'; comments.classList.add('comments-loading');
+  if (more) el.disabled = true;
   try {
     const response = await fetch(url, { credentials: 'same-origin', signal: AbortSignal.timeout(30000) });
     if (!response.ok) throw new Error(__('加载失败'));
@@ -197,7 +202,7 @@ async function loadCommentPage(event, el) {
     }
     enhanceComments();
   } catch (error) { notify(error.message, true); }
-  finally { delete el.dataset.busy; comments.classList.remove('comments-loading'); }
+  finally { delete el.dataset.busy; if (more) el.disabled = false; comments.classList.remove('comments-loading'); }
 }
 
 function textAvatar(img) {
@@ -208,21 +213,37 @@ function textAvatar(img) {
   replacement.style.backgroundColor = `hsl(${hue} 55% 50%)`; img.replaceWith(replacement);
 }
 
+const foldingObservers = new WeakMap();
+
+function observeFolding(el, prefix, height) {
+  if (foldingObservers.has(el)) return;
+  const fold = () => {
+    if (el.classList.contains(`${prefix}-unfolded`) || el.classList.contains(`${prefix}-folded`) || el.offsetHeight <= height) return;
+    el.classList.add(`${prefix}-folded`);
+    const wrapper = document.createElement('div');
+    wrapper.className = `show-full-${prefix}`;
+    wrapper.append(button(__('展开'), 'btn btn-outline-primary', () => {}));
+    el.append(wrapper);
+  };
+  // Images, fonts and responsive layouts can grow after DOMContentLoaded.
+  // Observe each new item once, including comments inserted through AJAX.
+  const observer = new ResizeObserver(fold);
+  foldingObservers.set(el, observer);
+  observer.observe(el);
+  fold();
+}
+
 export function enhanceComments() {
   spaceContent();
   // Legacy stored stickers keep working without a jQuery lazyload runtime.
-  $$('img[data-original]').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; img.src = img.dataset.original; img.removeAttribute('data-original'); img.classList.remove('lazyload'); });
+  $$('img[data-original]').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; img.addEventListener('load', () => fadeIn(img), { once: true }); img.src = img.dataset.original; img.removeAttribute('data-original'); img.classList.remove('lazyload'); });
   $$('img.avatar').forEach(img => { if (img.complete && !img.naturalWidth) textAvatar(img); });
   for (const [enabled, selector, prefix, height] of [
     [config.fold_long_comments, '.comment-item-inner', 'comment', 800],
     [config.fold_long_shuoshuo, '.shuoshuo-foldable > .shuoshuo-content', 'shuoshuo', 400]
   ]) {
     if (!enabled) continue;
-    $$(selector).forEach(el => {
-      if (el.classList.contains(`${prefix}-unfolded`) || el.classList.contains(`${prefix}-folded`) || el.offsetHeight <= height) return;
-      el.classList.add(`${prefix}-folded`);
-      const wrapper = document.createElement('div'); wrapper.className = `show-full-${prefix}`; wrapper.append(button(__('展开'), 'btn btn-outline-primary', () => {})); el.append(wrapper);
-    });
+    $$(selector).forEach(el => observeFolding(el, prefix, height));
   }
   refreshTimes();
 }

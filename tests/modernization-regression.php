@@ -222,6 +222,38 @@ modern_test('native custom logo renders when the toolbar title option has never 
 		wp_delete_attachment($logo, true);
 	}
 });
+modern_test('sharing preserves Unicode URLs and titles, valid links and existing platform filters', function() use ($post_id) {
+	$previous_post = $GLOBALS['post'] ?? null;
+	$previous_mode = get_option('argon_show_sharebtn', null);
+	$GLOBALS['post'] = get_post($post_id);
+	$title = '中文 & "quoted" + #/? 🌌';
+	$url = 'https://example.com/中文/?a=1&b=%2B#标题';
+	$title_filter = static fn() => $title;
+	$url_filter = static fn() => $url;
+	add_filter('the_title', $title_filter); add_filter('post_link', $url_filter);
+	try {
+		foreach (array('true' => 7, 'domestic' => 1, 'abroad' => 6) as $mode => $count) {
+			update_option('argon_show_sharebtn', $mode);
+			ob_start(); get_template_part('template-parts/share'); $html = ob_get_clean();
+			$dom = new DOMDocument(); @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $html);
+			$xpath = new DOMXPath($dom); $links = $xpath->query('//a[@data-share-platform]');
+			modern_assert($links->length === $count, 'Wrong platform filter: ' . $mode);
+			modern_assert($xpath->query('//a/button')->length === 0, 'Nested interactive elements');
+			foreach ($links as $link) {
+				parse_str(parse_url($link->getAttribute('href'), PHP_URL_QUERY), $params);
+				$name = $link->getAttribute('data-share-platform');
+				if (in_array($name, array('whatsapp', 'bluesky'), true)) modern_assert($params['text'] === $title . ' ' . $url, $name . ' text corrupted');
+				else modern_assert(($params['url'] ?? $params['u'] ?? '') === $url, $name . ' URL corrupted');
+				modern_assert($link->getAttribute('rel') === 'noopener noreferrer', 'Unsafe target');
+			}
+			modern_assert(!str_contains($html, 'shareqq') && !str_contains($html, 'qzone') && !str_contains($html, 'douban'), 'Retired destination');
+		}
+	} finally {
+		remove_filter('the_title', $title_filter); remove_filter('post_link', $url_filter);
+		$GLOBALS['post'] = $previous_post;
+		if ($previous_mode === null) delete_option('argon_show_sharebtn'); else update_option('argon_show_sharebtn', $previous_mode);
+	}
+});
 modern_test('theme bootstrap and WordPress hooks emit no PHP warnings or deprecated API diagnostics', function() {
 	modern_assert(isset($GLOBALS['argon_boot_diagnostics']), 'Boot diagnostics MU plugin was not loaded');
 	modern_assert(!$GLOBALS['argon_boot_diagnostics'], implode("\n", $GLOBALS['argon_boot_diagnostics']));

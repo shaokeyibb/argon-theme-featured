@@ -85,7 +85,7 @@
 		<form>
 			<div class="row">
 				<div class="col-md-12">
-					<textarea id="post_comment_content" class="form-control form-control-alternative" placeholder="<?php echo apply_filters("argon_comment_textarea_placeholder", __('评论内容', 'argon'));?>" name="comment" style="height: 80px;"></textarea>
+					<textarea id="post_comment_content" class="form-control form-control-alternative" placeholder="<?php echo apply_filters("argon_comment_textarea_placeholder", __('评论内容', 'argon'));?>" name="comment"></textarea>
 				</div>
 				<div class="col-md-12" style="height: 0;overflow: hidden;">
 					<pre id="post_comment_content_hidden" class=""></pre>

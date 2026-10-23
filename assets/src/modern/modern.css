@@ -35,7 +35,15 @@ pre.hljs-codeblock:focus-within .hljs-control { opacity: 1; }
 @media (hover: none) { pre.hljs-codeblock .hljs-control { opacity: .8; } }
 .modal-backdrop.show { opacity: .5; }
 .navbar .custom-logo { width: auto; max-width: min(300px, 60vw); max-height: 44px; object-fit: contain; }
-#leftbar_catalog .index-subItem-box .index-subItem-box { padding-inline-start: 12px; }
+#leftbar_catalog .index-subItem-box[hidden] { display: none; }
+/* Keep dropdown entry/exit motion while Bootstrap owns focus and placement. */
+.navbar .dropdown-menu {
+  opacity: 0;
+  translate: 0 10px;
+  transition: opacity .2s ease, translate .2s ease, display .2s allow-discrete;
+}
+.navbar .dropdown-menu.show { opacity: 1; translate: 0 0; }
+@starting-style { .navbar .dropdown-menu.show { opacity: 0; translate: 0 10px; } }
 .post-content .alignwide { width: 100%; }
 .post-content .alignfull { width: auto; max-width: none; margin-inline: -25px; }
 .post-content img { max-width: 100%; }

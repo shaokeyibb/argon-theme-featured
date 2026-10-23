@@ -5,6 +5,7 @@ import Tab from 'bootstrap/js/dist/tab';
 import Popover from 'bootstrap/js/dist/popover';
 import { $, $$, on, config, __, storage, setCookie, scrollToElement, reducedMotion } from './dom.js';
 import { hex2rgb, rgb2hsl, rgb2gray } from './color.js';
+import { slide } from './motion.js';
 
 export { Modal };
 
@@ -85,11 +86,13 @@ export function initUI() {
     el.classList.add('open');
     const input = $('input', el);
     if (input) { input.readOnly = false; input.focus(); }
-    $('.leftbar-search-button')?.classList.add('open');
+    el.closest('.leftbar-search-button')?.classList.add('open');
   });
-  on('focusout', '#navbar_search_input, #leftbar_search_input', () => {
-    $('#navbar_search_input_container')?.classList.remove('open');
-    $('.leftbar-search-button')?.classList.remove('open');
+  on('focusout', '#navbar_search_input, #leftbar_search_input', (event, el) => {
+    const container = el.closest('#navbar_search_input_container, #leftbar_search_container');
+    if (container?.contains(event.relatedTarget)) return;
+    container?.classList.remove('open');
+    el.closest('.leftbar-search-button')?.classList.remove('open');
   });
   on('keydown', '#navbar_search_input, #navbar_search_input_mobile, #leftbar_search_input', (event, el) => {
     if (event.key !== 'Enter' || !el.value.trim()) return;
@@ -109,7 +112,7 @@ export function initUI() {
     const block = el.closest('.collapse-block');
     const collapsed = block.classList.toggle('collapsed');
     el.setAttribute('aria-expanded', String(!collapsed));
-    $('.collapse-block-body', block).style.display = collapsed ? 'none' : '';
+    slide($('.collapse-block-body', block), !collapsed);
   });
   $$('.collapse-block-title').forEach(el => {
     el.setAttribute('role', 'button'); el.tabIndex = 0;
@@ -166,7 +169,8 @@ function initCatalog() {
   const container = $('#leftbar_catalog');
   if (!container || $('.argon-html-frame')) return; // HTML document bridge owns its outline.
   const headings = $$('#post_content h1, #post_content h2, #post_content h3, #post_content h4, #post_content h5, #post_content h6');
-  const list = document.createElement('ul'); list.className = 'index-subItem-box';
+  if (!headings.length) return;
+  const list = document.createElement('ul'); list.className = 'index-list';
   const links = new Map(), stack = [{ level: 0, list, last: null }];
   headings.forEach((heading, index) => {
     if (!heading.id) {
@@ -187,13 +191,62 @@ function initCatalog() {
     item.append(link); stack.at(-1).list.append(item); stack.at(-1).last = item; links.set(heading, link);
   });
   container.replaceChildren(list);
-  const observer = new IntersectionObserver(entries => {
-    const current = entries.find(entry => entry.isIntersecting);
-    if (!current) return;
-    links.forEach(link => { link.classList.remove('active'); link.removeAttribute('aria-current'); });
-    links.get(current.target).classList.add('active'); links.get(current.target).setAttribute('aria-current', 'location');
-  }, { rootMargin: '-80px 0px -65% 0px' });
-  headings.forEach(heading => observer.observe(heading));
+  const branches = $$('li > ul', list), scrollBox = $('#leftbar_part2_inner');
+  branches.forEach(branch => { branch.hidden = true; });
+  let activeHeading, scheduled = false;
+  const activate = heading => {
+    if (heading === activeHeading) return;
+    const initial = !activeHeading;
+    activeHeading = heading;
+    links.forEach((link, target) => {
+      const active = target === heading;
+      link.classList.toggle('active', active);
+      link.parentElement.classList.toggle('current', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+    const link = links.get(heading), item = link.parentElement;
+    // Show the current section's children and every ancestor on its path.
+    // Unrelated branches stay collapsed, including during fast reverse scrolls.
+    const states = branches.map(branch => ({
+      branch, open: branch.parentElement === item || branch.contains(item),
+      height: branch.getBoundingClientRect().height
+    }));
+    const changed = states.filter(({branch, open}) => branch.classList.contains('open') !== open);
+    // Set nested targets first; only the outermost changing branch animates.
+    // Its captured height prevents a jump when several levels close at once.
+    const animations = states.reverse().map(({branch, open, height}) => {
+      const ancestorChanges = changed.some(other => other.branch !== branch && other.branch.contains(branch));
+      branch.classList.toggle('open', open);
+      branch.previousElementSibling.setAttribute('aria-expanded', String(open));
+      return slide(branch, open, { duration: 400, immediate: initial || ancestorChanges, fromHeight: height });
+    });
+    Promise.all(animations).then(() => {
+      if (activeHeading !== heading || !scrollBox || !scrollBox.clientHeight || scrollBox.matches(':hover') || scrollBox.contains(document.activeElement)) return;
+      const bounds = scrollBox.getBoundingClientRect(), target = link.getBoundingClientRect();
+      const top = target.top < bounds.top + 12 ? target.top - bounds.top - 12 : target.bottom > bounds.bottom - 12 ? target.bottom - bounds.bottom + 12 : 0;
+      if (top) scrollBox.scrollBy({ top, behavior: reducedMotion() ? 'instant' : 'smooth' });
+    });
+  };
+  const update = () => {
+    scheduled = false;
+    const visible = headings.filter(heading => heading.getClientRects().length);
+    let current = visible[0];
+    for (const heading of visible) {
+      if (heading.getBoundingClientRect().top > 91) break;
+      current = heading;
+    }
+    if (scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 2) current = visible.at(-1);
+    if (current) activate(current);
+  };
+  const schedule = () => { if (!scheduled) { scheduled = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', schedule, { passive: true });
+  addEventListener('hashchange', schedule);
+  new ResizeObserver(schedule).observe($('#post_content'));
+  $('#post_content').addEventListener('load', schedule, true);
+  document.fonts.ready.then(schedule);
+  update();
 }
 
 function initScroll() {
@@ -238,6 +291,8 @@ function initScroll() {
       $('#fabtn_reading_progress')?.classList.toggle('fabtn-hidden', height <= 0 || progress < 0 || progress > 1);
       if ($('#fabtn_reading_progress_details')) $('#fabtn_reading_progress_details').textContent = `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%`;
       if ($('#fabtn_reading_progress_bar')) $('#fabtn_reading_progress_bar').style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
+    } else {
+      $('#fabtn_reading_progress')?.classList.add('fabtn-hidden');
     }
     if (document.documentElement.matches('.banner-as-cover.is-home')) {
       $('#float_action_buttons')?.classList.toggle('hidden', y < innerHeight * .2);
