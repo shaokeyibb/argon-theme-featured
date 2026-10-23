@@ -21,7 +21,7 @@ function argon_get_search_post_type_array(){
 	return $arr;
 }
 function search_filter($query) {
-	if (!$query -> is_search || is_admin()) {
+	if (!$query->is_search() || !$query->is_main_query() || is_admin()) {
 		return $query;
 	}
 	if (get_option('argon_enable_search_filters', 'true') == 'false'){

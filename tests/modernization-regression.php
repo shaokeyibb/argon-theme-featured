@@ -148,11 +148,83 @@ modern_test('AI respects per-post opt-out and concurrent locks', function() use 
 	add_option('argon_ai_lock_' . $post_id, time(), '', false);
 	modern_assert(!argon_update_ai_post_meta($post_id), 'Concurrent request ran'); delete_option('argon_ai_lock_' . $post_id);
 });
+modern_test('REST publish honors the opt-out saved in the same request', function() use (&$ai_request) {
+	update_option('argon_ai_async_generate', 'false');
+	$id = wp_insert_post(array('post_title' => 'REST opt-out', 'post_content' => 'Do not send this content.', 'post_status' => 'draft'));
+	$ai_request = null;
+	$request = new WP_REST_Request('POST', '/wp/v2/posts/' . $id);
+	$request->set_param('status', 'publish');
+	$request->set_param('meta', array('argon_ai_post_summary' => 'false'));
+	$response = rest_do_request($request);
+	modern_assert($response->get_status() === 200, wp_json_encode($response->get_data()));
+	modern_assert($ai_request === null && get_post_meta($id, 'argon_ai_summary', true) === '', 'AI read the previous opt-in before REST saved meta');
+});
+modern_test('REST page publish uses the newly saved prompt', function() use (&$ai_request) {
+	$id = wp_insert_post(array('post_type' => 'page', 'post_title' => 'REST page summary', 'post_content' => 'Summarize this page.', 'post_status' => 'draft'));
+	$ai_request = null;
+	$request = new WP_REST_Request('POST', '/wp/v2/pages/' . $id);
+	$request->set_param('status', 'publish');
+	$request->set_param('meta', array('argon_ai_post_summary' => 'true', 'argon_ai_extra_prompt_mode' => 'replace', 'argon_ai_extra_prompt' => 'Use the new page prompt.'));
+	$response = rest_do_request($request);
+	modern_assert($response->get_status() === 200, wp_json_encode($response->get_data()));
+	modern_assert($ai_request !== null, 'Pages did not trigger summary generation');
+	$payload = json_decode($ai_request[0]['body'], true);
+	modern_assert(end($payload['messages'])['content'] === 'Use the new page prompt.', 'Prompt was read before REST persisted it');
+	update_option('argon_ai_async_generate', 'true');
+});
+modern_test('search filters leave secondary queries unchanged', function() {
+	$query = new WP_Query(array('s' => 'fixture', 'post_type' => 'page'));
+	modern_assert($query->get('post_type') === 'page', 'Theme replaced another component\'s post type filter');
+});
+modern_test('queued AI jobs stop when a publication is withdrawn', function() use (&$ai_request) {
+	$id = wp_insert_post(array('post_title' => 'Withdrawn summary', 'post_content' => 'Do not send unpublished content.', 'post_status' => 'draft'));
+	$ai_request = null;
+	do_action('argon_update_ai_post_meta', $id);
+	modern_assert($ai_request === null, 'Queued job sent a withdrawn article');
+	modern_assert(argon_update_ai_post_meta($id), 'Manual draft generation should remain available');
+});
+modern_test('dynamic first images retain shortcode support without recursive rendering', function() {
+	$runs = 0;
+	add_shortcode('argon_fixture_image', static function() use (&$runs) {
+		$runs++;
+		argon_get_first_image_of_article(get_the_ID()); // A plugin can ask for its own thumbnail.
+		return '<img src="https://example.com/dynamic-first.png">';
+	});
+	$id = wp_insert_post(array('post_title' => 'Dynamic image', 'post_content' => '[argon_fixture_image]', 'post_status' => 'draft'));
+	$previous = $GLOBALS['post'] ?? null;
+	modern_assert(argon_get_first_image_of_article($id) === 'https://example.com/dynamic-first.png', 'Shortcode image missing');
+	modern_assert(argon_get_first_image_of_article($id) === 'https://example.com/dynamic-first.png' && $runs === 1, 'Fallback repeated rendering');
+	modern_assert(($GLOBALS['post'] ?? null) === $previous, 'Thumbnail changed the current post');
+	remove_shortcode('argon_fixture_image');
+});
 modern_test('settings page renders without jQuery or retired controls', function() {
 	wp_set_current_user(1); ob_start(); themeoptions_page(); $html = ob_get_clean();
 	modern_assert(!str_contains($html, '$(') && !str_contains($html, 'vendor/jquery'), 'jQuery still required');
 	modern_assert(!str_contains($html, 'name="argon_enable_zoomify"'), 'Retired setting remains');
 	modern_assert(str_contains($html, 'name="argon_enable_lightbox"'), 'New lightbox setting missing');
+});
+modern_test('native custom logo renders when the toolbar title option has never been saved', function() {
+	$previous_title = get_option('argon_toolbar_title', null);
+	$previous_logo = get_theme_mod('custom_logo');
+	$logo = wp_insert_attachment(array('post_title' => 'Logo fixture', 'post_mime_type' => 'image/png', 'guid' => 'https://example.com/logo.png'));
+	update_post_meta($logo, '_wp_attached_file', 'logo.png');
+	wp_update_attachment_metadata($logo, array('width' => 100, 'height' => 100, 'file' => 'logo.png', 'sizes' => array()));
+	delete_option('argon_toolbar_title'); set_theme_mod('custom_logo', $logo);
+	ob_start();
+	try {
+		get_header();
+		$html = ob_get_contents();
+		modern_assert(str_contains($html, 'class="custom-logo"'), 'Registered native logo was ignored without a legacy title option');
+	} finally {
+		ob_end_clean();
+		if ($previous_title !== null) update_option('argon_toolbar_title', $previous_title);
+		if ($previous_logo) set_theme_mod('custom_logo', $previous_logo); else remove_theme_mod('custom_logo');
+		wp_delete_attachment($logo, true);
+	}
+});
+modern_test('theme bootstrap and WordPress hooks emit no PHP warnings or deprecated API diagnostics', function() {
+	modern_assert(isset($GLOBALS['argon_boot_diagnostics']), 'Boot diagnostics MU plugin was not loaded');
+	modern_assert(!$GLOBALS['argon_boot_diagnostics'], implode("\n", $GLOBALS['argon_boot_diagnostics']));
 });
 restore_error_handler();
 $failed = array_filter($results, static fn($result) => $result !== 'passed');

@@ -1,4 +1,4 @@
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import { createWriteStream, mkdirSync, statSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -8,7 +8,7 @@ const directory = join(root,'release');
 mkdirSync(directory,{recursive:true});
 const destination = join(directory,'argon-theme-featured.zip');
 const output = createWriteStream(destination);
-const archive = archiver('zip',{zlib:{level:9}});
+const archive = new ZipArchive({zlib:{level:9}});
 const finished = new Promise((resolve,reject) => { output.on('close',resolve); output.on('error',reject); archive.on('error',reject); });
 archive.pipe(output);
 // Buffers preserve insertion order; archive.file() queues asynchronous stat jobs.

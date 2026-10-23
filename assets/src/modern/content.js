@@ -1,4 +1,5 @@
-import { $, $$, on, config, __, notify, copyText, button, storage, request, reducedMotion } from './dom.js';
+import { $, $$, on, config, __, notify, copyText, button, storage, request, reducedMotion, randomID } from './dom.js';
+import { spaceContent } from './typography.js';
 
 export function enhanceContent() {
   $$('.clamp').forEach(el => { el.style.setProperty('--clamp-lines', Number(el.getAttribute('clamp-line')) || 3); });
@@ -22,12 +23,8 @@ export function enhanceContent() {
   initExternalClicks();
   if (config.lightbox) initLightbox();
   if (config.code_highlight?.enable && $('article pre')) import('./highlight.js').then(module => module.highlight()).catch(() => {});
-  if (config.math && $('#post_content')) import('./math.js').then(module => module.renderMath($('#post_content'))).catch(() => {});
-  if (config.pangu && config.pangu !== 'false') import('pangu').then(({ default: pangu }) => {
-    if (config.pangu.includes('article')) pangu.spacingElementByClassName('post-content');
-    if (config.pangu.includes('comment')) pangu.spacingElementById('comments');
-    if (config.pangu.includes('shuoshuo')) pangu.spacingElementByClassName('shuoshuo-content');
-  }).catch(() => {});
+  if (config.math && /\$|\\\(|\\\[/.test($('#post_content')?.textContent || '')) import('./math.js').then(module => module.renderMath($('#post_content'))).catch(() => {});
+  spaceContent();
 }
 
 function initGithubCards() {
@@ -51,33 +48,40 @@ function initGithubCards() {
 }
 
 function initLightbox() {
+  const excluded = '.wp-lightbox-container, [data-wp-interactive], .no-fancybox, [data-no-fancybox="true"], .friend-link-avatar, .comment-sticker';
+  const imageLink = link => /\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(link?.href || '');
+  const eligible = img => !img.closest(excluded) && (!img.closest('a') || img.closest('a').matches('.comment-image') || imageLink(img.closest('a')));
   // WordPress Image blocks with core's lightbox retain their own Interactivity API.
   on('click', '#post_content img, .shuoshuo-content img, a.comment-image', async (event, el) => {
     if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    if (el.closest('.wp-lightbox-container, [data-wp-interactive], .no-fancybox, [data-no-fancybox="true"], .friend-link-avatar')) return;
+    if (el.closest(excluded)) return;
     const link = el.closest('a'), image = el.matches('img') ? el : $('img', el);
-    if (link && !link.matches('.comment-image') && !/\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(link.href)) return;
+    if (link && !link.matches('.comment-image') && !imageLink(link)) return;
     const src = link?.href || image?.currentSrc || image?.src;
     if (!src || !/^https?:/i.test(new URL(src, location.href).protocol)) return;
     event.preventDefault();
     try {
       const [{ default: PhotoSwipe }] = await Promise.all([import('photoswipe'), import('photoswipe/style.css')]);
       const gallery = image?.closest('#post_content, .shuoshuo-content') || el.closest('.comment-item-text');
-      const images = gallery ? $$('img', gallery).filter(img => !img.closest('.wp-lightbox-container, [data-wp-interactive], .no-fancybox, .friend-link-avatar') && !img.classList.contains('comment-sticker')) : [];
-      const data = images.map(img => ({ src: /\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(img.closest('a')?.href || '') ? img.closest('a').href : img.currentSrc || img.src, width: img.naturalWidth, height: img.naturalHeight, alt: img.alt }));
+      const images = gallery ? $$('img', gallery).filter(eligible) : [];
+      const data = images.map(img => ({ src: imageLink(img.closest('a')) ? img.closest('a').href : img.currentSrc || img.src, width: img.naturalWidth, height: img.naturalHeight, alt: img.alt }));
       let index = images.indexOf(image);
       if (index < 0) { index = 0; data.unshift({ src, width: image?.naturalWidth || 0, height: image?.naturalHeight || 0, alt: image?.alt || '' }); }
       // Measure full-size media before opening, including comment-image links.
       const item = data[index];
       const full = new Image(); full.src = item.src; await full.decode();
-      item.width = full.naturalWidth; item.height = full.naturalHeight;
+      item.width = full.naturalWidth; item.height = full.naturalHeight; item.measured = true;
       const lightbox = new PhotoSwipe({ dataSource: data, index, bgOpacity: .88,
         showAnimationDuration: reducedMotion() ? 0 : 333, hideAnimationDuration: reducedMotion() ? 0 : 333 });
       lightbox.on('contentLoad', event => {
         const content = event.content;
-        if (content.data.width && content.data.height) return;
+        if (content.data.measured || content.data.measuring) return;
+        content.data.measuring = true;
         const probe = new Image(); probe.src = content.data.src;
-        probe.decode().then(() => { content.data.width = probe.naturalWidth; content.data.height = probe.naturalHeight; lightbox.refreshSlideContent(content.index); }).catch(() => {});
+        probe.decode().then(() => {
+          content.data.width = probe.naturalWidth; content.data.height = probe.naturalHeight; content.data.measured = true;
+          if (!lightbox.isDestroying) lightbox.refreshSlideContent(content.index);
+        }).catch(() => {}).finally(() => { content.data.measuring = false; });
       });
       lightbox.init();
     } catch { if (link) location.assign(link.href); else notify(__('加载失败'), true); }
@@ -118,9 +122,9 @@ function initShare() {
 
 function initExternalClicks() {
   if (!config.external_link_clicks || !config.post_id) return;
-  const clicked = new Set(), pageID = crypto.randomUUID();
+  const clicked = new Set(), pageID = randomID();
   let clientID = storage.get('argon_external_link_clicks_client_id');
-  if (!clientID) { clientID = crypto.randomUUID(); storage.set('argon_external_link_clicks_client_id', clientID); }
+  if (!clientID) { clientID = randomID(); storage.set('argon_external_link_clicks_client_id', clientID); }
   on('click', 'a[data-argon-click], .external-link-click-wrapper a', async (_, link) => {
     if (clicked.has(link.href)) return;
     clicked.add(link.href);

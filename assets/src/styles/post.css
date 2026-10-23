@@ -218,12 +218,5 @@ article.post-preview-layout-3 .post-thumbnail {
 	max-height: 20vh;
 }
 
-#post_content img {
-    padding: 0 10vw;
-}
-
-#post_content .friend-links img,
-#post_content .friend-links-simple img,
-#post_content .friend-link-avatar img {
-    padding: 0;
-}
+/* Image width, aspect ratio and crop belong to core blocks / author markup.
+   Viewport padding could consume a small image's entire content box. */

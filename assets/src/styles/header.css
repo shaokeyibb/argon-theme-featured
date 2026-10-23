@@ -65,7 +65,7 @@ html.darkmode #navbar-main {
 }
 #navbar-main {
 	transition: background 0s, padding 0.15s ease;
-	background-color: var(--toolbar-color) !important;
+	background-color: rgba(var(--toolbar-color), 0.85) !important;
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
 	transition: all 0.3s ease;

@@ -6,11 +6,12 @@ jobs:
   browser-and-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: npm
+      - run: npm install --global npm@11.16.0
       - run: npm ci
       - run: npm audit
       - run: npm run build
@@ -19,7 +20,7 @@ jobs:
       - run: npm run test:browser
       - run: npm run package
       - run: npm run test:package
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: browser-and-release
@@ -39,18 +40,19 @@ jobs:
           - { wp: '7.0', php: '8.4' }
           - { wp: '7.0', php: '8.5' }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: npm
+      - run: npm install --global npm@11.16.0
       - run: npm ci
       - run: npm run build
       - run: npm run test:php
         env:
           ARGON_TEST_PHP: ${{ matrix.php }}
           ARGON_TEST_WP: ${{ matrix.wp }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: php-${{ matrix.php }}-wp-${{ matrix.wp }}

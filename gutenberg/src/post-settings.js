@@ -1,6 +1,6 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { SelectControl, TextareaControl, TextControl, Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -41,6 +41,7 @@ function PostSettings() {
     setBusy(true); setMessage(null);
     try {
       await savePost();
+      if (!select('core/editor').didPostSaveRequestSucceed()) throw new Error(__('文章保存失败，请先保存后再生成摘要', 'argon'));
       const response = await fetch(config.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: new URLSearchParams({
         action: 'regenerate_ai_post_summary', post_id: postId, argon_meta_box_nonce: config.nonce
       }), signal: AbortSignal.timeout(40000) });

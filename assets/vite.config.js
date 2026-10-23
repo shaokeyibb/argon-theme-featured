@@ -6,6 +6,7 @@ const require = createRequire(import.meta.url);
 
 export default defineConfig({
   base: './',
+  css: { preprocessorOptions: { scss: { quietDeps: true } } },
   plugins: [{ name: 'highlight-theme-assets', closeBundle() {
     const styles = resolve(dirname(require.resolve('highlight.js/package.json')), 'styles');
     mkdirSync(resolve(import.meta.dirname, 'dist/highlight'), { recursive: true });

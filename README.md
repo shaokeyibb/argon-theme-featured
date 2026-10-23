@@ -6,7 +6,7 @@
 
 - WordPress 6.6 或更新版本；重点适配 WordPress 7。
 - PHP 8.2 或更新版本，需要 DOM、mbstring 扩展。
-- 开发构建推荐 Node.js 24；最低 22.22.2。已构建发行包无需 Node.js 或 Composer。
+- 开发及测试使用 Node.js ≥ 24.18.0、npm ≥ 11.16.0（与 Playground 工具链要求一致）。已构建发行包无需 Node.js 或 Composer。
 
 ## 安装与升级
 
@@ -43,6 +43,7 @@ npm audit
 ## 文档
 
 - [现代化调查、架构变更、迁移与验证](docs/MODERNIZATION.md)
+- [重构后代码审查与回归修复](docs/REVIEW.md)
 - [HTML 文档文章](docs/html-document.md)
 - [测试和发布](tests/README.md)
 - [第三方组件与许可证](THIRD_PARTY_NOTICES.md)

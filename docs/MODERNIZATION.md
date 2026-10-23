@@ -9,7 +9,7 @@
 | 前台 Parcel、旧 pnpm 配置，编辑器单独依赖树 | npm workspaces、单一 lockfile；Vite 8 构建前台，官方 `@wordpress/scripts` 构建编辑器 | 根目录 `npm ci && npm run build`；运行环境无需 Node |
 | 大量手工复制的旧前端库与重复构建产物 | 删除旧 vendor/source 副本，包管理器锁定版本，生成许可证清单 | 发行包只带运行资源 |
 | jQuery 驱动导航、评论、设置、主题控件 | 原生 DOM、Fetch、事件委托、IntersectionObserver、CSS 与浏览器 API | 主题前台不加载 jQuery；WordPress 后台和其他插件仍可正常加载它 |
-| Bootstrap 4 JavaScript 与附属旧插件 | Bootstrap 5 原生组件；保留旧属性到新组件的适配 | 原短代码和已保存区块继续使用；保留 Argon 基础 CSS 的外观契约 |
+| Bootstrap 4 CSS/JavaScript 与附属旧插件 | Bootstrap 5 原生组件与 Sass；保留旧属性和少量历史类名适配 | 删除整份 2019 Argon Design System 样式、noUiSlider 和日期选择器样式；保留主题配色和横幅图形 |
 | 修改版 jquery-pjax-plus 替换局部 HTML，容易遗漏区块/插件资源 | 正常文档导航，支持时用跨文档 View Transitions 增强 | 浏览器历史、表单、插件脚本由正常页面生命周期处理 |
 | Zoomify、Fancybox 等重复灯箱 | 按点击加载 PhotoSwipe 5，避开 WordPress 自带灯箱和交互区块 | 已保存图片与相册无需重写；原排除类继续识别 |
 | 主题重写所有图片 HTML、自制 lazyload | 移除正文图片包装和强制懒加载，让 WordPress 保留 `srcset`、`sizes`、尺寸和加载优先级 | 避免给首屏高优先级图片强加 lazy；历史表情资源仍可按需载入 |
@@ -25,7 +25,7 @@
 | 缺少现代主题声明、资源直接硬编码输出 | `theme.json` v3、宽幅/响应式嵌入/编辑器样式/原生 logo；WP enqueue/module API | 保留 PHP 模板和原有布局；核心区块样式按需加载 |
 | 自改全局时区、固定 WordPress 路径、SEO 重复 | 使用 WP 时间语义和原生 URL；退订入口走 WordPress；识别常见 SEO 插件 | 支持子目录部署，避免重复输出主题 SEO 元数据 |
 | HTML 整体 DOM 重写可能损坏脚本中的中文 | HTML 文档解析明确 UTF-8；外链计数使用 WP HTML Tag Processor，仅改锚点属性 | 保留 Unicode、脚本/CSS 字面量和核心交互属性 |
-| 列表首图反复执行完整正文过滤器 | 直接从内容取首图，提供 `argon_first_image_source` 扩展过滤器 | 动态生成图片的插件可通过此过滤器提供源内容 |
+| 列表首图反复执行完整正文过滤器 | 原始内容优先；没有图片时按文章缓存一次渲染结果，并防递归 | 保留 Markdown、短代码与动态区块的首图；另提供 `argon_first_image_source` 扩展过滤器 |
 
 保留的主要功能包括文章/页面/说说、菜单与侧栏、目录、深色模式与配色、短代码和八类旧内容区块、HTML 文档区块、评论回复/编辑/历史/置顶/点赞/验证码/表情/通知、分享与二维码、AI 摘要、Discourse 及第三方统计集成。旧阅读量不再增长，但未删除数据库中的历史记录。旧灯箱、平滑滚动插件和 PJAX 的配置控件已移除。
 
@@ -35,7 +35,7 @@
 
 代码高亮、数学、图片灯箱、二维码和排版模块按实际使用动态导入。正文图片由 WordPress 处理加载优化；主题不再统一包装每个图片节点。普通匿名访问不产生主题令牌 Cookie，也不会更新主题自建阅读数，有利于页面缓存。评论和点赞等写入仍需实时接口，不能整体缓存其响应。
 
-仍保留 `argon-compat.css` 作为原版视觉样式基础，以及官方 Font Awesome 旧类名适配。移除这些样式会改变大量历史 HTML 的外观；本次移除了旧 JavaScript 行为依赖，没有声称彻底消除所有历史 CSS。动态模块也不意味着所有页面总字节数都变小，公式字体及完整图标覆盖仍有成本。没有在真实生产站进行 Core Web Vitals 基准，因此不提供未经测量的速度提升百分比。
+第二轮审查已删除整份 `argon-compat.css`，组件 CSS 和 JavaScript 都来自 Bootstrap 5。`theme-foundation.scss` 只配置主题视觉变量、横幅图形及少量历史 HTML 类名适配；Font Awesome 仍使用官方旧类名适配以保留内容图标。动态模块不意味着所有页面总字节数都变小，公式字体及完整图标覆盖仍有成本。没有在真实生产站进行 Core Web Vitals 基准，因此不提供未经测量的速度提升百分比。
 
 页面具有键盘可操作的基本控件、跳过导航链接、移动端布局和减少动画偏好支持。无 JavaScript 时可正常阅读与导航；交互评论、数学增强和灯箱仍需要 JavaScript。
 
@@ -54,7 +54,7 @@ HTML 文档仍使用独立、受权限保护且不可直接访问父页面的沙
 
 ## 验证范围
 
-验证日期：2026-10-24。自动化入口见 [测试说明](../tests/README.md)。所有测试均运行于隔离环境。
+第一轮验证日期：2026-10-24；下表记录提交 `196c816` 的结果。第二轮新增检查与重新验证结果见 [代码审查报告](REVIEW.md)。自动化入口见 [测试说明](../tests/README.md)。所有测试均运行于隔离环境。
 
 | WordPress 实际版本 | PHP 实际版本 | 安全 / HTML 文档 / 现代化 |
 | --- | --- | --- |

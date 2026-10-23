@@ -47,7 +47,7 @@ function argon_generate_article_summary(int $post_id, WP_Post $post): string {
 }
 
 function argon_on_save_post(int $post_id, WP_Post $post, string $old_status): void {
-    if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id) || $post->post_status !== 'publish'
+    if (!in_array($post->post_type, array('post', 'page'), true) || wp_is_post_revision($post_id) || wp_is_post_autosave($post_id) || $post->post_status !== 'publish'
         || get_option('argon_ai_post_summary', 'false') !== 'true' || get_post_meta($post_id, 'argon_ai_post_summary', true) === 'false') return;
     $local = get_post_meta($post_id, 'argon_ai_no_update_post_summary', true);
     if ($old_status === 'publish' && $local !== 'false' && ($local === 'true' || get_option('argon_ai_no_update_post_summary', 'true') === 'true')) return;
@@ -83,5 +83,12 @@ function argon_update_ai_post_meta($post_id): bool {
         delete_option($lock);
     }
 }
-add_action('argon_update_ai_post_meta', 'argon_update_ai_post_meta');
-add_action('publish_post', 'argon_on_save_post', 20, 3);
+add_action('argon_update_ai_post_meta', static function($post_id) {
+    // A publication may have been reverted while its queued event was pending.
+    if (get_post_status($post_id) === 'publish') argon_update_ai_post_meta($post_id);
+});
+// REST saves persist editor meta after publish_post. Wait for the complete save
+// so a new opt-out or prompt applies to this request, including pages.
+add_action('wp_after_insert_post', static function($post_id, $post, $update, $post_before) {
+    argon_on_save_post($post_id, $post, $post_before ? $post_before->post_status : 'new');
+}, 20, 4);

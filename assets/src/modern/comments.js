@@ -1,5 +1,7 @@
 import { $, $$, on, config, __, request, notify, scrollToElement, button } from './dom.js';
 import { Modal } from './ui.js';
+import { spaceContent } from './typography.js';
+import { humanTime } from './time.js';
 
 let replyID = 0, editID = 0;
 const value = id => $(`#${id}`)?.value ?? '';
@@ -26,6 +28,8 @@ function refreshCaptcha(result) {
 }
 
 export function initComments() {
+  setInterval(() => { if (!document.hidden) refreshTimes(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTimes(); });
   on('click', '.comment-reply', (_, el) => {
     resetForm(); replyID = Number(el.dataset.id);
     const comment = $(`#comment-${replyID}`);
@@ -205,6 +209,7 @@ function textAvatar(img) {
 }
 
 export function enhanceComments() {
+  spaceContent();
   // Legacy stored stickers keep working without a jQuery lazyload runtime.
   $$('img[data-original]').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; img.src = img.dataset.original; img.removeAttribute('data-original'); img.classList.remove('lazyload'); });
   $$('img.avatar').forEach(img => { if (img.complete && !img.naturalWidth) textAvatar(img); });
@@ -219,12 +224,12 @@ export function enhanceComments() {
       const wrapper = document.createElement('div'); wrapper.className = `show-full-${prefix}`; wrapper.append(button(__('展开'), 'btn btn-outline-primary', () => {})); el.append(wrapper);
     });
   }
-  const locale = (config.language || 'zh-CN').replace('_', '-');
-  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  refreshTimes();
+}
+
+function refreshTimes() {
   $$('.human-time').forEach(el => {
-    const date = Number(el.dataset.time) * 1000, seconds = (date - Date.now()) / 1000;
-    if (!Number.isFinite(seconds)) return;
-    const [divisor, unit] = Math.abs(seconds) < 3600 ? [60, 'minute'] : Math.abs(seconds) < 86400 ? [3600, 'hour'] : [86400, 'day'];
-    el.textContent = Math.abs(seconds) < 60 ? __('刚刚') : Math.abs(seconds) < 2592000 ? formatter.format(Math.round(seconds / divisor), unit) : new Date(date).toLocaleDateString(locale);
+    const text = humanTime(Number(el.dataset.time), { locale: (config.language || 'zh-CN').replace('_', '-'), dateFormat: config.dateFormat, justNow: __('刚刚') });
+    if (text) el.textContent = text;
   });
 }

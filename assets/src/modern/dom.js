@@ -7,6 +7,10 @@ export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 export const __ = text => ({ en_US: en, ru_RU: ru, zh_TW: tw }[config.language]?.[text] ?? text);
 export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+export function randomID() {
+  // randomUUID is HTTPS-only; getRandomValues also works on ordinary HTTP sites.
+  return [...crypto.getRandomValues(new Uint8Array(16))].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
 export function on(type, selector, handler) {
   document.addEventListener(type, event => {
     const target = event.target instanceof Element ? event.target.closest(selector) : null;

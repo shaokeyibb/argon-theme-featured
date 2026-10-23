@@ -1,4 +1,7 @@
 <?php
+// Translation calls must wait until WordPress has established the request locale.
+add_action('init', static function() {
+	global $emotionListDefault;
 	$emotionListDefault = array(
 		array(
 			'groupname' => __('颜文字', 'argon'), 
@@ -115,4 +118,4 @@
 			'description' => 'Source: github.com/k4yt3x/flowerhd'
 		)
 	);
-?>
+}, 0);

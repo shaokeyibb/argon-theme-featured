@@ -251,10 +251,10 @@
     "file": "KaTeX_Typewriter-Regular-CO6r4hn1.woff2",
     "src": "../node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.woff2"
   },
-  "../node_modules/pangu/dist/browser/pangu.js": {
-    "file": "pangu-CX1d3232.js",
-    "name": "pangu",
-    "src": "../node_modules/pangu/dist/browser/pangu.js",
+  "../node_modules/pangu/dist/browser/index.js": {
+    "file": "browser-e8pVUbTW.js",
+    "name": "browser",
+    "src": "../node_modules/pangu/dist/browser/index.js",
     "isDynamicEntry": true
   },
   "../node_modules/photoswipe/dist/photoswipe.css": {
@@ -268,7 +268,7 @@
     "isDynamicEntry": true
   },
   "../node_modules/qrcode/lib/browser.js": {
-    "file": "browser-BgDH0zJk.js",
+    "file": "browser-4dh4Vo6Q.js",
     "name": "browser",
     "src": "../node_modules/qrcode/lib/browser.js",
     "isDynamicEntry": true,
@@ -283,7 +283,7 @@
     "isEntry": true
   },
   "src/modern/highlight.js": {
-    "file": "highlight-AZGmKhQn.js",
+    "file": "highlight-8mAlErWi.js",
     "name": "highlight",
     "src": "src/modern/highlight.js",
     "isDynamicEntry": true,
@@ -292,19 +292,19 @@
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-ClvnDCF8.js",
+    "file": "theme-DSKWXKYc.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
     "dynamicImports": [
+      "../node_modules/pangu/dist/browser/index.js",
       "src/modern/highlight.js",
       "src/modern/math.js",
-      "../node_modules/pangu/dist/browser/pangu.js",
       "../node_modules/photoswipe/dist/photoswipe.esm.js",
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-iGgPGHxp.css"
+      "theme-DliEdeQ5.css"
     ],
     "assets": [
       "fa-solid-900-IAB4Droh.woff2",

@@ -1,0 +1,116 @@
+// Bootstrap 5 is the only component framework. These tokens and the small
+// aliases below preserve Argon's templates and previously saved post markup.
+@use 'bootstrap/scss/bootstrap' with (
+  $primary: #5e72e4,
+  $secondary: #f4f5f7,
+  $success: #2dce89,
+  $info: #11cdef,
+  $warning: #fb6340,
+  $danger: #f5365c,
+  $dark: #172b4d,
+  $theme-colors: ('primary': #5e72e4, 'secondary': #f4f5f7, 'success': #2dce89, 'info': #11cdef, 'warning': #fb6340, 'danger': #f5365c, 'light': #ced4da, 'dark': #172b4d, 'default': #172b4d, 'neutral': #fff),
+  $body-color: #525f7f,
+  $headings-color: #32325d,
+  $font-family-base: var(--font, sans-serif),
+  $font-size-base: 1rem,
+  $line-height-base: 1.5,
+  $border-radius: .25rem,
+  $grid-breakpoints: (xs: 0, sm: 576px, md: 768px, lg: 900px, xl: 1200px, xxl: 1700px),
+  $container-max-widths: (sm: 540px, md: 720px, lg: 960px, xl: 1140px, xxl: 1500px),
+  $btn-padding-y: .625rem,
+  $btn-padding-x: 1.25rem,
+  $btn-font-size: .875rem,
+  $btn-font-weight: 600,
+  $input-padding-y: .625rem,
+  $input-font-size: .875rem,
+  $card-spacer-y: 1.5rem,
+  $card-spacer-x: 1.5rem,
+  $link-decoration: none
+);
+
+// Layout utilities used by historic shortcodes and theme templates.
+@each $key, $size in (0: 0, 1: .25rem, 2: .5rem, 3: 1rem, 4: 1.5rem, 5: 3rem, auto: auto) {
+  .ml-#{$key} { margin-left: $size !important; }
+  .mr-#{$key} { margin-right: $size !important; }
+  @if $key != auto {
+    .pl-#{$key} { padding-left: $size !important; }
+    .pr-#{$key} { padding-right: $size !important; }
+  }
+}
+.float-right { float: right !important; }
+.float-left { float: left !important; }
+.text-right { text-align: right !important; }
+.text-left { text-align: left !important; }
+.font-weight-bold { font-weight: 700 !important; }
+.font-weight-normal { font-weight: 400 !important; }
+.font-weight-light { font-weight: 300 !important; }
+.font-italic { font-style: italic !important; }
+.btn-block { display: block; width: 100%; }
+.btn-icon-only { width: 2.375rem; height: 2.375rem; padding: 0; }
+.btn-icon-only.btn-sm { width: 2rem; height: 2rem; }
+.btn-icon .btn-inner--text:not(:first-child) { margin-left: .75em; }
+.btn-icon .btn-inner--icon:not(:first-child) { margin-left: .75em; }
+.badge-pill { border-radius: 50rem; padding-inline: .6em; }
+@each $name, $color in bootstrap.$theme-colors {
+  .badge-#{$name} { color: bootstrap.color-contrast($color); background-color: $color; }
+}
+.btn-neutral { color: var(--themecolor, #5e72e4); }
+.form-group { margin-bottom: 1.5rem; }
+.form-control-alternative, .input-group-alternative { border: 0; box-shadow: 0 1px 3px #32325d26, 0 1px 0 #00000005; }
+.input-group-prepend, .input-group-append { display: flex; }
+.input-group-prepend .input-group-text { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.input-group-append .input-group-text { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.input-group-alternative :is(.input-group-text, .form-control) { border: 0; }
+.custom-control { position: relative; display: block; min-height: 1.5rem; padding-left: 1.75rem; }
+.custom-control-input { position: absolute; left: 0; top: .25rem; width: 1rem; height: 1rem; accent-color: var(--themecolor, #5e72e4); }
+.custom-control-label { margin-bottom: 0; cursor: pointer; }
+.custom-control-inline { display: inline-flex; margin-right: 1rem; }
+.custom-toggle { display: inline-block; width: 50px; height: 1.5rem; position: relative; }
+.custom-toggle input { position: absolute; opacity: 0; width: 100%; height: 100%; }
+.custom-toggle-slider { position: absolute; cursor: pointer; inset: 0; border: 1px solid #cad1d7; border-radius: 34px !important; }
+.custom-toggle-slider::before { content: ''; position: absolute; height: 20px; width: 20px; left: 1px; bottom: 1px; border-radius: 50%; background: #e9ecef; transition: transform .2s; }
+.custom-toggle input:checked + .custom-toggle-slider { background: var(--themecolor, #5e72e4); }
+.custom-toggle input:checked + .custom-toggle-slider::before { transform: translateX(26px); }
+.custom-toggle input:focus-visible + .custom-toggle-slider { outline: 3px solid var(--themecolor, #5e72e4); outline-offset: 3px; }
+.close { float: right; padding: 0; color: inherit; font-size: 1.5rem; font-weight: 700; line-height: 1; border: 0; background: transparent; opacity: .6; }
+.modal-header .close { margin-left: auto; }
+.navbar-transparent { --bs-navbar-color: #ffffffeb; --bs-navbar-hover-color: #fff; --bs-navbar-active-color: #fff; --bs-navbar-brand-color: #fff; --bs-navbar-brand-hover-color: #fff; }
+.navbar-nav .nav-link { font-size: .9rem; }
+.navbar-collapse-header { display: none; }
+@media (max-width: 899.98px) {
+  .navbar-collapse-header { display: block; }
+  #navbar_global { position: absolute; z-index: 1050; top: calc(100% + .5rem); left: 1rem; right: 1rem; padding: 1.2rem; border-radius: .5rem; background: var(--color-foreground, #fff); box-shadow: 0 6px 24px #0003; }
+  #navbar_global .nav-link { color: var(--themecolor, #5e72e4); }
+}
+.nav-wrapper { padding: 1rem 0; }
+.avatar { color: #fff; background: #adb5bd; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; vertical-align: middle; }
+.avatar img { width: 100%; border-radius: inherit; }
+.avatar-sm { width: 36px; height: 36px; }
+.avatar-lg { width: 58px; height: 58px; }
+.icon { width: 3rem; height: 3rem; display: inline-flex; align-items: center; justify-content: center; }
+.icon-sm { width: 2rem; height: 2rem; }
+.icon-lg { width: 4rem; height: 4rem; }
+
+// The original Argon banner motif (MIT, licenses/argon-design-system.txt).
+.section { position: relative; padding-block: 4rem; }
+.section-lg { padding-block: 6rem; }
+.section-shaped { position: relative; }
+.section-shaped .shape { position: absolute; inset: 0; z-index: -1; }
+.shape span { position: absolute; border-radius: 50%; }
+.shape-primary { background: linear-gradient(150deg, #281483 15%, #8f6ed5 70%, #d782d9 94%); }
+.shape-default { background: linear-gradient(150deg, #7795f8 15%, #6772e5 70%, #555abf 94%); }
+.shape-dark { background: #32325d; }
+.shape-style-1 span { width: 120px; height: 120px; background: #ffffff1a; }
+.shape-style-1 span:nth-child(1) { left: -4%; bottom: auto; background: #ffffff18; }
+.shape-style-1 span:nth-child(2) { right: 4%; top: 10%; }
+.shape-style-1 span:nth-child(3) { right: 5.66666%; top: 280px; background: #ffffff4d; }
+.shape-style-1 span:nth-child(4) { right: 7%; top: 320px; background: #ffffff26; }
+.shape-style-1 span:nth-child(5) { left: 1%; top: 38%; background: #ffffff0d; }
+.shape-style-1 span:nth-child(6) { left: 10%; top: 44%; width: 200px; height: 200px; }
+.shape-style-1 span:nth-child(7) { right: 36%; bottom: 50%; background: #ffffff0a; }
+.shape-style-1 span:nth-child(8) { right: 2%; bottom: 70px; background: #ffffff33; }
+.shape-style-1 span:nth-child(9) { right: 2%; bottom: 1%; }
+.separator { position: absolute; inset-inline: 0; width: 100%; overflow: hidden; }
+.separator-bottom { top: auto; bottom: 0; }
+.separator svg { display: block; }
+.fill-white { fill: #fff; }

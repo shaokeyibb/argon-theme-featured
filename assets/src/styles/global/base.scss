@@ -76,6 +76,9 @@ article figcaption {
 article img,
 .shuoshuo-preview-container img {
 	max-width: 100%;
+}
+article img:not(.wp-block-image img),
+.shuoshuo-preview-container img:not(.wp-block-image img) {
 	height: auto;
 }
 .shuoshuo-preview-container img {

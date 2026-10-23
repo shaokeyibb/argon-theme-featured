@@ -31,6 +31,12 @@ function argon_enqueue_assets(): void {
 	foreach ($entry['css'] ?? array() as $index => $css) {
 		wp_enqueue_style('argon-theme-' . $index, argon_asset_url($css), array(), null);
 	}
+	// pagereveal runs before the first render: its listener must be a classic
+	// head script, not a deferred module. Only optional transition rejections
+	// are handled; unrelated errors keep their normal reporting.
+	wp_register_script('argon-navigation', false, array(), null, false);
+	wp_enqueue_script('argon-navigation');
+	wp_add_inline_script('argon-navigation', "for (const name of ['pageswap', 'pagereveal']) window.addEventListener(name, event => { event.viewTransition?.ready.catch(() => {}); });");
 	wp_enqueue_script_module('argon-theme', argon_asset_url($entry['file']), array(), null);
 	if (get_option('argon_disable_googlefont') !== 'true') {
 		wp_enqueue_style('argon-google-fonts', 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Serif+SC:300,600&display=swap', array(), null);

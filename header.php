@@ -282,7 +282,7 @@
 							$toolbar_title = '';
 						}
 					?>
-					<?php if (has_custom_logo() && get_option('argon_toolbar_title') === '') { the_custom_logo(); } else { ?>
+					<?php if (has_custom_logo() && get_option('argon_toolbar_title', '') === '') { the_custom_logo(); } else { ?>
 					<a class="navbar-brand navbar-title" href="<?php echo esc_url(home_url('/')); ?>"><?php echo $toolbar_title;?></a>
 					<?php } ?>
 				</div>
@@ -321,14 +321,14 @@
 										$output .= "\n
 										<li class='nav-item dropdown'>
 											<a href='" . $object -> url . "' class='nav-link' data-toggle='dropdown' no-pjax onclick='return false;' title='" . $object -> description . "'>
-										  		<i class='ni ni-book-bookmark d-lg-none'></i>
+												<i class='fa fa-bookmark d-lg-none' aria-hidden='true'></i>
 												<span class='nav-link-inner--text'>" . $object -> title . "</span>
 										  </a>";
 									}else{
 										$output .= "\n
 										<li class='nav-item'>
 											<a href='" . $object -> url . "' class='nav-link' target='" . $object -> target . "' title='" . $object -> description . "'>
-										  		<i class='ni ni-book-bookmark d-lg-none'></i>
+												<i class='fa fa-bookmark d-lg-none' aria-hidden='true'></i>
 												<span class='nav-link-inner--text'>" . $object -> title . "</span>
 										  </a>";
 									}
@@ -355,7 +355,7 @@
 						}
 					?>
 					<ul class="navbar-nav navbar-search">
-						<li id="navbar_search_container" class="nav-item" data-toggle="modal">
+						<li id="navbar_search_container" class="nav-item">
 							<div id="navbar_search_input_container">
 								<div class="input-group input-group-alternative">
 									<div class="input-group-prepend">

@@ -89,7 +89,7 @@ add_action('wp_ajax_nopriv_upvote_shuoshuo' , 'upvote_shuoshuo');
 
 //首页显示说说
 function argon_home_add_post_type_shuoshuo($query){
-	if (is_home() && $query -> is_main_query()){
+	if (!is_admin() && $query->is_home() && $query->is_main_query()){
 		$query -> set('post_type', array('post', 'shuoshuo'));
 	}
 	return $query;

@@ -19,12 +19,16 @@ body { overflow-x: clip; }
 .argon-masonry { column-count: var(--columns, 1); column-gap: 10px; }
 .argon-masonry > article, .argon-masonry > .shuoshuo-preview-container { break-inside: avoid; }
 .argon-masonry > nav { column-span: all; }
-.argon-code-gutter { position: absolute; top: 55px; left: 15px; font: inherit; font-size: 16px; line-height: 1.5; opacity: .55; pointer-events: none; user-select: none; white-space: pre; }
+.argon-code-gutter { position: absolute; top: 55px; bottom: 22px; left: 0; width: 50px; font: inherit; font-size: 16px; line-height: 1.5; pointer-events: none; user-select: none; overflow: hidden; background: var(--hljs-background-color); }
+.argon-code-gutter > span { position: absolute; right: 10px; opacity: .55; }
+.hljs-transparent-linenumber .argon-code-gutter { background: transparent; }
 .hljs-codeblock > code[hljs-codeblock-inner] { padding-left: 55px !important; }
 .hljs-codeblock.hljs-hide-linenumber > code[hljs-codeblock-inner] { padding-left: 20px !important; }
-.hljs-hide-linenumber .argon-code-gutter, .hljs-break-line .argon-code-gutter { display: none; }
+.hljs-hide-linenumber .argon-code-gutter { display: none; }
 .hljs-break-line > code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .hljs-codeblock:fullscreen { margin: 0; padding: 0; background: var(--hljs-background-color); overflow: auto; }
+.hljs-codeblock:fullscreen > code[hljs-codeblock-inner] { height: 100vh; margin: 0 !important; box-sizing: border-box; }
+html.argon-code-fullscreen { overflow: hidden; }
 .hljs-control .hljs-control-btn { font: inherit; font-size: 11px; color: inherit; background: none; border: 0; width: 24px; height: 24px; margin-left: 4px; padding: 0; }
 .hljs-control { max-width: calc(100% - 100px); }
 pre.hljs-codeblock:focus-within .hljs-control { opacity: 1; }
@@ -34,8 +38,8 @@ pre.hljs-codeblock:focus-within .hljs-control { opacity: 1; }
 #leftbar_catalog .index-subItem-box .index-subItem-box { padding-inline-start: 12px; }
 .post-content .alignwide { width: 100%; }
 .post-content .alignfull { width: auto; max-width: none; margin-inline: -25px; }
-.post-content img { max-width: 100%; height: auto; }
-.post-content .wp-block-image img { height: auto; }
+.post-content img { max-width: 100%; }
+.post-content img:not(.wp-block-image img) { height: auto; }
 .post-content .wp-block-embed.is-type-video iframe { max-width: 100%; }
 .post-content .wp-block-gallery { margin-inline: 0; }
 .post-content .wp-element-button { color: var(--wp--preset--color--base, #fff); }

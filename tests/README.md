@@ -4,7 +4,7 @@
 
 ## 准备与构建
 
-使用 Node.js 24（最低 22.22.2），在根目录运行：
+使用 Node.js ≥ 24.18.0、npm ≥ 11.16.0，在根目录运行：
 
 ```sh
 npm ci
@@ -13,7 +13,7 @@ npm test
 npm audit
 ```
 
-不再需要 Composer、pnpm、Parcel 或全局 PHP。`npm test` 检查发行文件白名单、manifest 引用、全部本地 CSS 资源路径、区块 metadata 类型及旧运行库意外回归。
+不再需要 Composer、pnpm、Parcel 或全局 PHP。`npm test` 检查发行文件白名单、manifest 引用、全部本地 CSS 资源路径、孤立字体、区块 metadata、旧运行库意外回归，以及评论时间格式与更新边界。
 
 ## PHP 集成测试
 
@@ -43,9 +43,9 @@ ARGON_TEST_WP=6.6 ARGON_TEST_PHP=8.2 npm run test:php
 | --- | ---: | --- |
 | security | 96 | nonce、对象权限、匿名入口、元数据白名单、KSES/XSS、验证码、评论写入/编辑/历史/点赞/置顶、远程请求失败 |
 | html-document | 50 | HTML 文档权限、媒体源码保护、短代码和区块、修订预览、替代正文、隔离桥接、索引与摘要 |
-| modernization | 19 | PHP 语法、原生主题支持、API 3、资源构建、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI HTTP 成功及失败 |
+| modernization | 26 | PHP 语法与启动期诊断、原生主题支持与 Logo、API 3、资源构建、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI 保存时序/撤回/失败、动态首图、主查询范围 |
 
-测试把主题产生的 PHP 警告和弃用提示视为失败。AI 测试验证请求与响应处理，不代表实际服务凭据、配额或特定模型可用。
+现代化测试在主题加载前安装诊断 MU 插件，启用 E_ALL 并收集主题调用栈产生的 PHP 警告、弃用和 WordPress doing_it_wrong 通知；这些诊断均视为失败。AI 测试验证请求与响应处理，不代表实际服务凭据、配额或特定模型可用。
 
 ## 浏览器集成测试
 
@@ -56,7 +56,7 @@ npm run test:browser
 
 自动启动 `127.0.0.1:9400` 的一次性 WordPress 站点，使用 6 个 PHP worker，禁止 WP-Cron。Windows 已有 Chrome 时可设置 `$env:ARGON_BROWSER_CHANNEL = 'chrome'`。该站点的测试账号只用于此隔离实例。
 
-六个流程覆盖桌面和手机页面、无 jQuery 前台、代码和公式、折叠块、灯箱键盘操作、深色模式持久化、评论提交与编辑、回复和管理交互、HTML 文档的脚本隔离/高度/主题同步、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存和无 JavaScript 阅读。每个流程监控未处理的浏览器脚本异常。旧区块 fixture 来自旧版真实构建产物的序列化结果，避免使用新实现生成自己的兼容性期望。
+九个流程覆盖桌面和手机页面及搜索、无 jQuery/无 randomUUID 的前台、代码折行/行号/复制/全屏降级、公式、折叠块/下拉/标签页、混合尺寸画廊及核心灯箱、自动空格、深色模式持久化、评论提交与编辑/回复/管理、HTML 文档沙箱、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存、保存失败阻止 AI 请求及无 JavaScript 阅读。旧区块 fixture 来自旧版真实构建产物的序列化结果，避免使用新实现生成自己的兼容性期望。
 
 截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
 

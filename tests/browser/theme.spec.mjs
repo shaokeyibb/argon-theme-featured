@@ -6,6 +6,10 @@ test.beforeEach(async ({page}) => {
   errors.length = 0;
   page.on('pageerror', error => errors.push(error.message));
   await page.route('https://secure.gravatar.com/**', route => route.abort());
+  await page.route('**/gallery-*.svg', route => {
+    const width = route.request().url().includes('full-1') ? 1200 : route.request().url().includes('full-2') ? 1800 : 160;
+    return route.fulfill({contentType:'image/svg+xml', body:`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width/2}"><rect width="100%" height="100%" fill="#5e72e4"/></svg>`});
+  });
 });
 test.afterEach(() => expect(errors).toEqual([]));
 async function login(page) {
@@ -20,11 +24,23 @@ async function toggleDarkMode(page) {
   await page.locator('#close_blog_settings').click();
 }
 test('native frontend, shortcodes, preferences, lightbox and responsive layout', async ({page,context}) => {
+  await page.addInitScript(() => Object.defineProperty(crypto, 'randomUUID', {value:undefined}));
   await page.goto(`/?p=${fixture().normal}`, {waitUntil:'domcontentloaded'});
   await expect(page.locator('.katex')).toBeVisible();
   await expect(page.locator('pre code[data-highlighted]')).toBeVisible();
+  await expect(page.locator('#pangu-fixture')).toHaveText('中文 English 自动排版');
+  await page.locator('#dropdown-fixture').click();
+  await expect(page.locator('#dropdown-fixture + .dropdown-menu')).toBeVisible();
+  await page.locator('#dropdown-fixture').press('Escape');
+  await expect(page.locator('#dropdown-fixture + .dropdown-menu')).toBeHidden();
+  await page.locator('#tab-review-link').click();
+  await expect(page.locator('#tab-review-b')).toBeVisible();
+  await expect(page.locator('#tab-review-a')).toBeHidden();
   expect(await page.evaluate(() => typeof window.jQuery)).toBe('undefined');
   expect((await context.cookies()).some(cookie => cookie.name === 'argon_user_token')).toBe(false);
+  await page.locator('#navbar_search_input_container').click();
+  await expect(page.locator('#navbar_search_input')).toBeFocused();
+  await page.locator('#navbar_search_input').press('Tab');
   await page.locator('.collapse-block-title').click();
   await expect(page.locator('#collapse-fixture')).toBeVisible();
   await page.locator('.collapse-block-title').press('Enter');
@@ -48,25 +64,33 @@ test('native frontend, shortcodes, preferences, lightbox and responsive layout',
   await page.locator('#sidebar_mask').click({position:{x:370,y:500}});
   await expect(page.locator('html')).not.toHaveClass(/leftbar-opened/);
   await page.screenshot({path:'temp/browser-mobile.png',fullPage:true});
+  expect(await page.locator('#navbar-main').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  await page.locator('#navbar-main > .container > button[aria-label="Toggle navigation"]').click();
+  await expect(page.locator('#navbar_search_input_mobile')).toBeVisible();
+  await page.locator('#navbar_search_input_mobile').fill('Native');
+  await Promise.all([page.waitForURL(/\?s=Native/, {waitUntil:'domcontentloaded'}), page.locator('#navbar_search_input_mobile').press('Enter')]);
+  await expect(page.locator('.post-title').first()).toBeVisible();
 });
 test('anonymous comments can post, edit, reply and retain ownership', async ({page,context}) => {
   test.setTimeout(90000);
   await page.goto(`/?p=${fixture().normal}`, {waitUntil:'domcontentloaded'});
   await page.locator('#post_comment_name').fill('Modern browser reader');
   await page.locator('#post_comment_email').fill('reader@example.test');
-  await page.locator('#post_comment_content').fill('A **modern** comment');
+  await page.locator('#post_comment_content').fill('中文English **modern** comment');
   const submitted = page.waitForResponse(r => r.url().includes('admin-ajax') && r.request().postData()?.includes('action=ajax_post_comment'));
   await page.locator('#post_comment_send').click();
   const result = await (await submitted).json();
   expect(result.status, JSON.stringify(result)).toBe('success');
   const comment = page.locator(`#comment-${result.id}`);
   await expect(comment).toContainText('modern');
+  await expect(comment.locator('.comment-item-text')).toContainText('中文 English');
   expect((await context.cookies()).find(c => c.name === 'argon_user_token')?.httpOnly).toBe(true);
   await comment.hover();
   await comment.locator('.comment-edit').click();
-  await page.locator('#post_comment_content').fill('Edited modern comment');
+  await page.locator('#post_comment_content').fill('Edited modern comment 中文English');
   await page.locator('#post_comment_send').click();
   await expect(comment.locator('.comment-item-text')).toContainText('Edited modern comment');
+  await expect(comment.locator('.comment-item-text')).toContainText('中文 English');
   await comment.hover();
   await comment.locator('.comment-reply').click();
   await expect(page.locator('#post_comment_reply_info')).toBeVisible();

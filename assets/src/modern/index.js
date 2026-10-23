@@ -1,4 +1,4 @@
-import '../styles/argon-compat.css';
+import '../styles/theme-foundation.scss';
 import '../styles/fonts.js';
 import '../style.scss';
 import './modern.css';

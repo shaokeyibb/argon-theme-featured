@@ -49,7 +49,7 @@ function argon_get_first_image_of_article($post_id = 0){
 	}
 	
 	// Inspect stored markup without rendering every shortcode/block again for each thumbnail.
-	$post_content_full = apply_filters('argon_first_image_source', $content, $post);
+	$post_content_full = argon_first_image_source($post);
 	
 	// 优先查找 data-original 属性（lazyload 场景）
 	if (preg_match('/<img[^>]+data-original=["\']([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
@@ -62,6 +62,24 @@ function argon_get_first_image_of_article($post_id = 0){
 	}
 	
 	return false;
+}
+function argon_first_image_source(WP_Post $post): string {
+	static $rendered = array(), $rendering = array();
+	$source = (string) apply_filters('argon_first_image_source', $post->post_content, $post);
+	if (str_contains($source, '<img') || isset($rendering[$post->ID])) return $source;
+	// Markdown plugins, dynamic blocks and shortcodes may create the first image.
+	// Render only the fallback, once per post/content version in this request.
+	$key = $post->ID . ':' . hash('sha256', $source);
+	if (isset($rendered[$key])) return $rendered[$key];
+	$previous = $GLOBALS['post'] ?? null;
+	$rendering[$post->ID] = true;
+	try {
+		$GLOBALS['post'] = $post;
+		return $rendered[$key] = (string) apply_filters('the_content', $source);
+	} finally {
+		$GLOBALS['post'] = $previous;
+		unset($rendering[$post->ID]);
+	}
 }
 function argon_has_post_thumbnail($postID = 0){
 	if ($postID == 0){

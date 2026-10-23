@@ -32,4 +32,17 @@ test('production bundle cannot accidentally restore retired runtimes', () => {
   const entry=readFileSync(join(root,'assets/dist',manifest['src/modern/index.js'].file),'utf8');
   for (const pattern of [/jQuery\.fn/, /pjax:start/, /Zoomify\.prototype/, /MathJax\.Hub/, /window\._?\$\s*=/]) assert(!pattern.test(entry), String(pattern));
   assert(!existsSync(join(root,'assets/vendor/jquery')));
+  assert(!existsSync(join(root,'assets/src/styles/argon-compat.css')));
+  const css = manifest['src/modern/index.js'].css.map(file => readFileSync(join(root, 'assets/dist', file), 'utf8')).join('\n');
+  for (const obsolete of ['.noUi-target', '.datepicker-dropdown', 'Bootstrap v4', '.hljs-ln-numbers']) assert(!css.includes(obsolete), obsolete);
+});
+test('bundled fonts are referenced by a deployable stylesheet', () => {
+  const files = releaseFiles(), referenced = new Set();
+  for (const file of files.filter(name => name.endsWith('.css'))) {
+    const css = readFileSync(join(root, file), 'utf8');
+    for (const match of css.matchAll(/url\(\s*['"]?([^'"\s)]+)['"]?\s*\)/g)) {
+      if (!/^(data:|https?:|#)/.test(match[1])) referenced.add(resolve(root, dirname(file), match[1].split(/[?#]/)[0]));
+    }
+  }
+  for (const font of files.filter(name => /\.(?:woff2?|ttf|eot)$/.test(name))) assert(referenced.has(resolve(root, font)), `Orphan font: ${font}`);
 });
