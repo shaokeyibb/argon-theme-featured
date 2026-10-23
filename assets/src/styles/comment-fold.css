@@ -18,16 +18,16 @@
 }
 .comment-item-inner.comment-folded .show-full-comment {
 	position: absolute;
-	bottom: 0;
+	bottom: 8px;
 	left: 0;
-	right: 0;
-	height: 35px;
+	width: max-content;
+	max-width: 100%;
 	color: var(--themecolor);
 	z-index: 2;
 	text-align: left;
 	cursor: pointer;
 	user-select: none;
-	opacity: 0.6;
+	opacity: 0.85;
 	transition: opacity 0.25s ease;
 }
 .comment-item-inner.comment-folded:hover .show-full-comment {
@@ -36,3 +36,20 @@
 .comment-item-inner:not(.comment-folded) .show-full-comment {
 	display: none;
 }
+.argon-fold-toggle.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	height: 32px;
+	padding: 4px 12px;
+	margin: 0;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 22px;
+	box-shadow: none;
+	transform: none;
+}
+.argon-fold-toggle.btn:hover { box-shadow: none; transform: none; }
+.argon-fold-toggle.btn:focus-visible { outline: 2px solid var(--themecolor); outline-offset: 2px; }

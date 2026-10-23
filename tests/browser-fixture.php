@@ -33,6 +33,7 @@ $posts['catalog'] = wp_insert_post(wp_slash(array('post_type' => 'page', 'post_t
 update_option('posts_per_page', 1);
 update_option('argon_home_show_shuoshuo', 'true');
 update_option('argon_fold_long_shuoshuo', 'true');
+update_option('argon_fold_long_comments', 'true');
 update_option('argon_toolbar_blur', 'true');
 update_option('argon_get_captcha_by_ajax', 'true');
 $posts['folding'] = wp_insert_post(wp_slash(array('post_type' => 'shuoshuo', 'post_title' => 'Delayed image folding', 'post_content' => '<p>Delayed image</p><img src="' . esc_url(home_url('/folding-delayed.svg')) . '" alt="Delayed tall image">', 'post_status' => 'publish', 'post_date' => date('Y-m-d H:i:s', time() - 1))));

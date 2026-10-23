@@ -193,8 +193,6 @@ html.darkmode .shuoshuo-content pre{
 	opacity: 1;
 }
 .shuoshuo-content.shuoshuo-folded .show-full-shuoshuo > button {
-	border-radius: var(--card-radius);
-	padding: 5px 20px;
 	opacity: 0.8;
 }
 .shuoshuo-content.shuoshuo-folded .show-full-shuoshuo button:hover {

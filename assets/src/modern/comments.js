@@ -217,20 +217,53 @@ const foldingObservers = new WeakMap();
 
 function observeFolding(el, prefix, height) {
   if (foldingObservers.has(el)) return;
-  const fold = () => {
-    if (el.classList.contains(`${prefix}-unfolded`) || el.classList.contains(`${prefix}-folded`) || el.offsetHeight <= height) return;
-    el.classList.add(`${prefix}-folded`);
-    const wrapper = document.createElement('div');
-    wrapper.className = `show-full-${prefix}`;
-    wrapper.append(button(__('展开'), 'btn btn-outline-primary', () => {}));
-    el.append(wrapper);
+  const foldedClass = `${prefix}-folded`, controlClass = `show-full-${prefix}`;
+  const observed = new Set();
+  let scheduled = false, lastWidth = -1, widthChangedAt = 0, settleTimer;
+  const update = () => {
+    scheduled = false;
+    if (!el.isConnected) {
+      clearTimeout(settleTimer); resize.disconnect(); mutations.disconnect(); foldingObservers.delete(el); return;
+    }
+    // A clipped parent can remain 200/400px tall while its content shrinks.
+    // Observe its natural children as well, excluding our own overlay control.
+    const targets = new Set([el, ...el.children].filter(node => !node.classList.contains(controlClass)));
+    for (const node of observed) if (!targets.has(node)) { resize.unobserve(node); observed.delete(node); }
+    for (const node of targets) if (!observed.has(node)) { resize.observe(node); observed.add(node); }
+    if (el.classList.contains(`${prefix}-unfolded`) || !el.getClientRects().length || !el.clientWidth) return;
+    // Responsive width transitions briefly squeeze even two lines into a tall
+    // column. Wait for that width to settle before deciding to clip content.
+    if (el.clientWidth !== lastWidth) {
+      lastWidth = el.clientWidth; widthChangedAt = performance.now();
+      clearTimeout(settleTimer); settleTimer = setTimeout(schedule, 120); return;
+    }
+    if (performance.now() - widthChangedAt < 120) return;
+    const wasFolded = el.classList.contains(foldedClass);
+    const maxHeight = el.style.getPropertyValue('max-height'), priority = el.style.getPropertyPriority('max-height');
+    if (wasFolded) el.style.setProperty('max-height', 'none', 'important');
+    const naturalHeight = el.getBoundingClientRect().height;
+    if (wasFolded) {
+      if (maxHeight) el.style.setProperty('max-height', maxHeight, priority);
+      else el.style.removeProperty('max-height');
+    }
+    const shouldFold = naturalHeight > height + 1;
+    el.classList.toggle(foldedClass, shouldFold);
+    const control = $(`:scope > .${controlClass}`, el);
+    if (!shouldFold) { control?.remove(); return; }
+    if (!control) {
+      const wrapper = document.createElement('div'); wrapper.className = controlClass;
+      const toggle = button(__('展开'), 'btn btn-outline-primary argon-fold-toggle', () => {});
+      const icon = document.createElement('i'); icon.className = 'fa fa-angle-down'; icon.setAttribute('aria-hidden', 'true');
+      toggle.prepend(icon); toggle.setAttribute('aria-expanded', 'false');
+      wrapper.append(toggle); el.append(wrapper);
+    }
   };
-  // Images, fonts and responsive layouts can grow after DOMContentLoaded.
-  // Observe each new item once, including comments inserted through AJAX.
-  const observer = new ResizeObserver(fold);
-  foldingObservers.set(el, observer);
-  observer.observe(el);
-  fold();
+  const schedule = () => { if (!scheduled) { scheduled = true; requestAnimationFrame(update); } };
+  const resize = new ResizeObserver(schedule);
+  const mutations = new MutationObserver(schedule);
+  foldingObservers.set(el, resize);
+  mutations.observe(el, { childList: true, characterData: true, subtree: true });
+  update();
 }
 
 export function enhanceComments() {
