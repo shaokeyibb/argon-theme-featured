@@ -392,6 +392,10 @@
 </div>
 <!--Banner-->
 <section id="banner" class="banner section section-lg section-shaped">
+	<?php $argon_banner_image = argon_get_banner_image(); ?>
+	<?php if ($argon_banner_image !== '') : ?>
+		<div class="argon-banner-media" aria-hidden="true"><?php echo $argon_banner_image; ?></div>
+	<?php endif; ?>
 	<div class="shape <?php echo get_option('argon_banner_background_hide_shapes') == 'true' ? '' : 'shape-style-1' ?> <?php echo get_option('argon_banner_background_color_type') == '' ? 'shape-primary' : get_option('argon_banner_background_color_type'); ?>">
 		<span></span>
 		<span></span>
@@ -417,13 +421,6 @@
 			<?php echo get_option('argon_banner_subtitle') == '' ? '' : '<span data-text="' . get_option('argon_banner_subtitle') . '" class="banner-subtitle d-block">&nbsp;</span>'; ?></div>
 		<?php }?>
 	</div>
-	<?php if (get_option('argon_banner_background_url') != '') { ?>
-		<style>
-			section.banner{
-				background-image: url(<?php echo get_banner_background_url(); ?>) !important;
-			}
-		</style>
-	<?php } ?>
 	<?php if ($banner_size == 'fullscreen') { ?>
 		<div class="cover-scroll-down">
 			<i class="fa fa-angle-down" aria-hidden="true"></i>

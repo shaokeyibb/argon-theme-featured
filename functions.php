@@ -5,6 +5,7 @@ require_once __DIR__ . '/inc/fun/html-document.php';
 
 // 载入主题检测更新、兼容性
 require get_template_directory() . '/inc/argon.php';
+require_once __DIR__ . '/inc/media.php';
 
 // 后台的相关功能：注册新后台主题配色方案和登录页样式，设置页
 require get_template_directory() . '/inc/fun/admin.php';

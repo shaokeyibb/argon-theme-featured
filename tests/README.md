@@ -62,6 +62,19 @@ npm run test:browser
 
 截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
 
+## 官方性能插件集成
+
+```sh
+node scripts/test-php.mjs media
+npx playwright test --config tests/media-playwright.config.mjs
+```
+
+隔离站点使用真实插件和 WordPress 图片生成流程，固定 Modern Image Formats 2.7.1、Image Placeholders 1.3.0、Enhanced Responsive Images 1.8.0；浏览器站点另启用 Optimization Detective 1.0.0-beta7、Image Prioritizer 1.0.0-beta4、Speculative Loading 1.7.0、Instant Back/Forward 1.3.3。这些版本的 WordPress 最低要求与主题不同，本套件在 WordPress 7.0 / PHP 8.3 上运行。
+
+14 项 PHP 检查覆盖 Markdown 附件识别、实际 WebP/占位色生成、原生响应式属性、封面模板、首图顺序、已有 picture 与原生区块、外链转义、子尺寸与现代格式 URL、对象缓存及关闭插件后的回退。4 个浏览器流程覆盖原生灯箱与 PhotoSwipe、桌面/手机布局、旧封面淡入后的可见性、无脚本 Banner、缓存重载、推测规则和检测脚本加载。使用独立端口 9401，失败 trace 保存到 `temp/media-browser-results/`。
+
+格式文件由插件生成；测试固定图片允许保留较大的 WebP 以稳定检查包装流程，不修改正式站点的格式选择策略。Image Prioritizer 按真实访客数据逐步优化，测试不会把检测脚本加载成功等同于已完成长期优化。
+
 ## 发行包
 
 ```sh

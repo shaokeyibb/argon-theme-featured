@@ -1,0 +1,15 @@
+{
+  "$schema":"https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions":{"php":"8.3","wp":"7.0"},
+  "steps":[
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/webp-uploads.2.7.1.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/dominant-color-images.1.3.0.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/auto-sizes.1.8.0.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/optimization-detective.1.0.0-beta7.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/image-prioritizer.1.0.0-beta4.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/speculation-rules.1.7.0.zip"},"options":{"activate":true}},
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://downloads.wordpress.org/plugin/nocache-bfcache.1.3.3.zip"},"options":{"activate":true}},
+    {"step":"runPHP","code":"<?php require '/wordpress/wp-load.php'; update_option('argon_update_source','stop'); switch_theme('argon-theme');"},
+    {"step":"runPHP","code":"<?php define('ARGON_MEDIA_TESTING',true); require '/wordpress/wp-load.php'; require '/wordpress/wp-content/themes/argon-theme/tests/media-browser-bootstrap.php';"}
+  ]
+}

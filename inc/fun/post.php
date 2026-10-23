@@ -20,47 +20,20 @@ function argon_get_first_image_of_article($post_id = 0){
 		}
 		return false;
 	}
-	
-	// 方法1：尝试从文章内容中查找附件ID（最佳实践）
-	// 这样可以使用 WordPress 标准函数获取优化后的图片
-	$content = $post -> post_content;
-	
-	// 查找 WordPress 图片块或附件 ID
-	if (preg_match('/<!-- wp:image {"id":(\d+)}/i', $content, $block_match)) {
-		// Gutenberg 图片块
-		$attachment_id = intval($block_match[1]);
-		if ($attachment_id) {
-			$image_data = wp_get_attachment_image_src($attachment_id, 'full');
-			if ($image_data) {
-				return $image_data[0];
-			}
+
+	// Preserve document order even when an earlier Markdown image lacks an ID.
+	$images = new WP_HTML_Tag_Processor(argon_first_image_source($post));
+	while ($images->next_tag('IMG')) {
+		if (preg_match('/(?:^|\s)wp-image-(\d+)(?:\s|$)/', (string) $images->get_attribute('class'), $match)) {
+			$data = wp_get_attachment_image_src((int) $match[1], 'full');
+			if ($data) return $data[0];
+		}
+		$url = $images->get_attribute('data-original') ?: $images->get_attribute('src');
+		if (is_string($url) && $url !== '' && !preg_match('/^(?:data|blob|javascript):/i', $url)) {
+			$url = esc_url_raw($url, array('http', 'https'));
+			if ($url !== '') return $url;
 		}
 	}
-	
-	// 查找经典编辑器中的 wp-image-{id} class
-	if (preg_match('/<img[^>]+class=["\'][^"\']*wp-image-(\d+)[^"\']*["\'][^>]*>/i', $content, $class_match)) {
-		$attachment_id = intval($class_match[1]);
-		if ($attachment_id) {
-			$image_data = wp_get_attachment_image_src($attachment_id, 'full');
-			if ($image_data) {
-				return $image_data[0];
-			}
-		}
-	}
-	
-	// Inspect stored markup without rendering every shortcode/block again for each thumbnail.
-	$post_content_full = argon_first_image_source($post);
-	
-	// 优先查找 data-original 属性（lazyload 场景）
-	if (preg_match('/<img[^>]+data-original=["\']([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
-		return $match[1];
-	}
-	
-	// 然后查找普通 src 属性，但排除 data: 和占位符
-	if (preg_match('/<img[^>]+src=["\'](?!data:)([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
-		return $match[1];
-	}
-	
 	return false;
 }
 function argon_first_image_source(WP_Post $post): string {
@@ -122,29 +95,28 @@ function argon_get_post_thumbnail_image($postID = 0, $size = 'full', $attr = arr
 		global $post;
 		$postID = $post -> ID;
 	}
-	
+
 	// 设置默认属性
 	$default_attr = array(
 		'class' => 'post-thumbnail',
 		'alt' => get_the_title($postID)
 	);
 	$attr = array_merge($default_attr, $attr);
-	
+	if (get_option('argon_enable_lazyload') === 'false' && !array_key_exists('loading', $attr)) $attr['loading'] = false;
+
 	if (has_post_thumbnail($postID)){
 		// 使用 WordPress 标准函数，支持所有图片过滤器和插件
-		$thumbnail = wp_get_attachment_image(get_post_thumbnail_id($postID), $size, false, $attr);
+		$thumbnail = get_the_post_thumbnail($postID, $size, $attr);
 		return apply_filters("argon_post_thumbnail_image", $thumbnail, $postID, $size, $attr);
 	}
-	
+
 	// 如果没有特色图片，尝试获取文章中的第一张图片
 	$first_image_url = argon_get_first_image_of_article($postID);
 	if ($first_image_url){
-		$class = isset($attr['class']) ? esc_attr($attr['class']) : 'post-thumbnail';
-		$alt = isset($attr['alt']) ? esc_attr($attr['alt']) : get_the_title($postID);
-		$img_html = '<img src="' . esc_url($first_image_url) . '" class="' . $class . '" alt="' . $alt . '">';
+		$img_html = argon_get_image_from_url($first_image_url, $size, $attr);
 		return apply_filters("argon_post_thumbnail_image", $img_html, $postID, $size, $attr);
 	}
-	
+
 	return '';
 }
 //文末附加内容

@@ -18,6 +18,8 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: node scripts/test-php.mjs media
+      - run: npx playwright test --config tests/media-playwright.config.mjs
       - run: npm run package
       - run: npm run test:package
       - uses: actions/upload-artifact@v7.0.2
@@ -27,6 +29,8 @@ jobs:
           path: |
             temp/browser-*.png
             temp/browser-results/
+            temp/media-browser-results/
+            temp/media-report-*.json
             release/
   wordpress:
     runs-on: ubuntu-latest

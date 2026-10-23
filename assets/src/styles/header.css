@@ -147,8 +147,12 @@ html.no-banner.toolbar-blur #navbar-main.navbar-no-blur {
 }
 .banner-container {
 	position: relative;
+	z-index: 1;
 	height: calc(40vh - 120px) !important;
 }
+.argon-banner-media { position: absolute; inset: 0; pointer-events: none; }
+.argon-banner-media > picture { display: block; width: 100%; height: 100%; }
+.argon-banner-media .argon-banner-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .banner-title {
 	font-size: 1.8em;
 	vertical-align: middle;

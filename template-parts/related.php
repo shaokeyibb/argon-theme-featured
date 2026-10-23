@@ -19,7 +19,7 @@
                     $tag_array[$key2] = $tag -> slug;
                 }
             }
-        }	
+        }
         $query = new WP_Query(array(
             'posts_per_page' => get_option('argon_related_post_limit' , '10'),
             'order' => get_option('argon_related_post_sort_order', 'DESC'),
@@ -57,25 +57,11 @@
                     <i class="related-post-arrow fa fa-chevron-right" aria-hidden="true"></i>
                     </div>';
                 if ($hasThumbnail){
-                    // 使用新的函数获取完整的 <img> 标签，支持 WebP 等现代图片格式
-                    $thumbnail_attr = array(
-                        'class' => 'related-post-thumbnail lazyload'
-                    );
-                    $thumbnail_html = argon_get_post_thumbnail_image(get_the_ID(), 'medium', $thumbnail_attr);
-                    
-                    // 将 src 替换为占位符，原 src 移到 data-original（用于 lazyload）
-                    $thumbnail_html = preg_replace_callback(
-                        '/<img(.*)src=["\']([^"\']+)["\'](.*)>/i',
-                        function($matches) {
-                            return '<img' . $matches[1] . 
-                                   'src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABBJREFUeNpi+P//PwNAgAEACPwC/tuiTRYAAAAASUVORK5CYII=" ' .
-                                   'data-original="' . $matches[2] . '"' . $matches[3] . '>';
-                        },
-                        $thumbnail_html
-                    );
-                    // 移除 srcset 属性
-                    $thumbnail_html = preg_replace('/\s*srcset=["\'][^"\']*["\']/', '', $thumbnail_html);
-                    echo $thumbnail_html;
+                    echo argon_get_post_thumbnail_image(get_the_ID(), 'medium', array(
+                        'class' => 'related-post-thumbnail',
+                        'sizes' => '180px',
+                        'loading' => get_option('argon_enable_lazyload') === 'false' ? false : 'lazy'
+                    ));
                 }
                 echo '</a>';
             }

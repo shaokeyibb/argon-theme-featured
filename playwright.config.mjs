@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/browser', timeout: 60000, workers: 1,
+  testIgnore: 'media.spec.mjs',
   use: { baseURL: 'http://127.0.0.1:9400', headless: true, trace: 'retain-on-failure', channel: process.env.ARGON_BROWSER_CHANNEL || undefined },
   outputDir: 'temp/browser-results',
   webServer: {

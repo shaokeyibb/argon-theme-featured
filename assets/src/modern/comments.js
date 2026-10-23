@@ -269,7 +269,15 @@ function observeFolding(el, prefix, height) {
 export function enhanceComments() {
   spaceContent();
   // Legacy stored stickers keep working without a jQuery lazyload runtime.
-  $$('img[data-original]').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; img.addEventListener('load', () => fadeIn(img), { once: true }); img.src = img.dataset.original; img.removeAttribute('data-original'); img.classList.remove('lazyload'); });
+  $$('img[data-original]').forEach(img => {
+    if (!img.hasAttribute('loading') && img.getAttribute('fetchpriority') !== 'high') img.loading = 'lazy';
+    if (!img.hasAttribute('decoding')) img.decoding = 'async';
+    // Old theme markup hid thumbnails inline. A temporary fade animation must
+    // not reveal the old opacity:0 again when its effect finishes.
+    if (img.matches('.post-thumbnail') && img.style.opacity === '0') img.style.removeProperty('opacity');
+    img.addEventListener('load', () => fadeIn(img), { once: true });
+    img.src = img.dataset.original; img.removeAttribute('data-original'); img.classList.remove('lazyload');
+  });
   $$('img.avatar').forEach(img => { if (img.complete && !img.naturalWidth) textAvatar(img); });
   for (const [enabled, selector, prefix, height] of [
     [config.fold_long_comments, '.comment-item-inner', 'comment', 800],

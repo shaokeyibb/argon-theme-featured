@@ -81,11 +81,13 @@
 	object-fit: cover;
 	pointer-events: none;
 }
-.post-thumbnail.lazyload {
-	transition: opacity 0.3s ease 0s;
-}
-.post-thumbnail.lazyload.lazyload-loaded {
-	opacity: 1 !important;
+.post-header.post-header-with-thumbnail > picture { display: block; }
+/* Core's lightbox measures the image's parent. Modern Image Formats uses
+   display:contents on picture, which otherwise gives that parent a zero box. */
+.wp-lightbox-container > picture {
+	display: inline-block !important;
+	max-width: 100%;
+	vertical-align: top;
 }
 .single .post-thumbnail,
 .page .post-thumbnail {
@@ -220,14 +222,18 @@ article.post-preview-layout-3 .post-thumbnail {
 
 /* Preserve the inset of classic/Markdown article images without putting
    viewport-sized padding inside small thumbnails or native image blocks. */
-#post_content > p > img:only-child:not([width]),
-#post_content > p > a:only-child > img:only-child:not([width]) {
+#post_content > p > img:only-child:is(:not([width]), .argon-image-inset),
+#post_content > p > a:only-child > img:only-child:is(:not([width]), .argon-image-inset),
+#post_content > p > picture:only-child > img.argon-image-inset,
+#post_content > p > a:only-child > picture:only-child > img.argon-image-inset {
 	display: block;
 	max-width: calc(100% - min(20vw, 40%));
 	height: auto;
 	margin-inline: auto;
 }
-#post_content > p:has(> img:only-child:not([width])),
-#post_content > p:has(> a:only-child > img:only-child:not([width])) {
+#post_content > p:has(> img:only-child:is(:not([width]), .argon-image-inset)),
+#post_content > p:has(> a:only-child > img:only-child:is(:not([width]), .argon-image-inset)),
+#post_content > p:has(> picture:only-child > img.argon-image-inset),
+#post_content > p:has(> a:only-child > picture:only-child > img.argon-image-inset) {
 	margin-bottom: 0;
 }
