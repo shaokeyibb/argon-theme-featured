@@ -7,4 +7,3 @@
     {"step":"runPHP","code":"<?php define('ARGON_MARKDOWN_TESTING', true); require '/wordpress/wp-load.php'; require '/wordpress/wp-content/themes/argon-theme/tests/markdown-shortcodes-regression.php';"}
   ]
 }
-
