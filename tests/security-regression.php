@@ -462,9 +462,10 @@ argon_test('integer comparator remains antisymmetric', function() use ($comment,
 restore_error_handler();
 $failed = array_filter($argon_test_results, static fn($result) => $result !== 'passed');
 $report = array('php' => PHP_VERSION, 'wordpress' => $GLOBALS['wp_version'], 'passed' => count($argon_test_results) - count($failed), 'failed' => count($failed), 'results' => $argon_test_results);
-$report_dir = __DIR__ . '/../temp';
-wp_mkdir_p($report_dir);
-file_put_contents($report_dir . '/security-report-' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.json', wp_json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$report_dir = dirname(__DIR__) . '/temp';
+if (!wp_mkdir_p($report_dir) || file_put_contents($report_dir . '/security-report-' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.json', wp_json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+	throw new RuntimeException('Could not write security report');
+}
 echo wp_json_encode(array('passed' => $report['passed'], 'failed' => $report['failed'])) . "\n";
 if ($failed){
 	throw new RuntimeException('Security regression failures: ' . wp_json_encode($failed));

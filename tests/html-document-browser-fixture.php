@@ -33,6 +33,8 @@ foreach (array('gutenberg', 'markdown', 'file') as $key) {
 $posts['draft'] = wp_insert_post(wp_slash(array('post_title' => 'HTML 文档：草稿', 'post_content' => $block, 'post_status' => 'draft', 'meta_input' => array('_is_githuber_markdown_enabled' => 'no'))));
 $posts['site'] = home_url('/');
 $posts['githuber_version'] = defined('GITHUBER_PLUGIN_VERSION') ? GITHUBER_PLUGIN_VERSION : '';
-wp_mkdir_p(__DIR__ . '/../temp');
-file_put_contents(__DIR__ . '/../temp/html-document-browser-fixture.json', wp_json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$fixture_dir = dirname(__DIR__) . '/temp';
+if (!wp_mkdir_p($fixture_dir) || file_put_contents($fixture_dir . '/html-document-browser-fixture.json', wp_json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+	throw new RuntimeException('Could not write HTML document browser fixture data');
+}
 echo wp_json_encode($posts);

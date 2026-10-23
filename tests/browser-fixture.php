@@ -47,5 +47,7 @@ set_theme_mod('nav_menu_locations', array('leftbar_menu' => $menu));
 update_option('argon_ai_post_summary', 'true');
 update_option('argon_openai_api_key', '');
 $posts['site'] = home_url('/');
-wp_mkdir_p(__DIR__ . '/../temp');
-file_put_contents(__DIR__ . '/../temp/browser-fixture.json', wp_json_encode($posts));
+$fixture_dir = dirname(__DIR__) . '/temp';
+if (!wp_mkdir_p($fixture_dir) || file_put_contents($fixture_dir . '/browser-fixture.json', wp_json_encode($posts)) === false) {
+	throw new RuntimeException('Could not write browser fixture data');
+}

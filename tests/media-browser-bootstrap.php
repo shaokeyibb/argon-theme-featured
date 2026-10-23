@@ -14,6 +14,8 @@ for($n=1;$n<=3;$n++) {
 	if($n>1) set_post_thumbnail($post_id,$media_fixture['attachment']);
 	$media_fixture['archive_posts'][]=$post_id;
 }
-wp_mkdir_p(__DIR__.'/../temp');
-file_put_contents(__DIR__.'/../temp/media-browser-fixture.json',wp_json_encode($media_fixture));
+$fixture_dir = dirname(__DIR__) . '/temp';
+if (!wp_mkdir_p($fixture_dir) || file_put_contents($fixture_dir . '/media-browser-fixture.json', wp_json_encode($media_fixture)) === false) {
+	throw new RuntimeException('Could not write media browser fixture data');
+}
 flush_rewrite_rules();

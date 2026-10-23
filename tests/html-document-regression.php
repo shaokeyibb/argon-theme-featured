@@ -374,7 +374,9 @@ html_test('global disable returns text and stops document endpoints', function()
 restore_error_handler();
 $failed = array_filter($results, static fn($result) => $result !== 'passed');
 $report = array('php' => PHP_VERSION, 'wordpress' => $GLOBALS['wp_version'], 'passed' => count($results) - count($failed), 'failed' => count($failed), 'results' => $results);
-wp_mkdir_p(__DIR__ . '/../temp');
-file_put_contents(__DIR__ . '/../temp/html-document-report-' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.json', wp_json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$report_dir = dirname(__DIR__) . '/temp';
+if (!wp_mkdir_p($report_dir) || file_put_contents($report_dir . '/html-document-report-' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.json', wp_json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+	throw new RuntimeException('Could not write HTML document report');
+}
 echo wp_json_encode(array('passed' => $report['passed'], 'failed' => $report['failed'])) . "\n";
 if ($failed) { throw new RuntimeException('HTML document regression failures: ' . wp_json_encode($failed)); }
