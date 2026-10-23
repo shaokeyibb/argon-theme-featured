@@ -763,18 +763,13 @@ function post_comment_updatemetas($id){
 			update_comment_meta($id, "qq_number", argon_request_string($_POST, 'qq'));
 		}
 	}
-	//保存 Sec-CH-UA 系列 Header（如果存在）
-	if (isset($_SERVER['HTTP_SEC_CH_UA'])){
-		update_comment_meta($id, "sec_ch_ua", $_SERVER['HTTP_SEC_CH_UA']);
-	}
-	if (isset($_SERVER['HTTP_SEC_CH_UA_PLATFORM'])){
-		update_comment_meta($id, "sec_ch_ua_platform", $_SERVER['HTTP_SEC_CH_UA_PLATFORM']);
-	}
-	if (isset($_SERVER['HTTP_SEC_CH_UA_PLATFORM_VERSION'])){
-		update_comment_meta($id, "sec_ch_ua_platform_version", $_SERVER['HTTP_SEC_CH_UA_PLATFORM_VERSION']);
-	}
-	if (isset($_SERVER['HTTP_SEC_CH_UA_FULL_VERSION_LIST'])){
-		update_comment_meta($id, "sec_ch_ua_full_version_list", $_SERVER['HTTP_SEC_CH_UA_FULL_VERSION_LIST']);
+	// WordPress slashes request headers; meta storage removes one slash layer.
+	foreach (array('sec_ch_ua', 'sec_ch_ua_platform', 'sec_ch_ua_platform_version', 'sec_ch_ua_full_version_list') as $key) {
+		$header = $_SERVER['HTTP_' . strtoupper($key)] ?? null;
+		if (is_string($header)) {
+			$value = substr(sanitize_text_field(wp_unslash($header)), 0, 4096);
+			if ($value !== '') update_comment_meta($id, $key, wp_slash($value));
+		}
 	}
 }
 add_action('comment_post' , 'post_comment_updatemetas');

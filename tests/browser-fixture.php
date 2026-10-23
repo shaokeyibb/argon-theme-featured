@@ -5,6 +5,7 @@ wp_set_password('argon-browser-local-test', 1);
 update_option('argon_comment_need_captcha', 'false');
 update_option('argon_comment_allow_editing', 'true');
 update_option('argon_enable_comment_pinning', 'true');
+update_option('argon_comment_ua', 'platform,browser,version');
 update_option('argon_enable_pangu', 'article|comment|shuoshuo');
 foreach (array('argon_disable_googlefont' => 'true', 'argon_enable_lightbox' => 'true', 'argon_enable_code_highlight' => 'true', 'argon_math_render' => 'katex', 'argon_enable_mathjax' => 'true', 'argon_show_sharebtn' => 'true', 'argon_comment_captcha' => 'false', 'argon_comment_edit' => 'true', 'argon_html_enabled' => 'true', 'argon_html_allow_scripts' => 'true', 'argon_ai_post_summary' => 'false', 'comment_moderation' => '', 'comment_previously_approved' => '', 'require_name_email' => '1') as $key => $value) update_option($key, $value);
 $content = '<!-- wp:heading --><h2 class="wp-block-heading">Modern WordPress content</h2><!-- /wp:heading --><!-- wp:paragraph --><p>原生区块、短代码和评论保持可用。Native blocks remain editable.</p><!-- /wp:paragraph -->';

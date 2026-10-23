@@ -21,6 +21,7 @@ npm audit
 npm run test:php
 node scripts/test-php.mjs security
 node scripts/test-php.mjs html-document modernization
+node scripts/test-php.mjs user-agent
 ```
 
 默认 WordPress 7.0 / PHP 8.3，可通过环境变量切换。在 PowerShell 中：
@@ -44,6 +45,7 @@ ARGON_TEST_WP=6.6 ARGON_TEST_PHP=8.2 npm run test:php
 | security | 96 | nonce、对象权限、匿名入口、元数据白名单、KSES/XSS、验证码、评论写入/编辑/历史/点赞/置顶、远程请求失败 |
 | html-document | 50 | HTML 文档权限、媒体源码保护、短代码和区块、修订预览、替代正文、隔离桥接、索引与摘要 |
 | modernization | 26 | PHP 语法与启动期诊断、原生主题支持与 Logo、API 3、资源构建、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI 保存时序/撤回/失败、动态首图、主查询范围 |
+| user-agent | 127 | 123 个 UA/Client Hints 样本，以及评论请求头保存、旧评论回退、转义、隐藏选项与 PHP 8.5 空字段处理 |
 
 现代化测试在主题加载前安装诊断 MU 插件，启用 E_ALL 并收集主题调用栈产生的 PHP 警告、弃用和 WordPress doing_it_wrong 通知；这些诊断均视为失败。AI 测试验证请求与响应处理，不代表实际服务凭据、配额或特定模型可用。
 

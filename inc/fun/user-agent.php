@@ -1,5 +1,5 @@
 <?php
-$argon_comment_ua = get_option("argon_comment_ua");
+$argon_comment_ua = (string) get_option("argon_comment_ua", '');
 $argon_comment_show_ua = Array();
 if (strpos($argon_comment_ua, 'platform') !== false){
 	$argon_comment_show_ua['platform'] = true;
@@ -31,6 +31,8 @@ function parse_ua_and_icon($userAgent, $comment_id = null){
 	}
 	
 	$parsed = argon_parse_user_agent($userAgent, $sec_ch_ua, $sec_ch_ua_platform, $sec_ch_ua_platform_version, $sec_ch_ua_full_version_list);
+	$platform_icon = $GLOBALS['UA_ICON'][$parsed['platform'] ?? 'Unknown'] ?? $GLOBALS['UA_ICON']['Unknown'];
+	$browser_icon = $GLOBALS['UA_ICON'][$parsed['browser'] ?? 'Unknown'] ?? $GLOBALS['UA_ICON']['Unknown'];
 	// 如果是管理员，添加 title 属性显示完整 UA 字符串
 	$title_attr = "";
 	if (current_user_can("manage_options")){
@@ -38,26 +40,18 @@ function parse_ua_and_icon($userAgent, $comment_id = null){
 	}
 	$out = "<div class='comment-useragent'" . $title_attr . ">";
 	if (isset($argon_comment_show_ua['platform']) && $argon_comment_show_ua['platform'] == true){
-		if (isset($GLOBALS['UA_ICON'][$parsed['platform']])){
-			$out .= $GLOBALS['UA_ICON'][$parsed['platform']] . " ";
-		}else{
-			$out .= $GLOBALS['UA_ICON']['Unknown'] . " ";
-		}
-		$out .= esc_html($parsed['platform']);
+		$out .= $platform_icon . " ";
+		$out .= esc_html($parsed['platform'] ?? __('未知', 'argon'));
 		// 如果存在操作系统版本，则显示
 		if (isset($parsed['platform_version']) && $parsed['platform_version'] !== null){
 			$out .= " " . esc_html($parsed['platform_version']);
 		}
 	}
 	if (isset($argon_comment_show_ua['browser']) && $argon_comment_show_ua['browser'] == true){
-		if (isset($GLOBALS['UA_ICON'][$parsed['browser']])){
-			$out .= " " . $GLOBALS['UA_ICON'][$parsed['browser']];
-		}else{
-			$out .= " " . $GLOBALS['UA_ICON']['Unknown'];
-		}
-		$out .= " " . esc_html($parsed['browser']);
+		$out .= " " . $browser_icon;
+		$out .= " " . esc_html($parsed['browser'] ?? __('未知', 'argon'));
 		if (isset($argon_comment_show_ua['version']) && $argon_comment_show_ua['version'] == true){
-			$out .= " " . esc_html($parsed['version']);
+			$out .= $parsed['version'] !== null ? " " . esc_html($parsed['version']) : '';
 		}
 	}
 	$out .= "</div>";

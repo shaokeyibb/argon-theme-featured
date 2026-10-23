@@ -73,6 +73,12 @@ test('native frontend, shortcodes, preferences, lightbox and responsive layout',
 });
 test('anonymous comments can post, edit, reply and retain ownership', async ({page,context}) => {
   test.setTimeout(90000);
+  await context.setExtraHTTPHeaders({
+    'sec-ch-ua': '"Chromium";v="140", "Microsoft Edge";v="140", "Not_A Brand";v="99"',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-ch-ua-platform-version': '"19.0.0"',
+    'sec-ch-ua-full-version-list': '"Microsoft Edge";v="140.0.3485.81", "Chromium";v="140.0.7339.81"',
+  });
   await page.goto(`/?p=${fixture().normal}`, {waitUntil:'domcontentloaded'});
   await page.locator('#post_comment_name').fill('Modern browser reader');
   await page.locator('#post_comment_email').fill('reader@example.test');
@@ -83,6 +89,8 @@ test('anonymous comments can post, edit, reply and retain ownership', async ({pa
   expect(result.status, JSON.stringify(result)).toBe('success');
   const comment = page.locator(`#comment-${result.id}`);
   await expect(comment).toContainText('modern');
+  await expect(comment.locator('.comment-useragent')).toContainText('Windows 11');
+  await expect(comment.locator('.comment-useragent')).toContainText('Edge 140.0.3485.81');
   await expect(comment.locator('.comment-item-text')).toContainText('中文 English');
   expect((await context.cookies()).find(c => c.name === 'argon_user_token')?.httpOnly).toBe(true);
   await comment.hover();
@@ -109,6 +117,7 @@ test('anonymous comments can post, edit, reply and retain ownership', async ({pa
   await expect(page.locator(`ul.children #comment-${reply.id}`)).toContainText('A nested reply');
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator(`#comment-${result.id} .comment-edit`)).toHaveCount(1);
+  await expect(comment.locator('.comment-useragent')).toContainText('Edge 140.0.3485.81');
   await login(page);
   await page.goto(`/?p=${fixture().normal}`, {waitUntil:'domcontentloaded'});
   await comment.hover();

@@ -1,0 +1,1425 @@
+[
+  {
+    "name": "Windows NT 10 remains ambiguous without hints",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "10/11",
+      "browser": "Chrome",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Safari reports Version rather than WebKit build",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": null,
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "Safari without Version does not expose engine as browser version",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": null,
+      "browser": "Safari",
+      "version": null
+    }
+  },
+  {
+    "name": "macOS 10_11_6",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS El Capitan 10.11.6",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "macOS 14_7_1",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS Sonoma 14.7.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "macOS 15_8_1",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_8_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS Sequoia 15.8.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "macOS 26_7_1",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 26_7_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS Tahoe 26.7.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "macOS 27_0_1",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 27_0_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS Golden Gate 27.0.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "macOS 28_0_1",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 28_0_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS 28.0.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "Compatibility 10.16 is not invented macOS 10",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15"
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": null
+    }
+  },
+  {
+    "name": "New iOS numeric versions are open ended",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/27.0"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": "iOS 27.0.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "New iPadOS numeric versions are open ended",
+    "input": [
+      "Mozilla/5.0 (iPad; CPU iPad OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/27.0"
+    ],
+    "expected": {
+      "platform": "iPad",
+      "platform_version": "iPadOS 27.0.1",
+      "browser": "Safari",
+      "version": "27.0"
+    }
+  },
+  {
+    "name": "iPod retained",
+    "input": [
+      "Mozilla/5.0 (iPod; CPU iPod OS 12_5_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/12.0"
+    ],
+    "expected": {
+      "platform": "iPod Touch",
+      "platform_version": "iOS 12.5.7",
+      "browser": "Safari",
+      "version": "12.0"
+    }
+  },
+  {
+    "name": "Safari frozen iOS 18_6",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/26.1"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": null,
+      "browser": "Safari",
+      "version": "26.1"
+    }
+  },
+  {
+    "name": "Safari frozen iOS 18_6_2",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/26.1"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": null,
+      "browser": "Safari",
+      "version": "26.1"
+    }
+  },
+  {
+    "name": "Safari frozen iOS 18_7",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/26.1"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": null,
+      "browser": "Safari",
+      "version": "26.1"
+    }
+  },
+  {
+    "name": "Actual older iOS still recognized",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 Version/18.7"
+    ],
+    "expected": {
+      "platform_version": "iOS 18.7",
+      "version": "18.7"
+    }
+  },
+  {
+    "name": "Android 16",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+    ],
+    "expected": {
+      "platform": "Android",
+      "platform_version": "16",
+      "browser": "Chrome",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Future Android 20",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 20; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+    ],
+    "expected": {
+      "platform_version": "20"
+    }
+  },
+  {
+    "name": "Frozen Android K has no guessed version",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+    ],
+    "expected": {
+      "platform": "Android",
+      "platform_version": null
+    }
+  },
+  {
+    "name": "HarmonyOS explicit marker wins over Android",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; HarmonyOS 6.0.0; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 HuaweiBrowser/16.0.0.123"
+    ],
+    "expected": {
+      "platform": "HarmonyOS",
+      "platform_version": "6.0.0",
+      "browser": "Huawei Browser",
+      "version": "16.0.0.123"
+    }
+  },
+  {
+    "name": "Huawei browser does not imply HarmonyOS",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 HuaweiBrowser/16.0.0.123"
+    ],
+    "expected": {
+      "platform": "Android",
+      "platform_version": "16"
+    }
+  },
+  {
+    "name": "OpenHarmony explicit marker",
+    "input": [
+      "Mozilla/5.0 (OpenHarmony 5.0; Phone) AppleWebKit/537.36 Chrome/132.0.0.0 HuaweiBrowser/5.0.4.101"
+    ],
+    "expected": {
+      "platform": "OpenHarmony",
+      "platform_version": "5.0",
+      "browser": "Huawei Browser",
+      "version": "5.0.4.101"
+    }
+  },
+  {
+    "name": "Ubuntu distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Ubuntu/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Ubuntu",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Debian distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Debian/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Debian",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Fedora distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Fedora/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Fedora",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Arch Linux distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Arch/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Arch Linux",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Manjaro distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Manjaro/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Manjaro",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Linux Mint distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Linux Mint/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Linux Mint",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "openSUSE distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; openSUSE/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "openSUSE",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Red Hat distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; RHEL/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Red Hat",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Gentoo distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Gentoo/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Gentoo",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Kali Linux distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Kali/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Kali Linux",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Alpine Linux distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Alpine/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Alpine Linux",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Rocky Linux distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Rocky/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Rocky Linux",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "AlmaLinux distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; AlmaLinux/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "AlmaLinux",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "NixOS distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; NixOS/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "NixOS",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Pop!_OS distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Pop!_OS/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Pop!_OS",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Deepin distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; Deepin/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Deepin",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "UOS distribution token",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64; UOS/26.10) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "UOS",
+      "platform_version": "26.10",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "FreeBSD explicit platform",
+    "input": [
+      "Mozilla/5.0 (FreeBSD 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "FreeBSD",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "OpenBSD explicit platform",
+    "input": [
+      "Mozilla/5.0 (OpenBSD 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "OpenBSD",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "NetBSD explicit platform",
+    "input": [
+      "Mozilla/5.0 (NetBSD 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "NetBSD",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Fuchsia explicit platform",
+    "input": [
+      "Mozilla/5.0 (Fuchsia 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Fuchsia",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Tizen explicit platform",
+    "input": [
+      "Mozilla/5.0 (Tizen 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Tizen",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "KaiOS explicit platform",
+    "input": [
+      "Mozilla/5.0 (KaiOS 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "KaiOS",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "Haiku explicit platform",
+    "input": [
+      "Mozilla/5.0 (Haiku 3.0) Gecko/20100101 Firefox/145.0"
+    ],
+    "expected": {
+      "platform": "Haiku",
+      "platform_version": "3.0",
+      "browser": "Firefox",
+      "version": "145.0"
+    }
+  },
+  {
+    "name": "ChromeOS explicit version",
+    "input": [
+      "Mozilla/5.0 (X11; CrOS x86_64 16371.49.0) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36"
+    ],
+    "expected": {
+      "platform": "Chrome OS",
+      "platform_version": "16371.49.0"
+    }
+  },
+  {
+    "name": "Frozen ChromeOS build is suppressed",
+    "input": [
+      "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) Chrome/140.0.0.0"
+    ],
+    "expected": {
+      "platform": "Chrome OS",
+      "platform_version": null
+    }
+  },
+  {
+    "name": "Windows Phone wins over Android compatibility token",
+    "input": [
+      "Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1) AppleWebKit/537.36 Chrome/52.0 Mobile Safari/537.36 Edge/15.15063"
+    ],
+    "expected": {
+      "platform": "Windows Phone",
+      "platform_version": "10.0",
+      "browser": "Edge",
+      "version": "15.15063"
+    }
+  },
+  {
+    "name": "Edge explicit product Edg",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/23.4.5"
+    ],
+    "expected": {
+      "browser": "Edge",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Edge explicit product EdgA",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 EdgA/23.4.5"
+    ],
+    "expected": {
+      "browser": "Edge",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Samsung Internet explicit product SamsungBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 SamsungBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Samsung Internet",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Opera explicit product OPR",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/23.4.5"
+    ],
+    "expected": {
+      "browser": "Opera",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Opera Mini explicit product Opera Mini",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Opera Mini/23.4.5"
+    ],
+    "expected": {
+      "browser": "Opera Mini",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Yandex explicit product YaBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 YaBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Yandex",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Vivaldi explicit product Vivaldi",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Vivaldi/23.4.5"
+    ],
+    "expected": {
+      "browser": "Vivaldi",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Brave explicit product Brave",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Brave/23.4.5"
+    ],
+    "expected": {
+      "browser": "Brave",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "DuckDuckGo explicit product DuckDuckGo",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 DuckDuckGo/23.4.5"
+    ],
+    "expected": {
+      "browser": "DuckDuckGo",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "HeadlessChrome explicit product HeadlessChrome",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 HeadlessChrome/23.4.5"
+    ],
+    "expected": {
+      "browser": "HeadlessChrome",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Chromium explicit product Chromium",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Chromium/23.4.5"
+    ],
+    "expected": {
+      "browser": "Chromium",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Electron explicit product Electron",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Electron/23.4.5"
+    ],
+    "expected": {
+      "browser": "Electron",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Whale explicit product Whale",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Whale/23.4.5"
+    ],
+    "expected": {
+      "browser": "Whale",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Coc Coc explicit product CocCocBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 CocCocBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Coc Coc",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Huawei Browser explicit product HuaweiBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 HuaweiBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Huawei Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "HONOR Browser explicit product HONORBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 HONORBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "HONOR Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Mi Browser explicit product MiuiBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 MiuiBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Mi Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "HeyTap Browser explicit product HeyTapBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 HeyTapBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "HeyTap Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "vivo Browser explicit product VivoBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 VivoBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "vivo Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "QQ Browser explicit product MQQBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 MQQBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "QQ Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Quark explicit product Quark",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Quark/23.4.5"
+    ],
+    "expected": {
+      "browser": "Quark",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "UC Browser explicit product UCBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 UCBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "UC Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Lenovo Browser explicit product SLBrowser",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 SLBrowser/23.4.5"
+    ],
+    "expected": {
+      "browser": "Lenovo Browser",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "DingTalk explicit product DingTalk",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 DingTalk/23.4.5"
+    ],
+    "expected": {
+      "browser": "DingTalk",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Alipay explicit product AlipayClient",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 AlipayClient/23.4.5"
+    ],
+    "expected": {
+      "browser": "Alipay",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Lark explicit product Lark",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Lark/23.4.5"
+    ],
+    "expected": {
+      "browser": "Lark",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "MaiMai explicit product MaiMai",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 MaiMai/23.4.5"
+    ],
+    "expected": {
+      "browser": "MaiMai",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "WeChat explicit product MicroMessenger",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 MicroMessenger/23.4.5"
+    ],
+    "expected": {
+      "browser": "WeChat",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "QQ explicit product QQ",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 QQ/23.4.5"
+    ],
+    "expected": {
+      "browser": "QQ",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "EdgiOS on iOS",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 EdgiOS/145.1.2"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": "iOS 27.0.1",
+      "browser": "Edge",
+      "version": "145.1.2"
+    }
+  },
+  {
+    "name": "FxiOS on iOS",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 FxiOS/145.1.2"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": "iOS 27.0.1",
+      "browser": "Firefox",
+      "version": "145.1.2"
+    }
+  },
+  {
+    "name": "CriOS on iOS",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 CriOS/145.1.2"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": "iOS 27.0.1",
+      "browser": "Chrome",
+      "version": "145.1.2"
+    }
+  },
+  {
+    "name": "OPiOS on iOS",
+    "input": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1 OPiOS/145.1.2"
+    ],
+    "expected": {
+      "platform": "iPhone",
+      "platform_version": "iOS 27.0.1",
+      "browser": "Opera",
+      "version": "145.1.2"
+    }
+  },
+  {
+    "name": "Waterfox Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/140.0 Waterfox/23.4.5"
+    ],
+    "expected": {
+      "browser": "Waterfox",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "LibreWolf Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/140.0 LibreWolf/23.4.5"
+    ],
+    "expected": {
+      "browser": "LibreWolf",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Floorp Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/140.0 Floorp/23.4.5"
+    ],
+    "expected": {
+      "browser": "Floorp",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Pale Moon Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/140.0 PaleMoon/23.4.5"
+    ],
+    "expected": {
+      "browser": "Pale Moon",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "SeaMonkey Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/140.0 SeaMonkey/23.4.5"
+    ],
+    "expected": {
+      "browser": "SeaMonkey",
+      "version": "23.4.5"
+    }
+  },
+  {
+    "name": "Android WebView",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10; wv) AppleWebKit/537.36 Version/4.0 Chrome/140.0.7339.81 Mobile Safari/537.36"
+    ],
+    "expected": {
+      "platform": "Android",
+      "platform_version": "16",
+      "browser": "Android WebView",
+      "version": "140.0.7339.81"
+    }
+  },
+  {
+    "name": "Zhihu legacy extraction",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 ZhihuHybrid/1.0 com.zhihu.android/Futureve/10.41.0"
+    ],
+    "expected": {
+      "browser": "Zhihu",
+      "version": "10.41.0"
+    }
+  },
+  {
+    "name": "IE11 legacy support",
+    "input": [
+      "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko"
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "7",
+      "browser": "MSIE",
+      "version": "11.0"
+    }
+  },
+  {
+    "name": "Opera Presto legacy support",
+    "input": [
+      "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.12.388 Version/12.16"
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "7",
+      "browser": "Opera",
+      "version": "12.16"
+    }
+  },
+  {
+    "name": "curl generic client",
+    "input": [
+      "curl/8.16.0"
+    ],
+    "expected": {
+      "platform": null,
+      "platform_version": null,
+      "browser": "curl",
+      "version": "8.16.0"
+    }
+  },
+  {
+    "name": "Googlebot preserved",
+    "input": [
+      "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+    ],
+    "expected": {
+      "browser": "Googlebot",
+      "version": "2.1"
+    }
+  },
+  {
+    "name": "Known OS survives unknown browser",
+    "input": [
+      "Mozilla/5.0 (X11; Linux x86_64)"
+    ],
+    "expected": {
+      "platform": "Linux",
+      "platform_version": null,
+      "browser": null,
+      "version": null
+    }
+  },
+  {
+    "name": "Empty headers graceful",
+    "input": [
+      ""
+    ],
+    "expected": {
+      "platform": null,
+      "platform_version": null,
+      "browser": null,
+      "version": null
+    }
+  },
+  {
+    "name": "Malformed input types graceful",
+    "input": [
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "expected": {
+      "platform": null,
+      "platform_version": null,
+      "browser": null,
+      "version": null
+    }
+  },
+  {
+    "name": "Windows UA-CH 0.1.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"0.1.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "7"
+    }
+  },
+  {
+    "name": "Windows UA-CH 0.2.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"0.2.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "8"
+    }
+  },
+  {
+    "name": "Windows UA-CH 0.3.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"0.3.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "8.1"
+    }
+  },
+  {
+    "name": "Windows UA-CH 10.0.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"10.0.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "10"
+    }
+  },
+  {
+    "name": "Windows UA-CH 12.0.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"12.0.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "10"
+    }
+  },
+  {
+    "name": "Windows UA-CH 13.0.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"13.0.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "11"
+    }
+  },
+  {
+    "name": "Windows UA-CH 19.0.0",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"19.0.0\"",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "11"
+    }
+  },
+  {
+    "name": "Missing hint OS preserves UA OS",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "",
+      "",
+      ""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "10/11",
+      "browser": "Chrome",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Missing full list retains low list",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
+      "\"Microsoft Edge\";v=\"140\"",
+      "\"Windows\"",
+      "\"19.0.0\"",
+      ""
+    ],
+    "expected": {
+      "browser": "Edge",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Malformed full list falls back",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"19.0.0\"",
+      "broken"
+    ],
+    "expected": {
+      "browser": "Chrome",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Full-list-only request",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      null,
+      null,
+      null,
+      "\"Microsoft Edge\";v=\"140.0.3485.81\""
+    ],
+    "expected": {
+      "browser": "Edge",
+      "version": "140.0.3485.81"
+    }
+  },
+  {
+    "name": "Platform-only request",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      null,
+      "\"Windows\"",
+      "\"19.0.0\"",
+      null
+    ],
+    "expected": {
+      "platform_version": "11"
+    }
+  },
+  {
+    "name": "Full hint browser version",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"19.0.0\"",
+      "\"Google Chrome\";v=\"140.0.7339.81\""
+    ],
+    "expected": {
+      "browser": "Chrome",
+      "version": "140.0.7339.81"
+    }
+  },
+  {
+    "name": "Specific hint wins irrespective of order",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\", \"Brave\";v=\"140\"",
+      "\"Windows\"",
+      "\"19.0.0\"",
+      "\"Google Chrome\";v=\"140.0.7339.81\", \"Brave\";v=\"140.0.7339.81\""
+    ],
+    "expected": {
+      "browser": "Brave",
+      "version": "140.0.7339.81"
+    }
+  },
+  {
+    "name": "Whitespace around hint separators",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Chromium\" ; v = \"140\", \"Microsoft Edge\" ; v = \"140.1.2.3\""
+    ],
+    "expected": {
+      "browser": "Edge",
+      "version": "140.1.2.3"
+    }
+  },
+  {
+    "name": "Generic Chromium does not erase Firefox derivative",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Vivaldi/7.1.2",
+      "\"Chromium\";v=\"140\""
+    ],
+    "expected": {
+      "browser": "Vivaldi",
+      "version": "7.1.2"
+    }
+  },
+  {
+    "name": "Generic Chrome does not erase embedded WeChat",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 MicroMessenger/8.0.61",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\""
+    ],
+    "expected": {
+      "browser": "WeChat",
+      "version": "8.0.61"
+    }
+  },
+  {
+    "name": "Generic Linux does not erase distro",
+    "input": [
+      "Mozilla/5.0 (X11; Ubuntu/26.10; Linux x86_64) Chrome/140.0.0.0",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Linux\"",
+      "\"0.0.0\""
+    ],
+    "expected": {
+      "platform": "Ubuntu",
+      "platform_version": "26.10"
+    }
+  },
+  {
+    "name": "Generic Android does not erase HarmonyOS",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 HarmonyOS/6.0",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Android\"",
+      "\"16.0.0\""
+    ],
+    "expected": {
+      "platform": "HarmonyOS",
+      "platform_version": "6.0"
+    }
+  },
+  {
+    "name": "macOS hints recover real version",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"macOS\"",
+      "\"27.0.1\""
+    ],
+    "expected": {
+      "platform": "Macintosh",
+      "platform_version": "macOS Golden Gate 27.0.1"
+    }
+  },
+  {
+    "name": "Hints distinguish genuine Catalina from frozen UA",
+    "input": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"macOS\"",
+      "\"10.15.7\""
+    ],
+    "expected": {
+      "platform_version": "macOS Catalina 10.15.7"
+    }
+  },
+  {
+    "name": "Android hints recover real version",
+    "input": [
+      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Android\"",
+      "\"17.0.0\""
+    ],
+    "expected": {
+      "platform_version": "17.0.0"
+    }
+  },
+  {
+    "name": "iPad hints preserve device",
+    "input": [
+      "Mozilla/5.0 (iPad; CPU iPad OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1",
+      null,
+      "\"iOS\"",
+      "\"27.0.1\""
+    ],
+    "expected": {
+      "platform": "iPad",
+      "platform_version": "iPadOS 27.0.1"
+    }
+  },
+  {
+    "name": "Invalid hint version ignored",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"Windows\"",
+      "\"<script>alert(1)</script>\""
+    ],
+    "expected": {
+      "platform_version": "10/11"
+    }
+  },
+  {
+    "name": "GREASE-only header falls back",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Not;A=Brand\";v=\"8\""
+    ],
+    "expected": {
+      "browser": "Chrome",
+      "version": "140.0.0.0"
+    }
+  },
+  {
+    "name": "Invalid hint platform ignored",
+    "input": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"140\", \"Chromium\";v=\"140\"",
+      "\"<svg onload=alert(1)>\"",
+      "\"27.0\""
+    ],
+    "expected": {
+      "platform": "Windows",
+      "platform_version": "10/11"
+    }
+  }
+]

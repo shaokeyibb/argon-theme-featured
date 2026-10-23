@@ -7,7 +7,7 @@ const php = process.env.ARGON_TEST_PHP || '8.3';
 const wp = process.env.ARGON_TEST_WP || '7.0';
 mkdirSync(resolve(root, 'temp'), { recursive: true });
 const suites = process.argv.slice(2);
-for (const suite of suites.length ? suites : ['security', 'html-document', 'modernization']) {
+for (const suite of suites.length ? suites : ['security', 'html-document', 'modernization', 'user-agent']) {
   const blueprint = JSON.parse(readFileSync(resolve(root, `tests/${suite}-blueprint.json`), 'utf8'));
   blueprint.preferredVersions = { php, wp };
   const path = resolve(root, `temp/${suite}-${php}-${wp}-blueprint.json`);
