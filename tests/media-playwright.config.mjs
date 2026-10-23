@@ -7,6 +7,7 @@ export default defineConfig({
   webServer:{
     cwd:fileURLToPath(new URL('..',import.meta.url)),
     command:'node --experimental-wasm-jspi node_modules/@wp-playground/cli/wp-playground.js server --port=9401 --workers=6 --define-bool DISABLE_WP_CRON true --mount-dir . /wordpress/wp-content/themes/argon-theme --blueprint tests/media-browser-blueprint.json',
-    url:'http://127.0.0.1:9401/featured-media/',timeout:300000,reuseExistingServer:!process.env.CI
+    // Wait for the whole blueprint, including media generation and rewrite rules.
+    wait:{stdout:/WordPress is running on http:\/\/127\.0\.0\.1:9401\b/},timeout:300000
   }
 });

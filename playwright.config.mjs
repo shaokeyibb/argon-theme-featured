@@ -6,6 +6,8 @@ export default defineConfig({
   outputDir: 'temp/browser-results',
   webServer: {
     command: 'node --experimental-wasm-jspi node_modules/@wp-playground/cli/wp-playground.js server --port=9400 --workers=6 --define-bool DISABLE_WP_CRON true --mount-dir . /wordpress/wp-content/themes/argon-theme --blueprint tests/browser-blueprint.json',
-    url: 'http://127.0.0.1:9400', timeout: 180000, reuseExistingServer: !process.env.CI
+    // Playground accepts HTTP requests before its blueprint creates the fixtures.
+    // Its ready message is emitted only after every blueprint step has finished.
+    wait: { stdout: /WordPress is running on http:\/\/127\.0\.0\.1:9400\b/ }, timeout: 180000
   }
 });
