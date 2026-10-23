@@ -1,0 +1,10 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {"php": "8.3", "wp": "7.0"},
+  "steps": [
+    {"step":"installPlugin","pluginData":{"resource":"url","url":"https://github.com/terrylinooo/githuber-md/releases/download/1.17.0/wp-githuber-md-1.17.0.zip"},"options":{"activate":true}},
+    {"step":"runPHP","code":"<?php require '/wordpress/wp-load.php'; update_option('argon_update_source', 'stop'); switch_theme('argon-theme');"},
+    {"step":"runPHP","code":"<?php define('ARGON_MARKDOWN_TESTING', true); require '/wordpress/wp-load.php'; require '/wordpress/wp-content/themes/argon-theme/tests/markdown-shortcodes-regression.php';"}
+  ]
+}
+

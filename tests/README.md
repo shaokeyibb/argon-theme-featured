@@ -58,7 +58,7 @@ npm run test:browser
 
 自动启动 `127.0.0.1:9400` 的一次性 WordPress 站点，使用 6 个 PHP worker，禁止 WP-Cron。测试等待 Playground 完成全部初始化步骤并输出就绪消息后开始，避免首页已响应但测试数据尚未生成的启动竞态。初始化脚本使用不含 `..` 的绝对路径创建输出目录，并检查写入结果，因此全新检出也无需预建 `temp/`。每次运行创建新站点，请保持测试端口空闲。Windows 已有 Chrome 时可设置 `$env:ARGON_BROWSER_CHANNEL = 'chrome'`。该站点的测试账号只用于此隔离实例。
 
-二十五个流程覆盖桌面和手机页面及搜索、Banner 与分页几何尺寸、滚动导航、浮动按钮、目录分支跟随/折叠与锚点跳转、延迟图片加载后的折叠、响应式宽度过渡中的短内容与缩短后的自动取消折叠、展开按钮边界与键盘操作、缓存 nonce 刷新、分类菜单点击、日间/夜间组件配色、实际评论点赞前后的图标颜色、展开/收起和淡入淡出动画、快速反向操作与减少动态效果偏好、分享平台地址与无脚本回退、系统分享成功/取消/失败、带缓存查询参数的脚本与单次复制、无 jQuery/无 randomUUID 的前台、代码折行/行号/复制/全屏降级、公式、折叠块/下拉/标签页、混合尺寸画廊及核心灯箱、自动空格、深色模式持久化、评论提交与编辑/回复/管理、HTML 文档沙箱、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存、保存失败阻止 AI 请求及无 JavaScript 阅读。旧区块和配色基准来自旧版真实构建产物，避免使用新实现生成自己的兼容性期望。
+二十六个流程覆盖桌面和手机页面及搜索、Banner 与分页几何尺寸、滚动导航、浮动按钮、目录分支跟随/折叠与锚点跳转、延迟图片加载后的折叠、响应式宽度过渡中的短内容与缩短后的自动取消折叠、展开按钮边界与键盘操作、缓存 nonce 刷新、分类菜单点击、日间/夜间组件配色、实际评论点赞前后的图标颜色、展开/收起和淡入淡出动画、快速反向操作与减少动态效果偏好、分享平台地址与无脚本回退、系统分享成功/取消/失败、带缓存查询参数的脚本与单次复制、无 jQuery/无 randomUUID 的前台、代码折行/行号/复制/全屏降级、公式、折叠块/下拉/标签页、混合尺寸画廊及核心灯箱、自动空格、深色模式持久化、评论提交与编辑/回复/管理、HTML 文档沙箱、嵌套网格在手机/桌面与无脚本时的宽度、长代码局部滚动、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存、保存失败阻止 AI 请求及无 JavaScript 阅读。旧区块和配色基准来自旧版真实构建产物，避免使用新实现生成自己的兼容性期望。
 
 截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
 
@@ -66,12 +66,15 @@ npm run test:browser
 
 ```sh
 node scripts/test-php.mjs media
+node scripts/test-php.mjs markdown-shortcodes
 npx playwright test --config tests/media-playwright.config.mjs
 ```
 
 隔离站点使用真实插件和 WordPress 图片生成流程，固定 Modern Image Formats 2.7.1、Image Placeholders 1.3.0、Enhanced Responsive Images 1.8.0；浏览器站点另启用 Optimization Detective 1.0.0-beta7、Image Prioritizer 1.0.0-beta4、Speculative Loading 1.7.0、Instant Back/Forward 1.3.3。这些版本的 WordPress 最低要求与主题不同，本套件在 WordPress 7.0 / PHP 8.3 上运行。
 
-14 项 PHP 检查覆盖 Markdown 附件识别、实际 WebP/占位色生成、原生响应式属性、封面模板、首图顺序、已有 picture 与原生区块、外链转义、子尺寸与现代格式 URL、对象缓存及关闭插件后的回退。4 个浏览器流程覆盖原生灯箱与 PhotoSwipe、桌面/手机布局、旧封面淡入后的可见性、无脚本 Banner、缓存重载、推测规则和检测脚本加载。使用独立端口 9401，失败 trace 保存到 `temp/media-browser-results/`。
+14 项 PHP 检查覆盖 Markdown 附件识别、实际 WebP/占位色生成、原生响应式属性、封面模板、首图顺序、已有 picture 与原生区块、外链转义、子尺寸与现代格式 URL、对象缓存及关闭插件后的回退。5 个浏览器流程覆盖原生灯箱与 PhotoSwipe、桌面/手机布局、旧封面淡入后的可见性、无脚本 Banner、缓存重载、推测规则和检测脚本加载，以及 Githuber MD 嵌套短代码中的 Markdown、展开交互与响应式媒体。使用独立端口 9401，失败 trace 保存到 `temp/media-browser-results/`。
+
+Markdown 短代码套件使用上游 GitHub 发行包中的 Githuber MD 1.17.0，17 项 PHP 检查覆盖块级与行内语法、嵌套、禁用嵌套、代码示例、原有 HTML、特殊数据格式、转义和 URL 安全、切换普通编辑器及插件共享解析器的隔离。另使用本站已安装的 1.17.1 副本在隔离环境验证，不把生产站点作为测试数据写入目标。
 
 格式文件由插件生成；测试固定图片允许保留较大的 WebP 以稳定检查包装流程，不修改正式站点的格式选择策略。Image Prioritizer 按真实访客数据逐步优化，测试不会把检测脚本加载成功等同于已完成长期优化。
 

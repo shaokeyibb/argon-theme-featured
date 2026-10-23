@@ -115,7 +115,7 @@ HTML 内的图片、CSS 和 JavaScript 使用绝对资源 URL 最方便。内联
 - 目录通过受控消息同步文档内标题，支持定位；开启 scripts 时可用。消息只提供有限的展示能力，不接收任意父页面代码或 HTML。
 - 保留主题评论、Discourse、分享、阅读量、相关文章和文章导航。文档内部的图片灯箱、数学渲染、代码高亮、外链点击角标等由文档自身负责，主题不改写其 DOM。
 - 文档可响应 `html[data-argon-theme="dark"]` / `.argon-dark`，使用 `--argon-primary-color` 和 `--argon-viewport-height` 变量。主题不强制反转文档颜色。
-- 文档应自行编写响应式布局。主题保证外层宽度适配，并对自动高度提供限幅及循环增长回退；任意固定宽度页面的内部排版仍由其 CSS 决定。
+- 文档应自行编写响应式布局。主题保证外层宽度适配，并为内部块级容器提供可收缩、长文本换行、代码局部滚动和媒体限宽的低优先级默认值；作者的显式 CSS 优先。自动高度提供限幅及循环增长回退，固定列宽、显式最小宽度及特殊布局仍由文档自身决定。
 
 ## 开发验证
 
@@ -126,7 +126,7 @@ npx --yes @wp-playground/cli@3.1.60 run-blueprint --mount-dir (Get-Location).Pat
 Get-Content temp/html-document-report-8.3.json
 ```
 
-Playground CLI 3.1.60 需要 Node.js 24.18 或更高版本。将 blueprint 的 `preferredVersions.php` 改为 `8.1` 可以验证主题最低 PHP 版本。
+Playground CLI 3.1.60 需要 Node.js 24.18 或更高版本。将 blueprint 的 `preferredVersions.php` 改为 `8.2` 可以验证主题最低 PHP 版本。
 
 浏览器测试 fixture 使用真实 WP Githuber MD 和原生媒体上传：
 

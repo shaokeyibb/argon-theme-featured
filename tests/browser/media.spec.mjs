@@ -1,4 +1,26 @@
 import {test,expect} from '@playwright/test';
+test('Githuber Markdown inside nested shortcodes renders, expands and retains responsive media',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/markdown-shortcodes/',{waitUntil:'domcontentloaded'});
+  const body=page.locator('.collapse-block-body');
+  await expect(body).toBeHidden();
+  await page.locator('.collapse-block-title').click();
+  await expect(body).toBeVisible();
+  await expect(body.locator('h2')).toHaveText('Markdown heading');
+  await expect(body.locator('strong')).toHaveText('Bold text');
+  await expect(body.locator('li')).toHaveCount(2);
+  await expect(body.locator('.admonition-body em')).toHaveText('Nested emphasis');
+  await expect(body.locator('pre code')).toContainText('[label]code sample[/label]');
+  await expect(body.locator('.badge')).toHaveCount(0);
+  const image=body.locator('img');await image.scrollIntoViewIfNeeded();
+  await expect.poll(()=>image.evaluate(el=>el.currentSrc)).toMatch(/\.webp$/);
+  await expect(image).toHaveAttribute('srcset',/300w/);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
+  await page.locator('.collapse-block-title').click();await expect(body).toBeHidden();
+  await page.locator('.collapse-block-title').press('Enter');await expect(body).toBeVisible();
+  expect(errors).toEqual([]);
+});
 test('official image plugins optimize Markdown, linked images and native blocks',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/media-compatibility/',{waitUntil:'networkidle'});

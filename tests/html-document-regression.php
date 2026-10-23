@@ -254,6 +254,7 @@ html_test('disabling scripts also removes bridge and keeps fixed-height renderin
 	$response = html_response($article);
 	html_assert(!str_contains(argon_html_sandbox(), 'allow-scripts') && str_contains($response['headers']['Content-Security-Policy'], "script-src 'none'"));
 	html_assert(!str_contains($response['body'], 'argonHtmlBridge'));
+	html_assert(str_contains($response['body'], 'data-argon-html-layout') && str_contains($response['body'], 'min-inline-size: 0'));
 	ob_start(); argon_html_render_article($article); $html = ob_get_clean();
 	html_assert(str_contains($html, 'data-height="viewport"'));
 	update_option('argon_html_allow_scripts', 'true');

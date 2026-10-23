@@ -2,6 +2,10 @@
 if (!defined('ARGON_MODERN_TESTING')) exit;
 wp_set_current_user(1);
 wp_set_password('argon-browser-local-test', 1);
+// Seed the test user's persisted preference before the editor hydrates its store.
+update_user_meta(1, $GLOBALS['wpdb']->get_blog_prefix() . 'persisted_preferences', array(
+	'core/edit-post' => array('welcomeGuide' => false), '_modified' => gmdate('c'),
+));
 update_option('argon_comment_need_captcha', 'false');
 update_option('argon_comment_allow_editing', 'true');
 update_option('argon_enable_comment_pinning', 'true');

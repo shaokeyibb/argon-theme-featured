@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/markdown-shortcodes.php';
 // Register every real block on the server, using dependencies extracted by wp-scripts.
 function argon_init_gutenberg_blocks() {
     $dir = get_template_directory() . '/gutenberg/build/';
@@ -156,11 +157,11 @@ function shortcode_alert($attr,$content=""){
 	if (isset($attr['icon'])){
 		$out .= "<span class='alert-inner--icon'><i class='fa fa-" . esc_attr(sanitize_html_class($attr['icon'])) . "'></i></span>";
 	}
-	$out .= "<span class='alert-inner--text'>";
+	$out .= "<div class='alert-inner--text'>";
 	if (isset($attr['title'])){
 		$out .= "<strong>" . esc_html($attr['title']) . "</strong> ";
 	}
-	$out .= $content . "</span></div>";
+	$out .= $content . "</div></div>";
 	return $out;
 }
 add_shortcode('admonition','shortcode_admonition');

@@ -555,6 +555,12 @@ function argon_html_prepare_document(string $html, string $base, string $token, 
 	$base_element = $dom->createElement('base');
 	$base_element->setAttribute('href', $base);
 	$head->appendChild($base_element);
+	// Keep intrinsic code/media widths from expanding nested grid and flex containers.
+	// Inline defaults also apply when document scripts are disabled by the sandbox.
+	$style = $dom->createElement('style');
+	$style->setAttribute('data-argon-html-layout', '');
+	$style->appendChild($dom->createTextNode(file_get_contents(get_template_directory() . '/assets/html-document/document.css')));
+	$head->appendChild($style);
 	foreach ($dom->getElementsByTagName('a') as $link) {
 		if ($document_url !== '' && str_starts_with($link->getAttribute('href'), '#')) {
 			$link->setAttribute('href', $document_url . $link->getAttribute('href'));

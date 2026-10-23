@@ -140,6 +140,43 @@ test('HTML document remains sandboxed, resizes and syncs theme', async ({page}) 
   await toggleDarkMode(page);
   await expect(frame.locator('html')).toHaveAttribute('data-argon-theme','dark');
 });
+test('HTML documents keep nested grids, code and media within mobile and desktop widths', async ({page,browser}) => {
+  await page.goto(`/?p=${fixture().html}`, {waitUntil:'domcontentloaded'});
+  const frame = page.frameLocator('.argon-html-frame');
+  await expect(frame.locator('#nested-layout')).toBeVisible();
+  for (const width of [1440,390,320,844,1440]) {
+    await page.setViewportSize({width,height:844});
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect.poll(() => frame.locator('body').evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const layout = await frame.locator('#nested-layout').evaluate(el => {
+      const code = el.querySelector('pre'), image = el.querySelector('img');
+      const links = [...el.querySelectorAll('nav a')].map(a => a.getBoundingClientRect());
+      code.scrollLeft = 120;
+      return {
+        containersFit: [...el.querySelectorAll('.timeline,.nested-body,.code-container')].every(node => node.scrollWidth <= node.clientWidth + 1),
+        codeScrolls: code.scrollWidth > code.clientWidth && code.scrollLeft > 0,
+        imageFits: image.getBoundingClientRect().right <= el.getBoundingClientRect().right,
+        imageRatio: image.getBoundingClientRect().width / image.getBoundingClientRect().height,
+        linksOverlap: links[0].right > links[1].left,
+        authoredWidth: el.querySelector('#authored-size').getBoundingClientRect().width,
+      };
+    });
+    expect(layout, `viewport ${width}`).toMatchObject({containersFit:true,codeScrolls:true,imageFits:true,linksOverlap:false,authoredWidth:48});
+    expect(layout.imageRatio).toBeCloseTo(10, 1);
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(frame.locator('#wide-code')).toBeVisible();
+  await expect.poll(() => frame.locator('body').evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const noScript = await browser.newPage({javaScriptEnabled:false,viewport:{width:390,height:844}});
+  try {
+    await noScript.goto(`http://127.0.0.1:9400/?p=${fixture().html}`, {waitUntil:'domcontentloaded'});
+    const content = noScript.frameLocator('.argon-html-frame');
+    await expect(content.locator('#script-status')).toHaveText('脚本尚未执行');
+    expect(await content.locator('body').evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await content.locator('#wide-code').evaluate(el => el.scrollWidth > el.clientWidth && getComputedStyle(el).overflowX === 'auto')).toBe(true);
+  } finally { await noScript.close(); }
+});
 test('settings load native controls and round-trip exports', async ({page}) => {
   await login(page);
   await page.goto('/wp-admin/admin.php?page=admin.php', {waitUntil:'domcontentloaded'});

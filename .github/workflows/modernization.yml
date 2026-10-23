@@ -19,6 +19,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: node scripts/test-php.mjs media
+      - run: node scripts/test-php.mjs markdown-shortcodes
       - run: npx playwright test --config tests/media-playwright.config.mjs
       - run: npm run package
       - run: npm run test:package
@@ -31,6 +32,7 @@ jobs:
             temp/browser-results/
             temp/media-browser-results/
             temp/media-report-*.json
+            temp/markdown-shortcodes-report-*.json
             release/
   wordpress:
     runs-on: ubuntu-latest

@@ -1,0 +1,6 @@
+/* Low-specificity defaults inside the sandbox only. Authored layout rules win. */
+:where(body) { overflow-wrap: anywhere; }
+:where(main, article, section, header, footer, nav, aside, div, ul, ol, li, figure, p, pre) { min-inline-size: 0; }
+:where(pre) { max-inline-size: 100%; overflow-x: auto; }
+:where(img, video, canvas, svg) { max-inline-size: 100%; }
+:where(img, video) { height: auto; }

@@ -64,17 +64,12 @@ test('gallery uses full image dimensions and leaves core lightbox in control', a
 });
 
 test('AI regeneration stops after the editor fails to save', async ({page}) => {
-  const welcome = page.getByRole('dialog', {name:'Welcome to the editor'});
-  // Preferences hydrate asynchronously, so the guide can appear after the
-  // editor controls. Dismiss it through its real UI whenever it blocks a click.
-  await page.addLocatorHandler(welcome, dialog => dialog.getByRole('button', {name:'Close', exact:true}).click());
   await page.goto('/wp-login.php', {waitUntil:'domcontentloaded'});
   await page.locator('#user_login').fill('admin'); await page.locator('#user_pass').fill('argon-browser-local-test');
   await Promise.all([page.waitForURL('**/wp-admin/**', {waitUntil:'domcontentloaded'}), page.locator('#wp-submit').click()]);
   await page.goto(`/wp-admin/post.php?post=${fixture().normal}&action=edit`, {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => window.wp?.data?.select('core/editor').getCurrentPostId());
-  await page.evaluate(() => wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false));
-  await expect(welcome).toBeHidden();
+  await expect(page.getByRole('dialog', {name:'Welcome to the editor'})).toBeHidden();
   const settings = page.getByRole('button', {name:'Argon 文章设置', exact:true});
   if (await settings.getAttribute('aria-expanded') !== 'true') await settings.click();
   await expect(settings).toHaveAttribute('aria-expanded', 'true');

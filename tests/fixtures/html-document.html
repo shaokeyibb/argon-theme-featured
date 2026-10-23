@@ -11,6 +11,13 @@
         h1 { font-size: clamp(24px, 5vw, 42px); line-height: 1.2; }
         .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .card { padding: 20px; border-radius: 16px; background: white; border: 1px solid #dde5f1; }
+        .nested-grid, .nested-body, .code-container { display: grid; gap: 12px; }
+        .nested-grid { padding: 12px; border: 1px solid #dde5f1; }
+        .timeline { display: grid; grid-template-columns: 16px 1fr; gap: 12px; }
+        .nested-body pre { margin: 0; padding: 12px; background: #dce6ff; }
+        .sample-nav { display: flex; gap: 12px; overflow-x: auto; }
+        .sample-nav a { white-space: nowrap; padding: 4px; }
+        #authored-size { min-inline-size: 48px; width: 48px; }
         button { padding: 12px 20px; border: 0; border-radius: 8px; background: var(--argon-primary-color, #5e72e4); color: white; cursor: pointer; }
         #expanded { display: none; height: 500px; margin-top: 20px; background: #dce6ff; border-radius: 12px; }
         [data-argon-theme="dark"] body { background: #172033; color: #edf2fa; }
@@ -28,6 +35,17 @@
         <section class="card"><h2>响应式布局</h2><p>手机上卡片变为单列。</p></section>
         <section class="card"><h2>交互内容</h2><p>按钮可以改变文档高度。</p></section>
     </div>
+    <section class="nested-grid" id="nested-layout">
+        <h2>嵌套布局与长内容</h2>
+        <div class="timeline"><span>●</span><div class="nested-body">
+            <p>长代码应在自己的区域内滚动，正文继续按容器宽度换行。</p>
+            <div class="code-container"><pre id="wide-code">const output = processLongDocument("a-very-long-unbroken-input-that-must-remain-readable-by-scrolling-without-widening-the-article-or-its-nested-grid");</pre></div>
+            <p id="long-word">https://example.test/a/very-long-unbroken-reference-abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz</p>
+            <img id="wide-image" width="1200" height="120" alt="Wide media" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='120'%3E%3Crect width='1200' height='120' fill='%235e72e4'/%3E%3C/svg%3E">
+            <nav class="sample-nav"><a href="https://example.test/one">first-unbroken-navigation-link</a><a href="https://example.test/two">second-unbroken-navigation-link</a></nav>
+            <div id="authored-size">48px</div>
+        </div></div>
+    </section>
     <h2>交互测试</h2>
     <button id="expand" type="button">展开内容</button>
     <button id="popup" type="button">测试弹窗</button>
