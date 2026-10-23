@@ -1,0 +1,30 @@
+{
+  "name": "argon-theme-featured",
+  "version": "3.0.0",
+  "private": true,
+  "engines": { "node": ">=22.22.2" },
+  "workspaces": ["assets", "gutenberg"],
+  "scripts": {
+    "build": "npm run build --workspaces && node scripts/licenses.mjs",
+    "dev": "npm run dev --workspace assets",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "test:php": "node scripts/test-php.mjs",
+    "test:package": "node scripts/test-package.mjs",
+    "package": "node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.29.9",
+    "@wordpress/scripts": "^37.0.0",
+    "@playwright/test": "^1.64.1",
+    "@wp-playground/cli": "3.1.60",
+    "archiver": "^7.0.1"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.1.4",
+    "postcss-selector-parser": "^7.1.7",
+    "qs": "^6.16.1",
+    "markdownlint-cli": { "js-yaml": "^5.5.0", "smol-toml": "^1.9.1" },
+    "katex": "^0.19.0"
+  }
+}

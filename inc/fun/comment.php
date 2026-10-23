@@ -646,7 +646,7 @@ function comment_mail_notify($comment){
 			$fullTitle = __("您在", 'argon') . " 「" . get_post_title_by_id($commentPostID) . "」 " . __("的评论有了新的回复", 'argon');
 			$content = htmlspecialchars(get_comment_meta($id, "comment_content_source", true));
 			$link = get_permalink($commentPostID) . "#comment-" . $id;
-			$unsubscribeLink = site_url("unsubscribe-comment-mailnotice?comment=" . $parentID . "&token=" . get_comment_meta($parentID, "mailnotice_unsubscribe_key", true));
+			$unsubscribeLink = add_query_arg(array('argon_unsubscribe' => '1', 'comment' => $parentID, 'token' => get_comment_meta($parentID, 'mailnotice_unsubscribe_key', true)), home_url('/'));
 			$html = '
 					<!DOCTYPE html>
 					<html>
@@ -779,7 +779,16 @@ function post_comment_updatemetas($id){
 }
 add_action('comment_post' , 'post_comment_updatemetas');
 add_action('comment_unapproved_to_approved', 'comment_mail_notify');
-add_rewrite_rule('^unsubscribe-comment-mailnotice/?(.*)$', '/wp-content/themes/argon/inc/fun/unsubscribe-comment-mailnotice.php$1', 'top');
+// Query endpoint works with plain permalinks, renamed themes and custom content paths.
+// Retain the public path used by previously sent notification emails.
+add_action('template_redirect', static function() {
+	$path = wp_parse_url(wp_unslash($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+	if (argon_request_string($_GET, 'argon_unsubscribe') !== '1' && !preg_match('~/unsubscribe-comment-mailnotice/?$~', (string) $path)) return;
+	nocache_headers();
+	status_header(200);
+	require get_template_directory() . '/inc/fun/unsubscribe-comment-mailnotice.php';
+	exit;
+}, 0);
 //编辑评论
 function user_edit_comment(){
 	argon_ajax_nonce();

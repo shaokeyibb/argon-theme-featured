@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/collapse",
+  "title": "折叠区块",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "color": {
+      "type": "string",
+      "default": "#ffffff00"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "content": {
+      "type": "string",
+      "default": ""
+    },
+    "fa_icon_name": {
+      "type": "string",
+      "default": ""
+    },
+    "collapsed": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_left_border": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

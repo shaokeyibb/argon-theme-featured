@@ -22,6 +22,7 @@ function init_shuoshuo(){
 		'public' => true,
 		'publicly_queryable' => true,
 		'show_ui' => true,
+		'show_in_rest' => true,
 		'show_in_menu' => true,
 		'exclude_from_search' => true,
 		'query_var' => true,
@@ -34,7 +35,7 @@ function init_shuoshuo(){
 		'hierarchical' => false,
 		'menu_position' => null,
 		'menu_icon' => 'dashicons-format-quote',
-		'supports' => array('editor', 'author', 'title', 'custom-fields', 'comments')
+		'supports' => array('editor', 'author', 'title', 'custom-fields', 'comments', 'revisions')
 	);
 	register_post_type('shuoshuo', $args);
 }
@@ -44,12 +45,7 @@ function init_shuoshuo(){
 function get_shuoshuo_upvotes($ID){
 	$count_key = 'upvotes';
 	$count = get_post_meta($ID, $count_key, true);
-	if ($count==''){
-		delete_post_meta($ID, $count_key);
-		add_post_meta($ID, $count_key, '0');
-		$count = '0';
-	}
-	return number_format_i18n($count);
+	return number_format_i18n((int) $count);
 }
 function set_shuoshuo_upvotes($ID){
 	if (get_post_type($ID) != 'shuoshuo'){

@@ -11,8 +11,6 @@ node_modules/
 
 # Composer 依赖
 /vendor/
-# 但保留 assets/vendor（手动管理的第三方库）
-!/assets/vendor/
 
 # ============================================
 # 构建输出和缓存
@@ -23,9 +21,7 @@ node_modules/
 parcel-bundle-reports/
 **/parcel-bundle-reports/
 
-# 编译输出（可选，根据项目需求取消注释）
-# /assets/dist/
-# /gutenberg/dist/
+# 运行构建资源跟踪入库，发行包另外输出到 release/
 
 # ============================================
 # 系统文件
@@ -110,9 +106,10 @@ coverage/
 # ============================================
 # Composer vendor 中的 .git 目录
 /vendor/**/.git/
-# 但保留 assets/vendor
-!/assets/vendor/**/.git/
 
 # 临时上传文件（如果有）
 uploads/
 temp/
+release/
+playwright-report/
+test-results/

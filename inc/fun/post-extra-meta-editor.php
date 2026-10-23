@@ -102,6 +102,7 @@ function argon_meta_box_1(){
                 })
                 mode.dispatchEvent(new Event('change'))
             </script>
+        <?php } ?>
         <h4><?php _e("启用 Discourse 嵌入式评论", 'argon');?></h4>
         <?php $argon_enable_discourse_comments = get_post_meta($post->ID, "argon_enable_discourse_comments", true);?>
         <select name="argon_enable_discourse_comments" id="argon_enable_discourse_comments">
@@ -113,96 +114,14 @@ function argon_meta_box_1(){
         <?php $argon_discourse_comments_topic_id = get_post_meta($post->ID, "argon_discourse_comments_topic_id", true);?>
         <input type="text" class="regular-text" name="argon_discourse_comments_topic_id" id="argon_discourse_comments_topic_id" value="<?php echo esc_attr($argon_discourse_comments_topic_id); ?>">
         <p style="margin-top: 15px;"><?php _e("输入你想关联到的 Discourse 主题 ID，不输入则会在 Discourse 创建一个新的主题以绑定到此文章上。", 'argon');?></p>
-    <?php } ?>
 
-		<script>$ = window.jQuery;</script>
-		<script>
-			function showAlert(type, message){
-				if (!wp.data){
-					alert(message);
-					return;
-				}
-				wp.data.dispatch('core/notices').createNotice(
-					type,
-					message,
-					{ type: "snackbar", isDismissible: true, }
-				);
-			}
-            function registerListener(elementName, buttonID){
-                const element = $(`#${elementName}`);
-                const button = $(`#${buttonID}`);
-                element.change(function(){
-                    button.css("display", "");
-                });
-                button.click(function(){
-                    button.addClass("is-busy").attr("disabled", "disabled").css("opacity", "0.5");
-                    element.attr("disabled", "disabled");
-                    const data = {
-                        action: 'update_post_meta_ajax',
-                        argon_meta_box_nonce: $("#argon_meta_box_nonce").val(),
-                        post_id: <?php echo $post->ID; ?>,
-                        meta_key: elementName,
-                        meta_value: element.val()
-                    };
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'post',
-                        data: data,
-                        success: function(response) {
-                            button.removeClass("is-busy").removeAttr("disabled").css("opacity", "1");
-                            element.removeAttr("disabled");
-                            if (response.status == "failed"){
-                                showAlert("failed", "<?php _e("应用失败", 'argon');?>");
-                                return;
-                            }
-                            button.css("display", "none");
-                            showAlert("success", "<?php _e("应用成功", 'argon');?>");
-                        },
-                        error: function(response) {
-                            button.removeClass("is-busy").removeAttr("disabled").css("opacity", "1");
-                            element.removeAttr("disabled");
-                            showAlert("failed", "<?php _e("应用失败", 'argon');?>");
-                        }
-                    });
-                });
-            }
-            registerListener('argon_show_post_outdated_info', 'apply_show_post_outdated_info')
-            registerListener('argon_ai_no_update_post_summary', 'apply_ai_no_update_post_summary')
-            registerListener('argon_ai_extra_prompt_mode', 'apply_ai_extra_prompt_mode')
-            registerListener('argon_ai_extra_prompt', 'apply_ai_extra_prompt_mode')
-
-            $(`#regenerate_ai_post_summary`).click(function(){
-                $(this).addClass("is-busy").attr("disabled", "disabled").css("opacity", "0.5");
-                const data = {
-                    action: 'regenerate_ai_post_summary',
-                    argon_meta_box_nonce: $("#argon_meta_box_nonce").val(),
-                    post_id: <?php echo $post->ID; ?>
-                };
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'post',
-                    data: data,
-                    success: function(response) {
-                        $(`#regenerate_ai_post_summary`).removeClass("is-busy").removeAttr("disabled").css("opacity", "1");
-                        if (response.status == "failed"){
-                            showAlert("failed", "<?php _e("重新生成失败", 'argon');?>");
-                            return;
-                        }
-                        showAlert("success", "<?php _e("重新生成成功", 'argon');?>");
-                    },
-                    error: function(response) {
-                        $(`#regenerate_ai_post_summary`).removeClass("is-busy").removeAttr("disabled").css("opacity", "1");
-                        showAlert("failed", "<?php _e("重新生成失败", 'argon');?>");
-                    }
-                });
-            });
-		</script>
 	<?php
 }
-function argon_add_meta_boxes(){
+function argon_add_meta_boxes($post_type, $post){
+	if ($post instanceof WP_Post && use_block_editor_for_post($post)) return;
 	add_meta_box('argon_meta_box_1', __("文章设置", 'argon'), 'argon_meta_box_1', array('post', 'page'), 'side', 'low');
 }
-add_action('admin_menu', 'argon_add_meta_boxes');
+add_action('add_meta_boxes', 'argon_add_meta_boxes', 10, 2);
 function argon_authorize_raw_post_meta($allowed, $meta_key, $post_id, $user_id){
 	return user_can($user_id, 'edit_post', $post_id) && user_can($user_id, 'unfiltered_html');
 }

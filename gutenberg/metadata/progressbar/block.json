@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/progressbar",
+  "title": "进度条",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "color": {
+      "type": "string",
+      "default": "#7889e8"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "progress": {
+      "type": "number",
+      "default": 50
+    },
+    "show_title": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

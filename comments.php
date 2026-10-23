@@ -150,28 +150,6 @@
 									content: attr(captcha);
 								}
 							</style>
-							<?php if (get_option('argon_get_captcha_by_ajax', 'false') == 'true') {?>
-								<script>
-									$(".post-comment-captcha-container").attr("captcha", "Loading...");
-									$.ajax({
-										url : argonConfig.wp_path + "wp-admin/admin-ajax.php",
-										type : "POST",
-										dataType : "json",
-										data : {
-											action: "get_captcha",
-											_wpnonce: window.argonConfig.ajax_nonce,
-										},
-										success : function(result){
-											$(".post-comment-captcha-container").attr("captcha", result['captcha']);
-											$("#post_comment_captcha_seed").val(result['captchaSeed']);
-											$("#post_comment_captcha_nonce").val(result['captchaNonce']);
-										},
-										error : function(xhr){
-											$(".post-comment-captcha-container").attr("captcha", "<?php _e('获取验证码失败', 'argon');?>");
-										}
-									});
-								</script>
-							<?php } ?>
 						</div>
 					</div>
 				</div>

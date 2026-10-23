@@ -1,26 +1,16 @@
 <?php
-//Gutenberg 编辑器区块
+// Register every real block on the server, using dependencies extracted by wp-scripts.
 function argon_init_gutenberg_blocks() {
-	wp_register_script(
-		'argon-gutenberg-block-js',
-		$GLOBALS['assets_path'].'/gutenberg/dist/blocks.build.js',
-		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'),
-		null,
-		true
-	);
-	wp_register_style(
-		'argon-gutenberg-block-backend-css',
-		$GLOBALS['assets_path'].'/gutenberg/dist/blocks.editor.build.css',
-		array('wp-edit-blocks'),
-		filemtime(get_template_directory() . '/gutenberg/dist/blocks.editor.build.css')
-	);
-	register_block_type(
-		'argon/argon-gutenberg-block', array(
-			//'style'         => 'argon-gutenberg-block-frontend-css',
-			'editor_script' => 'argon-gutenberg-block-js',
-			'editor_style'  => 'argon-gutenberg-block-backend-css',
-		)
-	);
+    $dir = get_template_directory() . '/gutenberg/build/';
+    $url = get_template_directory_uri() . '/gutenberg/build/';
+    if (!is_readable($dir . 'blocks.asset.php')) return;
+    $asset = require $dir . 'blocks.asset.php';
+    wp_register_script('argon-blocks', $url . 'blocks.js', $asset['dependencies'], $asset['version'], true);
+    wp_register_style('argon-blocks-editor', $url . 'blocks.css', array(), $asset['version']);
+    wp_set_script_translations('argon-blocks', 'argon', get_template_directory() . '/languages');
+    foreach (glob(get_template_directory() . '/gutenberg/metadata/*/block.json') as $metadata) {
+        register_block_type($metadata);
+    }
 }
 add_action('init', 'argon_init_gutenberg_blocks');
 function argon_add_gutenberg_category($block_categories, $editor_context) {

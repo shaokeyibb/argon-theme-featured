@@ -1,6 +1,5 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/inc/fun/security.php';
 require_once __DIR__ . '/inc/fun/html-document.php';
 
@@ -79,11 +78,6 @@ function theme_locale_hook( $locate, $domain ) {
 
 add_filter( 'theme_locale', 'theme_locale_hook', 10, 2 );
 
-//时区修正
-if ( get_option( 'argon_enable_timezone_fix' ) == 'true' ) {
-	date_default_timezone_set( 'UTC' );
-}
-
 function array_remove( &$arr, $item ) {
 	$pos = array_search( $item, $arr );
 	if ( $pos !== false ) {
@@ -110,7 +104,7 @@ function set_user_token_cookie() {
 	}
 }
 
-set_user_token_cookie();
+// Created by the comment submission handler only; ordinary reads stay cacheable.
 
 //解析 UA 和相应图标
 require_once( get_template_directory() . '/inc/lib/useragent-parser.php' );
@@ -136,10 +130,10 @@ function check_email_address( $email ) {
 
 //首页隐藏特定分类文章
 function argon_home_hide_categories( $query ) {
-	if ( is_home() && $query->is_main_query() ) {
+	if ( !is_admin() && $query->is_home() && $query->is_main_query() ) {
 		$excludeCategories = explode( ",", get_option( "argon_hide_categories" ) );
 		$excludeCategories = array_map( function ( $cat ) {
-			return - $cat;
+			return absint($cat);
 		}, $excludeCategories );
 		$query->set( 'category__not_in', $excludeCategories );
 		$query->set( 'tag__not_in', $excludeCategories );
@@ -161,3 +155,5 @@ add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 require __DIR__ . '/inc/fun/nofollow-friendlink.php';
 
 require __DIR__ . '/inc/fun/chatgpt.php';
+
+require_once __DIR__ . '/inc/editor.php';

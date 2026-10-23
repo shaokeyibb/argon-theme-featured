@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/tabpanel",
+  "title": "Tab 面板",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "list": {
+      "type": "array",
+      "default": [
+        {
+          "title": "",
+          "content": "",
+          "id": 0,
+          "deleted": false
+        }
+      ]
+    },
+    "id": {
+      "type": "string",
+      "default": ""
+    },
+    "active": {
+      "type": "number",
+      "default": 0
+    },
+    "has_animation": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

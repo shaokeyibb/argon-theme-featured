@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/alert",
+  "title": "提示",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "color": {
+      "type": "string",
+      "default": "#7889e8"
+    },
+    "content": {
+      "type": "string",
+      "default": ""
+    },
+    "fa_icon_name": {
+      "type": "string",
+      "default": "info-circle"
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

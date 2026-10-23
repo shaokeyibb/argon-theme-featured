@@ -1,4 +1,9 @@
 <?php
+// SEO plugins own their metadata; sites can override this detection explicitly.
+function argon_should_render_seo_metadata(): bool {
+	$plugin_active = defined('WPSEO_VERSION') || defined('RANK_MATH_VERSION') || defined('AIOSEO_VERSION') || defined('SEOPRESS_VERSION') || function_exists('the_seo_framework');
+	return (bool) apply_filters('argon_render_seo_metadata', !$plugin_active);
+}
 //页面 Description Meta
 function get_seo_description(){
 	global $post;

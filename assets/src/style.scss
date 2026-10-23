@@ -3,7 +3,7 @@ Theme Name: argon
 Author: solstice23
 Author URI: https://solstice23.top/
 Description: 轻盈、简洁、美观的 Wordpress 主题
-Version: 1.3.3
+Version: 3.0.0
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Tags: 简约, 两栏, 侧栏在左边, 浮动侧栏, 文章目录, 自适应, 夜间模式, 可自定义
@@ -12,118 +12,114 @@ Tags: 简约, 两栏, 侧栏在左边, 浮动侧栏, 文章目录, 自适应, �
 @charset "utf-8";
 
 
-@import './styles/global.scss';
+@use './styles/global.scss';
 
 /*页面框架*/
-@import './styles/page-frame.css';
+@use './styles/page-frame.css';
 
 
-/*Pjax加载动画 & 卡片动画*/
-@import './styles/pjax-animations.scss';
+/*卡片入场动画*/
+@use './styles/card-animations.scss';
 
 /*顶栏和 Banner 部分*/
-@import './styles/header.css';
+@use './styles/header.css';
 
 /*左侧栏*/
-@import './styles/sidebar.css';
+@use './styles/sidebar.css';
 
 /*底栏*/
-@import './styles/footer.css';
+@use './styles/footer.css';
 
 /*浮动按钮栏 (回顶等)*/
-@import './styles/float-buttons.css';
+@use './styles/float-buttons.css';
 
 /*页码*/
-@import './styles/pagination.css';
+@use './styles/pagination.css';
 
 /*文章*/
-@import './styles/post.css';
-@import './styles/post-password.css';
-@import './styles/post-catalog.css';
-@import './styles/post-navigation.css';
-@import './styles/post-donate.css';
-@import './styles/post-extra-content.css';
+@use './styles/post.css';
+@use './styles/post-password.css';
+@use './styles/post-catalog.css';
+@use './styles/post-navigation.css';
+@use './styles/post-donate.css';
+@use './styles/post-extra-content.css';
 
 /* AI 摘要卡片 */
-@import "./styles/ai-summary-card.css";
+@use "./styles/ai-summary-card.css";
 
 
 /*Reference*/
-@import './styles/reference.css';
+@use './styles/reference.css';
 
 
 
 
 /*搜索等页面的标题卡片*/
-@import './styles/page-information-card.css';
+@use './styles/page-information-card.css';
 
 
 /*评论区*/
-@import './styles/comment.css';
-@import './styles/comment-content.scss';
-@import './styles/comment-fold.css';
-@import './styles/comment-load.css';
-@import './styles/comment-edit-history.css';
-@import './styles/comment-form.css';
-@import './js/css/comment-emotion.scss';
+@use './styles/comment.css';
+@use './styles/comment-content.scss';
+@use './styles/comment-fold.css';
+@use './styles/comment-load.css';
+@use './styles/comment-edit-history.css';
+@use './styles/comment-form.css';
+@use './styles/comment-emotion.scss';
 
 /*相关文章*/
-@import './js/css/related-posts.scss';
+@use './styles/related-posts.scss';
 
 
 /*短代码适配*/
-@import './styles/shortcodes.css';
+@use './styles/shortcodes.css';
 
 /*noUiSlidebar*/
-@import './styles/libs/noUiSlidebar.css';
 
 /*nprogress 加载进度条*/
-@import './styles/libs/nprogress.css';
 /*iziToast*/
-@import './styles/libs/iziToast.css';
 /*Mathjax 相关*/
-@import './styles/libs/mathjax.css';
 
 /*LazyLoad 加载样式*/
-@import './styles/libs/lazyload.css';
 
 /*Fancybox 样式*/
-@import './styles/libs/fancybox.css';
 /*Zoomify 样式*/
-@import './styles/libs/zoomify.css';
 
 /*Wordpress Adminbar*/
-@import './styles/adminbar.css';
+@use './styles/adminbar.css';
 
 /*说说*/
-@import './styles/shuoshuo.css';
+@use './styles/shuoshuo.css';
 
 /*归档时间轴*/
-@import './styles/archive-timeline.css';
+@use './styles/archive-timeline.css';
 
 /*Loading Animations*/
-@import './styles/loading-animations.css';
+@use './styles/loading-animations.css';
 
 /*Highlight.js*/
-@import './styles/highlight.css';
+@use './styles/highlight.css';
 
 /*==========Style-Dark==========*/
-@import './styles/style-dark.css';
+@use './styles/style-dark.css';
 
 
 /*==========Style-Mobile==========*/
-@import './styles/style-mobile.css';
+@use './styles/style-mobile.css';
 
 
 
 /*打印样式优化*/
-@import './styles/print.css';
+@use './styles/print.css';
 
 /*Noscript*/
-@import './styles/noscript.css';
+@use './styles/noscript.css';
 
 /*Safari 兼容*/
-@import './styles/safari.css';
+@use './styles/safari.css';
 
 /*外链点击统计*/
-@import './styles/external-link-clicks.css';
+@use './styles/external-link-clicks.css';
+@use './styles/shortcodes/todo.scss';
+@use './styles/share.scss';
+@use './styles/horizontal-scroll.scss';

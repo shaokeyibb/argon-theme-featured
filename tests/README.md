@@ -1,58 +1,78 @@
-# 安全回归测试与部署说明
+# 测试与发布
 
-## 本次修复
+所有 PHP 和浏览器测试均创建独立的 WordPress Playground + SQLite 站点；只挂载本仓库读取源码并向 `temp/` 写报告，不连接现有 WordPress 数据库。测试会创建用户、文章和评论并修改主题选项，禁止把测试 PHP 脚本直接载入生产站点。邮件被拦截，AI 使用 WordPress HTTP API 的模拟响应。
 
-- `update_post_meta_ajax` 与 `regenerate_ai_post_summary` 移除匿名入口，要求登录、有效 nonce、有效文章/页面和对应对象编辑权限。元数据只能修改主题设置白名单中的键，并检查值类型和枚举值；相同值也必须先通过鉴权。
-- 文末 HTML 与自定义 CSS 额外要求 `unfiltered_html`，同时注册元数据权限回调，覆盖主题 AJAX、普通保存与 WordPress 自定义字段入口。后台 textarea 和 Discourse 字段均按输出上下文转义。
-- 评论编辑、置顶、历史、点赞、说说点赞与验证码 AJAX 增加请求校验。置顶要求评论管理权限；访问评论和历史同时检查文章可见性、密码、审核状态和悄悄话权限。普通评论提交也校验父评论归属与可见性。
-- 评论 Markdown 最终输出经过 KSES，历史内容作为文本转义；修复短代码属性、GitHub 卡片、分享脚本、SEO、UA 信息、请求头和主题 Cookie 的注入入口。外链统计只接受页面实际生成过的链接凭据。
-- 访客令牌改用 `random_bytes`，比较使用 `hash_equals`；新令牌 Cookie 设置 HttpOnly、SameSite=Lax，并在 HTTPS 下设置 Secure。验证码改用签名种子和服务端密钥计算，移除 PHP Session 和全局随机数重新播种。
-- 修复 PHP 8 下数组输入、空返回值、缺失字段、排序回调和废弃编码参数的问题。远程请求使用 WordPress HTTP API 并设置超时；AI 未配置或调用失败时返回失败，日志不记录 SDK 请求中的密钥。
-- 更新 Composer 锁定依赖：Guzzle 7.16.0、PSR-7 2.13.2、Promises 2.6.0，清除原有依赖安全公告。
+## 准备与构建
 
-## 运行 PHP 集成测试
+使用 Node.js 24（最低 22.22.2），在根目录运行：
 
-只在临时 WordPress 环境运行。脚本会创建用户、文章和评论，修改主题选项，不能载入生产站点。Blueprint 使用独立的 WordPress Playground + SQLite，挂载此目录以读取主题并写入测试报告，不连接现有 WordPress 数据库。测试屏蔽邮件发送，不调用实际 AI 服务。
-
-准备 Composer 生产依赖，并使用满足 `@wp-playground/cli` engines 要求的 Node.js。在仓库根目录运行（PowerShell）：
-
-```powershell
-composer install --no-dev --prefer-dist --no-interaction
-npx --yes @wp-playground/cli@3.1.60 run-blueprint --mount-dir (Get-Location).Path /wordpress/wp-content/themes/argon-theme --blueprint tests/security-blueprint.json
-Get-Content temp/security-report-8.3.json
+```sh
+npm ci
+npm run build
+npm test
+npm audit
 ```
 
-Blueprint 默认测试 PHP 8.3。修改副本中的 `preferredVersions.php` 为 `8.1` 或 `8.5` 可测试其他版本。每次运行都会新建数据库，报告写入 `temp/security-report-<PHP主次版本>.json`；报告 `failed` 必须为 0，命令退出码必须为 0。
+不再需要 Composer、pnpm、Parcel 或全局 PHP。`npm test` 检查发行文件白名单、manifest 引用、全部本地 CSS 资源路径、区块 metadata 类型及旧运行库意外回归。
 
-测试直接调用主题 AJAX 处理函数，通过 WordPress 的 `wp_die_ajax_handler` 读取响应。角色权限、nonce、KSES、文章/评论和元数据操作均使用真实 WordPress；另检查匿名 hook 已移除。它覆盖异常输入、越权和恶意 HTML，也覆盖合法元数据保存、匿名评论提交/编辑、验证码刷新、正常外链点击与页面渲染。主题 PHP 警告和弃用提示会使测试失败。
+## PHP 集成测试
 
-## 验证记录
-
-2026-10-21，WordPress 7.1.3：
-
-| PHP | 集成测试 |
-| --- | --- |
-| 8.1.34 | 96 项通过 |
-| 8.3.33 | 96 项通过 |
-| 8.5.10 | 96 项通过 |
-
-另已检查全部已跟踪 PHP 文件及新增 PHP 文件的语法，运行前端 `pnpm run build`，并在真实浏览器 DOM 中验证 GitHub 卡片前端/后端两条路径对恶意描述与主页地址的处理（4 个用例）。
-
-依赖审计命令：
-
-```powershell
-composer audit --locked --no-dev --abandoned=report
-pnpm --dir assets audit --prod
-pnpm --dir assets run build
+```sh
+npm run test:php
+node scripts/test-php.mjs security
+node scripts/test-php.mjs html-document modernization
 ```
 
-本次 Composer 与 pnpm 生产依赖安全公告均为 0。`haozi-team/chatgpt-php` 仍被标记为 abandoned；本次保留现有 SDK 接口并修复其错误处理，后续应单独迁移 SDK。审计结果仅覆盖依赖数据库已收录的公告。
+默认 WordPress 7.0 / PHP 8.3，可通过环境变量切换。在 PowerShell 中：
 
-## 部署要点
+```powershell
+$env:ARGON_TEST_WP = '7.0'
+$env:ARGON_TEST_PHP = '8.5'
+npm run test:php
+```
 
-1. 服务器至少使用 PHP 8.1，并保留主题已依赖的 DOM、mbstring 等扩展。`style.css` 已声明最低 PHP 版本。
-2. 按更新后的 `composer.lock` 执行 `composer install --no-dev --prefer-dist --no-interaction`；仅复制 PHP 文件而沿用旧 `vendor` 不会获得依赖补丁。
-3. 同时发布 PHP 文件与 `assets/dist/argon-theme.js`，清理页面缓存和 CDN 缓存。新增 nonce 参数要求前后端版本一致；长时间缓存的页面可能持有过期 nonce，页面缓存时间需短于站点 nonce 有效期。
-4. 原始 HTML/CSS 现在只允许有 `unfiltered_html` 权限的用户修改。既有内容不会自动重写；如果站点曾开放不可信作者账号，应另行检查历史内容。
+在 POSIX shell 中：
 
-以上回归记录来自本地代码和隔离测试站点。真实 AI 服务成功响应、特定插件组合或生产缓存配置需在部署环境另行验证；公开点赞和计数接口的 nonce 也不等同于反刷限流。
+```sh
+ARGON_TEST_WP=6.6 ARGON_TEST_PHP=8.2 npm run test:php
+```
+
+脚本要求命令成功、报告产生于本次执行且 `failed` 为零，结果保存在 `temp/<suite>-report-<php>-wp-<wp>.json`。同一工作目录不要并行运行两个 PHP 版本相同、WordPress 版本不同的任务，它们会共享中间报告名。版本选择如 `7.0` 会解析为该分支可用的补丁版，实际版本以报告为准。
+
+| 套件 | 检查数 | 主要覆盖 |
+| --- | ---: | --- |
+| security | 96 | nonce、对象权限、匿名入口、元数据白名单、KSES/XSS、验证码、评论写入/编辑/历史/点赞/置顶、远程请求失败 |
+| html-document | 50 | HTML 文档权限、媒体源码保护、短代码和区块、修订预览、替代正文、隔离桥接、索引与摘要 |
+| modernization | 19 | PHP 语法、原生主题支持、API 3、资源构建、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI HTTP 成功及失败 |
+
+测试把主题产生的 PHP 警告和弃用提示视为失败。AI 测试验证请求与响应处理，不代表实际服务凭据、配额或特定模型可用。
+
+## 浏览器集成测试
+
+```sh
+npx playwright install chromium
+npm run test:browser
+```
+
+自动启动 `127.0.0.1:9400` 的一次性 WordPress 站点，使用 6 个 PHP worker，禁止 WP-Cron。Windows 已有 Chrome 时可设置 `$env:ARGON_BROWSER_CHANNEL = 'chrome'`。该站点的测试账号只用于此隔离实例。
+
+六个流程覆盖桌面和手机页面、无 jQuery 前台、代码和公式、折叠块、灯箱键盘操作、深色模式持久化、评论提交与编辑、回复和管理交互、HTML 文档的脚本隔离/高度/主题同步、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存和无 JavaScript 阅读。每个流程监控未处理的浏览器脚本异常。旧区块 fixture 来自旧版真实构建产物的序列化结果，避免使用新实现生成自己的兼容性期望。
+
+截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
+
+## 发行包
+
+```sh
+npm run package
+npm run test:package
+```
+
+包内顶层目录为 `argon-theme-featured/`，包含 PHP、区块 metadata、编译资源、语言、表情、许可证和文档。固定文件顺序、时间戳与权限，便于校验同一构建的产物。安装测试将 ZIP 安装到全新的 WordPress 实例，验证激活、页面输出、区块注册和必需文件，不从源码主题目录加载运行资源。
+
+[CI 配置](../.github/workflows/modernization.yml) 执行 npm 审计、构建检查、浏览器测试，以及 WordPress 6.6 / PHP 8.2 和 WordPress 7.0 / PHP 8.2–8.5 的 PHP 矩阵。CI 配置本身不表示远端任务已执行；本地实际验证结果见[现代化报告](../docs/MODERNIZATION.md)。
+
+## 升级检查
+
+完整发布 PHP 与编译资源后清理页面和 CDN 缓存，避免旧页面持有新接口不接受的 nonce。页面缓存有效期应短于站点 nonce 的有效期。原始 HTML/CSS 仍要求 `unfiltered_html`，公开计数/点赞 nonce 仍只是请求校验，并不提供反刷限流。
+
+2026-10-21 的旧验证针对重构前版本（Composer、pnpm、PHP 8.1）；其依赖安装方式与基线已被本文替代。原有 96 项安全检查和 50 项 HTML 文档检查仍保留并持续执行。

@@ -98,13 +98,8 @@
     });
     new MutationObserver(function () { states.forEach(function (_, frame) { theme(frame); }); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] });
-    if (window.jQuery) {
-        window.jQuery(document).on('pjax:end.argonHtml pjax:complete.argonHtml', initialize)
-            .on('pjax:beforeReplace.argonHtml', function () { states.clear(); });
-    }
     window.argonHtmlInitialize = initialize;
-    // Argon's bundle can own a different jQuery instance from WordPress. Observe mounts directly
-    // rather than relying exclusively on events registered against one copy's event registry.
+    // Support blocks mounted dynamically by plugins without a navigation-library dependency.
     var pendingInitialization = false;
     new MutationObserver(function (records) {
         var changed = records.some(function (record) {

@@ -1,8 +1,9 @@
-.external-link-click-wrapper {
+.argon-external-link, .external-link-click-wrapper {
 	position: relative;
 	display: inline-block;
 }
-.external-link-click-badge {
+.argon-external-link[data-argon-click-count]::after, .external-link-click-badge {
+	content: attr(data-argon-click-count);
 	position: absolute;
 	top: -0.6em;
 	right: -1.2em;

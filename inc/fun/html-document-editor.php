@@ -16,7 +16,7 @@ function argon_html_register_meta(): void {
 		'postId' => get_the_ID() ?: 0,
 	));
 	register_block_type('argon/html-document', array(
-		'api_version' => 2, 'editor_script' => 'argon-html-editor', 'editor_style' => 'argon-html-document-editor',
+		'api_version' => 3, 'editor_script' => 'argon-html-editor', 'editor_style' => 'argon-html-document-editor',
 		'attributes' => array('source' => array('type' => 'string', 'default' => ''), 'fileId' => array('type' => 'number', 'default' => 0),
 			'height' => array('type' => 'string', 'default' => 'auto'), 'hideHeader' => array('type' => 'boolean', 'default' => false)),
 		'render_callback' => static fn() => '',
@@ -198,7 +198,7 @@ function argon_html_editor_assets(string $hook): void {
 		wp_enqueue_script('argon-html-editor');
 	} else {
 		// Do not pull Gutenberg into Githuber MD / Classic Editor.
-		wp_enqueue_script('argon-html-classic-editor', get_template_directory_uri() . '/assets/html-document/editor.js', array('jquery'),
+		wp_enqueue_script('argon-html-classic-editor', get_template_directory_uri() . '/assets/html-document/editor.js', array(),
 			(string) filemtime(get_template_directory() . '/assets/html-document/editor.js'), true);
 		wp_localize_script('argon-html-classic-editor', 'argonHtmlEditor', array('ajaxUrl' => admin_url('admin-ajax.php'),
 			'nonce' => wp_create_nonce('argon_html_editor'), 'canAuthor' => current_user_can('unfiltered_html'),
@@ -206,12 +206,13 @@ function argon_html_editor_assets(string $hook): void {
 	}
 	wp_enqueue_style('argon-html-document', get_template_directory_uri() . '/assets/html-document/style.css', array(),
 		(string) filemtime(get_template_directory() . '/assets/html-document/style.css'));
-	wp_enqueue_script('argon-html-document', get_template_directory_uri() . '/assets/html-document/host.js', array('jquery'),
+	wp_enqueue_script('argon-html-document', get_template_directory_uri() . '/assets/html-document/host.js', array(),
 		(string) filemtime(get_template_directory() . '/assets/html-document/host.js'), true);
 }
 add_action('admin_enqueue_scripts', 'argon_html_editor_assets');
 
 add_action('add_meta_boxes', static function() {
+	if (get_post() && use_block_editor_for_post(get_post())) return;
 	if (!current_user_can('unfiltered_html')) {
 		return;
 	}

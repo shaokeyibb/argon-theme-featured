@@ -17,7 +17,7 @@ import {
 } from '@wordpress/components';
 import { isWhitespaceCharacter } from 'is-whitespace-character'
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 const calcTranslucentColor = (color) => {
 	if (color.length == 7){
@@ -52,11 +52,11 @@ registerBlockType('argon/collapse', {
 			default: ''
 		},
 		collapsed: {
-			type: 'bool',
+			type: 'boolean',
 			default: true
 		},
 		show_left_border: {
-			type: 'bool',
+			type: 'boolean',
 			default: false
 		}
 	},
@@ -171,7 +171,7 @@ registerBlockType('argon/collapse', {
 					<span className="collapse-block-title-inner" dangerouslySetInnerHTML={{ __html: props.attributes.title }}/>
 					<i className="collapse-icon fa fa-angle-down"></i>
 				</div>
-				<div className="collapse-block-body" style={props.attributes.collapsed ? "display: none" : ""} dangerouslySetInnerHTML={{ __html: props.attributes.content }}/>
+				<div className="collapse-block-body" style={props.attributes.collapsed ? { display: 'none' } : undefined} dangerouslySetInnerHTML={{ __html: props.attributes.content }}/>
 			</div>
 		);
 	},

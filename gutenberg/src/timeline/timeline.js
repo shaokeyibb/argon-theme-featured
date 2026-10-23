@@ -17,7 +17,7 @@ import {
 	Panel, PanelBody, PanelRow
 } from '@wordpress/components';
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 registerBlockType('argon/timeline', {
 	title: __('时间线'),
@@ -104,7 +104,7 @@ registerBlockType('argon/timeline', {
 				return;
 			}
 			return (
-				<div class="argon-timeline-node" key={node.id.toString()}>
+				<div className="argon-timeline-node" key={node.id.toString()}>
 					<RichText
 						tagName="div"
 						className="argon-timeline-time"
@@ -112,7 +112,7 @@ registerBlockType('argon/timeline', {
 						value={node.time}
 						onChange={value => onChangeTime(value, node.id)}
 					/>
-					<div class="argon-timeline-card bg-gradient-secondary shadow-sm">
+					<div className="argon-timeline-card bg-gradient-secondary shadow-sm">
 						<RichText
 							tagName="div"
 							className="argon-timeline-title"
@@ -128,7 +128,7 @@ registerBlockType('argon/timeline', {
 							onChange={value => onChangeContent(value, node.id)}
 						/>
 						{getUndeletedItemsCount(props.attributes.list) > 1 &&
-							<Button className="is-tertiary timeline-remove-item-btn" onClick={() => removeNode(node.id)} style={{color: "#7889e8"}}><span class="dashicon dashicons dashicons-trash"></span></Button>
+							<Button className="is-tertiary timeline-remove-item-btn" onClick={() => removeNode(node.id)} style={{color: "#7889e8"}}><span className="dashicon dashicons dashicons-trash"></span></Button>
 						}
 					</div>
 				</div>
@@ -137,7 +137,7 @@ registerBlockType('argon/timeline', {
 
 		return (
 			<div>
-				<div class="argon-timeline">
+				<div className="argon-timeline">
 					{nodelist}
 					<Button className="is-primary" onClick={addNode}  style={{marginTop: 8, backgroundColor: "#7889e8"}}>{__("+ 添加节点")}</Button>
 				</div>
@@ -150,11 +150,11 @@ registerBlockType('argon/timeline', {
 				return;
 			}
 			return (
-				<div class="argon-timeline-node">
+				<div className="argon-timeline-node">
 					{(node.time != "") &&
 						<div className="argon-timeline-time" dangerouslySetInnerHTML={{ __html: node.time }}></div>
 					}
-					<div class="argon-timeline-card card bg-gradient-secondary shadow-sm">
+					<div className="argon-timeline-card card bg-gradient-secondary shadow-sm">
 						{(node.title != "") &&
 							<div className="argon-timeline-title" dangerouslySetInnerHTML={{ __html: node.title }}></div>
 						}
@@ -167,7 +167,7 @@ registerBlockType('argon/timeline', {
 		});
 		return (
 			<div>
-				<div class="argon-timeline">
+				<div className="argon-timeline">
 					{nodelist}
 				</div>
 			</div>

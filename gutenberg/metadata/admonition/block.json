@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/admonition",
+  "title": "警告",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "color": {
+      "type": "string",
+      "default": "#7889e8"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "content": {
+      "type": "string",
+      "default": ""
+    },
+    "fa_icon_name": {
+      "type": "string",
+      "default": ""
+    },
+    "show_title": {
+      "type": "boolean",
+      "default": false
+    },
+    "show_content": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

@@ -17,7 +17,7 @@ import {
 } from '@wordpress/components';
 import { isWhitespaceCharacter } from 'is-whitespace-character'
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 registerBlockType('argon/admonition', {
 	title: __('警告'),
@@ -45,11 +45,11 @@ registerBlockType('argon/admonition', {
 			default: ''
 		},
 		show_title: {
-			type: 'bool',
+			type: 'boolean',
 			default: false
 		},
 		show_content: {
-			type: 'bool',
+			type: 'boolean',
 			default: true
 		},
 	},

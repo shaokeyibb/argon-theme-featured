@@ -16,7 +16,7 @@ import {
 	Panel, PanelBody, PanelRow
 } from '@wordpress/components';
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -42,7 +42,7 @@ registerBlockType('argon/progressbar', {
 			default: 50
 		},
 		show_title: {
-			type: 'bool',
+			type: 'boolean',
 			default: true
 		}
 	},
@@ -61,10 +61,10 @@ registerBlockType('argon/progressbar', {
 		}
 		return (
 			<div>
-				<div class="progress-wrapper">
-					<div class="progress-info">
+				<div className="progress-wrapper">
+					<div className="progress-info">
 						{props.attributes.show_title &&
-							<div class="progress-label">
+							<div className="progress-label">
 								<RichText
 									tagName="span"
 									placeholder={__("标题")}
@@ -73,12 +73,12 @@ registerBlockType('argon/progressbar', {
 								/>
 							</div>
 						}
-						<div class="progress-percentage">
+						<div className="progress-percentage">
 							<span>{props.attributes.progress}%</span>
 						</div>
 					</div>
-					<div class="progress">
-						<div class="progress-bar" style={{ width: props.attributes.progress.toString() + "%", backgroundColor: props.attributes.color }} />
+					<div className="progress">
+						<div className="progress-bar" style={{ width: props.attributes.progress.toString() + "%", backgroundColor: props.attributes.color }} />
 					</div>
 				</div>
 				<InspectorControls key="setting">
@@ -122,19 +122,19 @@ registerBlockType('argon/progressbar', {
 	},
 	save: (props) => {
 		return (
-			<div class="progress-wrapper">
-				<div class="progress-info">
+			<div className="progress-wrapper">
+				<div className="progress-info">
 					{props.attributes.show_title &&
-						<div class="progress-label">
+						<div className="progress-label">
 							<span dangerouslySetInnerHTML={{ __html: props.attributes.title }}/>
 						</div>
 					}
-					<div class="progress-percentage">
+					<div className="progress-percentage">
 						<span>{props.attributes.progress}%</span>
 					</div>
 				</div>
-				<div class="progress">
-					<div class="progress-bar" style={{ width: props.attributes.progress.toString() + "%", backgroundColor: props.attributes.color }} />
+				<div className="progress">
+					<div className="progress-bar" style={{ width: props.attributes.progress.toString() + "%", backgroundColor: props.attributes.color }} />
 				</div>
 			</div>
 		);

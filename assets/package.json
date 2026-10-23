@@ -1,48 +1,10 @@
 {
-  "name": "argon-js",
-  "version": "1.0.0",
-  "description": "",
-  "source": "src/argon-theme.js",
-  "scripts": {
-    "watch": "parcel watch",
-    "build": "parcel build",
-    "clean": "rimraf dist .parcel-cache"
-  },
-  "author": "solstice23",
-  "license": "GPL-3.0",
-  "browserslist": [
-    "> 0.5%",
-    "last 2 versions",
-    "not dead"
-  ],
-  "devDependencies": {
-    "@fullhuman/postcss-purgecss": "^7.0.2",
-    "@parcel/reporter-bundle-analyzer": "^2.12.0",
-    "@parcel/transformer-sass": "^2.12.0",
-    "cssnano": "^7.1.2",
-    "parcel": "^2.12.0",
-    "path-browserify": "^1.0.1",
-    "postcss": "^8.4.49",
-    "rimraf": "^6.0.1"
-  },
+  "name": "@argon/frontend", "version": "3.0.0", "private": true, "type": "module",
+  "scripts": { "dev": "vite build --watch", "build": "vite build" },
   "dependencies": {
-    "@fancyapps/ui": "^4.0.31",
-    "@popperjs/core": "^2.11.8",
-    "@simonwep/pickr": "^1.9.1",
-    "bootstrap": "^4.6.2",
-    "clamp-js": "^0.7.0",
-    "clipboard": "^2.0.11",
-    "fontawesome-4.7": "^4.7.0",
-    "headroom.js": "^0.12.0",
-    "highlight.js": "^11.10.0",
-    "highlightjs-line-numbers.js": "^2.8.0",
-    "izitoast": "^1.4.0",
-    "jquery": "^3.7.1",
-    "jquery.easing": "^1.4.1",
-    "nouislider": "^15.8.1",
-    "nprogress": "^0.2.0",
-    "pangu": "^4.0.7",
-    "qrcode": "^1.5.4",
-    "tippy.js": "^6.3.7"
-  }
+    "bootstrap": "^5.3.8", "@popperjs/core": "^2.11.8", "@fortawesome/fontawesome-free": "^7.3.1",
+    "highlight.js": "^11.11.1", "katex": "^0.19.0", "pangu": "^7.2.0",
+    "photoswipe": "^5.4.4", "qrcode": "^1.5.4"
+  },
+  "devDependencies": { "vite": "^8.3.5", "sass": "^1.93.2" }
 }

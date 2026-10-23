@@ -72,11 +72,8 @@
 ?>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<?php if (get_option('argon_enable_mobile_scale') != 'true'){ ?>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<?php }else{ ?>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-	<?php } ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<?php if (argon_should_render_seo_metadata()) : ?>
 	<meta property="og:site_name" content="<?php echo esc_attr(get_bloginfo('name'));?>">
 	<meta property="og:title" content="<?php echo esc_attr(wp_get_document_title());?>">
 	<meta property="og:type" content="article">
@@ -102,6 +99,7 @@
 	<?php 	}
 		} ?>
 
+	<?php endif; ?>
 	<meta name="theme-color" content="<?php echo $themecolor; ?>">
 	<meta name="theme-color-rgb" content="<?php echo hex2str($themecolor); ?>">
 	<meta name="theme-color-origin" content="<?php echo $themecolor_origin; ?>">
@@ -117,32 +115,20 @@
 	<?php if ( is_singular() && pings_open( get_queried_object() ) ) : ?>
 	<link rel="pingback" href="<?php echo esc_url( get_bloginfo( 'pingback_url' ) ); ?>">
 	<?php endif; ?>
-	<?php
-		wp_enqueue_style("style", $GLOBALS['assets_path'] . "/assets/dist/argon-theme.css", null, $GLOBALS['theme_version']);
-		if (get_option('argon_disable_googlefont') != 'true') {wp_enqueue_style("googlefont", "//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Serif+SC:300,600&display=swap");}
-	?>
-	<?php $GLOBALS['wp_path'] = get_option('argon_wp_path') == '' ? '/' : get_option('argon_wp_path'); ?>
 	<script>
 		document.documentElement.classList.remove("no-js");
 		var argonConfig = <?php echo argon_json(array(
 			'ajax_nonce' => wp_create_nonce('argon_public_ajax'),
-			'wp_path' => $GLOBALS['wp_path'],
+			'ajax_url' => admin_url('admin-ajax.php'),
+			'home_url' => home_url('/'),
+			'lightbox' => get_option('argon_enable_lightbox', 'true') !== 'false',
+			'math' => get_option('argon_math_render') === 'katex',
+			'captcha_ajax' => get_option('argon_get_captcha_by_ajax') === 'true',
 			'language' => argon_get_locate(),
 			'dateFormat' => get_option('argon_dateformat', 'YMD'),
-			'zoomify' => get_option('argon_enable_zoomify') === 'true' ? array(
-				'duration' => (int) get_option('argon_zoomify_duration', 200),
-				'easing' => get_option('argon_zoomify_easing', 'cubic-bezier(0.4,0,0,1)'),
-				'scale' => (float) get_option('argon_zoomify_scale', 0.9)
-			) : false,
 			'pangu' => get_option('argon_enable_pangu', 'false'),
-			'lazyload' => get_option('argon_enable_lazyload') !== 'false' ? array(
-				'threshold' => (int) get_option('argon_lazyload_threshold', 800),
-				'effect' => get_option('argon_lazyload_effect', 'fadeIn')
-			) : false,
 			'fold_long_comments' => get_option('argon_fold_long_comments', 'false') === 'true',
 			'fold_long_shuoshuo' => get_option('argon_fold_long_shuoshuo', 'false') === 'true',
-			'disable_pjax' => get_option('argon_pjax_disabled', 'false') === 'true',
-			'pjax_animation_durtion' => get_option('argon_disable_pjax_animation') === 'true' ? 0 : 600,
 			'headroom' => get_option('argon_enable_headroom', 'false'),
 			'waterflow_columns' => get_option('argon_article_list_waterflow', '1'),
 			'code_highlight' => array(
@@ -157,6 +143,8 @@
 		)); ?>;
 	</script>
 	<script>
+		function argonSafeStorage(name){ return {getItem: function(key){try{return window[name].getItem(key);}catch(e){return null;}},setItem: function(key,value){try{window[name].setItem(key,value);}catch(e){}}}; }
+		var argonSession = argonSafeStorage('sessionStorage'), argonLocal = argonSafeStorage('localStorage');
 		var darkmodeAutoSwitch = <?php echo argon_json(get_option('argon_darkmode_autoswitch') ?: 'false'); ?>;
 		function setDarkmode(enable){
 			if (enable){
@@ -171,17 +159,17 @@
 		function toggleDarkmode(){
 			if (document.documentElement.classList.contains("darkmode")){
 				setDarkmode(false);
-				sessionStorage.setItem("Argon_Enable_Dark_Mode", "false");
+				argonSession.setItem("Argon_Enable_Dark_Mode", "false");
 			}else{
 				setDarkmode(true);
-				sessionStorage.setItem("Argon_Enable_Dark_Mode", "true");
+				argonSession.setItem("Argon_Enable_Dark_Mode", "true");
 			}
 		}
-		if (sessionStorage.getItem("Argon_Enable_Dark_Mode") == "true"){
+		if (argonSession.getItem("Argon_Enable_Dark_Mode") == "true"){
 			setDarkmode(true);
 		}
 		function toggleDarkmodeByPrefersColorScheme(media){
-			if (sessionStorage.getItem('Argon_Enable_Dark_Mode') == "false" || sessionStorage.getItem('Argon_Enable_Dark_Mode') == "true"){
+			if (argonSession.getItem('Argon_Enable_Dark_Mode') == "false" || argonSession.getItem('Argon_Enable_Dark_Mode') == "true"){
 				return;
 			}
 			if (media.matches){
@@ -191,7 +179,7 @@
 			}
 		}
 		function toggleDarkmodeByTime(){
-			if (sessionStorage.getItem('Argon_Enable_Dark_Mode') == "false" || sessionStorage.getItem('Argon_Enable_Dark_Mode') == "true"){
+			if (argonSession.getItem('Argon_Enable_Dark_Mode') == "false" || argonSession.getItem('Argon_Enable_Dark_Mode') == "true"){
 				return;
 			}
 			let hour = new Date().getHours();
@@ -203,7 +191,7 @@
 		}
 		if (darkmodeAutoSwitch == 'system'){
 			var darkmodeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-			darkmodeMediaQuery.addListener(toggleDarkmodeByPrefersColorScheme);
+			darkmodeMediaQuery.addEventListener('change', toggleDarkmodeByPrefersColorScheme);
 			toggleDarkmodeByPrefersColorScheme(darkmodeMediaQuery);
 		}
 		if (darkmodeAutoSwitch == 'time'){
@@ -216,14 +204,14 @@
 		function toggleAmoledDarkMode(){
 			document.documentElement.classList.toggle("amoled-dark");
 			if (document.documentElement.classList.contains("amoled-dark")){
-				localStorage.setItem("Argon_Enable_Amoled_Dark_Mode", "true");
+				argonLocal.setItem("Argon_Enable_Amoled_Dark_Mode", "true");
 			}else{
-				localStorage.setItem("Argon_Enable_Amoled_Dark_Mode", "false");
+				argonLocal.setItem("Argon_Enable_Amoled_Dark_Mode", "false");
 			}
 		}
-		if (localStorage.getItem("Argon_Enable_Amoled_Dark_Mode") == "true"){
+		if (argonLocal.getItem("Argon_Enable_Amoled_Dark_Mode") == "true"){
 			document.documentElement.classList.add("amoled-dark");
-		}else if (localStorage.getItem("Argon_Enable_Amoled_Dark_Mode") == "false"){
+		}else if (argonLocal.getItem("Argon_Enable_Amoled_Dark_Mode") == "false"){
 			document.documentElement.classList.remove("amoled-dark");
 		}
 	</script>
@@ -232,21 +220,8 @@
 			document.documentElement.classList.add("using-safari");
 		}
 	</script>
-	<?php 
-		wp_enqueue_script("argonjs", $GLOBALS['assets_path'] . "/assets/dist/argon-theme.js", array(), (string) filemtime(get_template_directory() . '/assets/dist/argon-theme.js'));
-	?>
 	<?php wp_head(); ?>
 
-	<?php if (get_option('argon_enable_smoothscroll_type') == '2') { /*平滑滚动*/?>
-		<script src="<?php echo $GLOBALS['assets_path']; ?>/assets/vendor/smoothscroll/smoothscroll2.js"></script>
-	<?php }else if (get_option('argon_enable_smoothscroll_type') == '3'){?>
-		<script src="<?php echo $GLOBALS['assets_path']; ?>/assets/vendor/smoothscroll/smoothscroll3.min.js"></script>
-	<?php }else if (get_option('argon_enable_smoothscroll_type') == '1_pulse'){?>
-		<script src="<?php echo $GLOBALS['assets_path']; ?>/assets/vendor/smoothscroll/smoothscroll1_pulse.js"></script>
-	<?php }else if (get_option('argon_enable_smoothscroll_type') != 'disabled'){?>
-		<script src="<?php echo $GLOBALS['assets_path']; ?>/assets/vendor/smoothscroll/smoothscroll1.js"></script>
-	<?php }?>
-</head>
 
 <?php echo get_option('argon_custom_html_head'); ?>
 
@@ -283,8 +258,10 @@
 	}
 ?>
 
+</head>
 <body <?php body_class(); ?>>
-<?php /*wp_body_open();*/ ?>
+<?php wp_body_open(); ?>
+<a class="skip-link" href="#main"><?php esc_html_e('跳转到内容', 'argon'); ?></a>
 <div id="toolbar">
 	<header class="header-global">
 		<nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light bg-primary headroom--not-bottom headroom--not-top headroom--pinned">
@@ -305,7 +282,9 @@
 							$toolbar_title = '';
 						}
 					?>
-					<a class="navbar-brand navbar-title" href="<?php bloginfo('url'); ?>"><?php echo $toolbar_title;?></a>
+					<?php if (has_custom_logo() && get_option('argon_toolbar_title') === '') { the_custom_logo(); } else { ?>
+					<a class="navbar-brand navbar-title" href="<?php echo esc_url(home_url('/')); ?>"><?php echo $toolbar_title;?></a>
+					<?php } ?>
 				</div>
 				<div class="navbar-collapse collapse" id="navbar_global">
 					<div class="navbar-collapse-header">

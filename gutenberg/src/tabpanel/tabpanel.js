@@ -17,7 +17,9 @@ import {
 	Panel, PanelBody, PanelRow
 } from '@wordpress/components';
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
+import { useEffect } from '@wordpress/element';
+import { select } from '@wordpress/data';
 
 const getRandomString = (length) => {
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -60,11 +62,11 @@ registerBlockType('argon/tabpanel', {
 		},
 	},
 	edit: (props) => {
-		if (props.attributes.id == '' || (props.attributes.id[0] >= '0' && props.attributes.id[0] <= '9')) {
-			props.setAttributes({
-				id: "tabpanel-" + getRandomString(8)
-			})
-		}
+		useEffect(() => {
+			const editor = select('core/block-editor');
+			const duplicate = props.attributes.id && editor.getClientIdsWithDescendants().some(id => id !== props.clientId && editor.getBlockAttributes(id)?.id === props.attributes.id);
+			if (!props.attributes.id || /^\d/.test(props.attributes.id) || duplicate) props.setAttributes({ id: 'tabpanel-' + props.clientId });
+		}, [props.attributes.id, props.clientId]);
 		const addNode = () => {
 			let newList = [
 				...props.attributes.list,
@@ -149,7 +151,8 @@ registerBlockType('argon/tabpanel', {
 							role="tab"
 							aria-controls={`#${props.attributes.id}-${node.id}`}
 							aria-selected="false"
-							onClick={() => {
+							onClick={(event) => {
+								event.preventDefault();
 								props.setAttributes({ active: node.id });
 							}}
 						/>
@@ -251,14 +254,14 @@ registerBlockType('argon/tabpanel', {
 		});
 		
 		return (
-			<div class="argon-tabpanel">
-				<div class="tabpanel-header nav-wrapper">
-					<ul class="nav nav-pills nav-fill" role="tablist">
+			<div className="argon-tabpanel">
+				<div className="tabpanel-header nav-wrapper">
+					<ul className="nav nav-pills nav-fill" role="tablist">
 						{tabTitleNodeList}
 					</ul>
 				</div>
-				<div class="tabpanel-body card card-body shadow-sm">
-					<div class="tab-content">
+				<div className="tabpanel-body card card-body shadow-sm">
+					<div className="tab-content">
 						{tabContentNodeList}
 					</div>
 				</div>

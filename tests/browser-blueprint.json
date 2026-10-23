@@ -1,0 +1,8 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": { "php": "8.3", "wp": "7.0" },
+  "steps": [
+    { "step": "runPHP", "code": "<?php require '/wordpress/wp-load.php'; update_option('argon_update_source', 'stop'); switch_theme('argon-theme');" },
+    { "step": "runPHP", "code": "<?php define('ARGON_MODERN_TESTING', true); require '/wordpress/wp-load.php'; require '/wordpress/wp-content/themes/argon-theme/tests/browser-fixture.php';" }
+  ]
+}

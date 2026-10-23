@@ -62,7 +62,7 @@
         var components = wp.components;
         var blockEditor = wp.blockEditor || wp.editor;
         wp.blocks.registerBlockType('argon/html-document', {
-            apiVersion: 2, title: translate('Argon HTML 文档'), icon: 'media-code', category: 'argon',
+            apiVersion: 3, title: translate('Argon HTML 文档'), icon: 'media-code', category: 'argon',
             description: translate('替换文章正文；其他区块作为摘要、搜索、RSS 和文本阅读使用的替代正文。'),
             supports: { html: false, multiple: false },
             attributes: { source: { type: 'string', default: '' }, fileId: { type: 'number', default: 0 }, height: { type: 'string', default: 'auto' }, hideHeader: { type: 'boolean', default: false } },

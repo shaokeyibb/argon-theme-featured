@@ -1,0 +1,21 @@
+<?php
+if (!defined('ARGON_MODERN_TESTING')) exit;
+wp_set_current_user(1);
+wp_set_password('argon-browser-local-test', 1);
+update_option('argon_comment_need_captcha', 'false');
+update_option('argon_comment_allow_editing', 'true');
+update_option('argon_enable_comment_pinning', 'true');
+foreach (array('argon_disable_googlefont' => 'true', 'argon_enable_lightbox' => 'true', 'argon_enable_code_highlight' => 'true', 'argon_math_render' => 'katex', 'argon_enable_mathjax' => 'true', 'argon_show_sharebtn' => 'true', 'argon_comment_captcha' => 'false', 'argon_comment_edit' => 'true', 'argon_html_enabled' => 'true', 'argon_html_allow_scripts' => 'true', 'argon_ai_post_summary' => 'false', 'comment_moderation' => '', 'comment_previously_approved' => '', 'require_name_email' => '1') as $key => $value) update_option($key, $value);
+$content = '<!-- wp:heading --><h2 class="wp-block-heading">Modern WordPress content</h2><!-- /wp:heading --><!-- wp:paragraph --><p>原生区块、短代码和评论保持可用。Native blocks remain editable.</p><!-- /wp:paragraph -->';
+$content .= '[collapse title="Expandable content"]<p id="collapse-fixture">Legacy shortcode body</p>[/collapse]';
+$content .= '<h3>Code and math</h3><pre><code class="language-js">const answer = 42;' . "\n" . 'console.log(answer);</code></pre><p>\\(E = mc^2\\)</p>';
+$content .= '<figure class="wp-block-image"><img src="' . esc_url(get_template_directory_uri() . '/screenshot.png') . '" width="1200" height="900" alt="Theme preview"></figure>';
+$content .= '<p>' . str_repeat('Readable content with accessible layout. ', 70) . '</p>';
+$posts = array();
+$posts['normal'] = wp_insert_post(wp_slash(array('post_title' => 'Argon 3 Modernization', 'post_content' => $content, 'post_status' => 'publish', 'comment_status' => 'open')));
+$source = file_get_contents(__DIR__ . '/fixtures/html-document.html');
+$posts['html'] = wp_insert_post(wp_slash(array('post_title' => 'HTML Document', 'post_content' => '<!-- wp:argon/html-document {"source":"' . base64_encode($source) . '"} /-->', 'post_status' => 'publish')));
+$posts['comment'] = wp_insert_comment(array('comment_post_ID' => $posts['normal'], 'comment_author' => 'Existing reader', 'comment_content' => 'Existing comment survives the upgrade.', 'comment_approved' => 1));
+$posts['site'] = home_url('/');
+wp_mkdir_p(__DIR__ . '/../temp');
+file_put_contents(__DIR__ . '/../temp/browser-fixture.json', wp_json_encode($posts));

@@ -1,6 +1,5 @@
 <?php
-	require(preg_replace('/wp-content(.*?)$/', '', dirname( __FILE__ )) . 'wp-blog-header.php');
-	header('HTTP/1.1 200 OK');
+	if (!defined('ABSPATH')) exit;
 	$id = filter_var(argon_request_string($_GET, 'comment'), FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)));
 	$token = argon_request_string($_GET, 'token');
 	$stored_token = $id === false ? '' : get_comment_meta($id, 'mailnotice_unsubscribe_key', true);
@@ -30,54 +29,16 @@
 		$title = "<i class='fa fa-check' style='color: #2dce89;margin-right: 12px;'></i>" . __("退订成功", 'argon');
 		$info = __("您已成功退订评论 #", 'argon') . $id . __(" 的邮件通知<br>该评论下有新回复时您将不会再收到通知", 'argon');
 	}
+add_filter('pre_get_document_title', static fn() => $page_title);
+get_header();
 ?>
-<html>
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-	<link href="<?php bloginfo('template_url'); ?>/assets/vendor/nucleo/css/nucleo.css" rel="stylesheet">
-	<link href="<?php bloginfo('template_url'); ?>/assets/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-	<link type="text/css" href="<?php bloginfo('template_url'); ?>/assets/css/argon.min.css" rel="stylesheet">
-	<script src="<?php bloginfo('template_url'); ?>/assets/vendor/jquery/jquery.min.js"></script>
-	<script src="<?php bloginfo('template_url'); ?>/assets/vendor/bootstrap/bootstrap.min.js"></script>
-	<script src="<?php bloginfo('template_url'); ?>/assets/js/argon.min.js"></script>
-	<title><?php echo $page_title; ?></title>
-</head>
-<body>
-	<div class="position-relative">
-		<section class="section section-lg section-shaped pb-250" style="height: 100vh !important;">
-			<div class="shape shape-style-1 shape-default">
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-				<span></span>
-			</div>
-			<div class="card main-card shadow">
-				<div class="display-3 text-black"><?php echo $title; ?></div>
-				<p class="lead text-black"><?php echo $info; ?></p>
-			</div>
-		</section>
-	</div>
-</body>
-</html>
-
-<style>
-	body{
-		overflow: hidden;
-	}
-	.main-card {
-		width: 700px;
-		max-width: calc(100vw - 50px);
-		margin: auto;
-		padding: 40px 50px;
-		position: fixed;
-		left: 50vw;
-		top: 50vh;
-		transform: translate(-50% , calc(-50% - 60px));
-	}
-</style>
+<div class="page-information-card-container"></div>
+<?php get_sidebar(); ?>
+<div id="primary" class="content-area">
+<main id="main" class="site-main" role="main">
+  <section class="card shadow p-5" style="max-width: 700px; margin: 3rem auto;">
+    <h1><?php echo wp_kses_post($title); ?></h1>
+    <p><?php echo wp_kses_post($info); ?></p>
+    <a class="btn btn-primary" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('返回首页', 'argon'); ?></a>
+  </section>
+<?php get_footer(); ?>

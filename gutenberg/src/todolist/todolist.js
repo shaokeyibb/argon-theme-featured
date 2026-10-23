@@ -17,7 +17,7 @@ import {
 	Panel, PanelBody, PanelRow
 } from '@wordpress/components';
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 registerBlockType('argon/todolist', {
 	title: 'Todo List',
@@ -70,7 +70,6 @@ registerBlockType('argon/todolist', {
 			props.setAttributes({ list: newList });
 		};
 		const onChangeCheckStatus = (value, id) => {
-			console.log(value);
 			let newList = props.attributes.list.map((node) => {
 				if (node.id == id){
 					return {...node, checked: value}
@@ -85,16 +84,16 @@ registerBlockType('argon/todolist', {
 				return;
 			}
 			return (
-				<div class="shortcode-todo custom-control custom-checkbox" key={node.id.toString()}>
-					<input class="custom-control-input" type="checkbox" checked={node.checked}/>
-					<label class="custom-control-label" onClick={e => onChangeCheckStatus(!node.checked, node.id)}/>
+				<div className="shortcode-todo custom-control custom-checkbox" key={node.id.toString()}>
+					<input id={`${props.clientId}-${node.id}`} className="custom-control-input" type="checkbox" checked={node.checked} onChange={event => onChangeCheckStatus(event.target.checked, node.id)} aria-label={__('完成')}/>
+					<label htmlFor={`${props.clientId}-${node.id}`} className="custom-control-label"/>
 					<RichText
 						tagName="span"
 						placeholder={__("条目内容")}
 						value={node.content}
 						onChange={value => onChangeContent(value, node.id)}
 					/>
-					<Button className="is-tertiary todolist-remove-item-btn" onClick={() => removeNode(node.id)} style={{color: "#7889e8"}}><span class="dashicon dashicons dashicons-trash"></span></Button>
+					<Button className="is-tertiary todolist-remove-item-btn" onClick={() => removeNode(node.id)} style={{color: "#7889e8"}}><span className="dashicon dashicons dashicons-trash"></span></Button>
 				</div>
 			);
 		});
@@ -112,9 +111,9 @@ registerBlockType('argon/todolist', {
 				return;
 			}
 			return (
-				<div class="shortcode-todo custom-control custom-checkbox">
-					<input class="custom-control-input" type="checkbox" checked={node.checked ? true : null}/>
-					<label class="custom-control-label">
+				<div className="shortcode-todo custom-control custom-checkbox">
+					<input className="custom-control-input" type="checkbox" checked={node.checked ? true : null}/>
+					<label className="custom-control-label">
 						<span dangerouslySetInnerHTML={{ __html: node.content }}/>
 					</label>
 				</div>
@@ -122,7 +121,7 @@ registerBlockType('argon/todolist', {
 		});
 		
 		return (
-			<div style="margin-bottom: 20px;">
+			<div style={{ marginBottom: '20px' }}>
 				{nodelist}
 			</div>
 		);

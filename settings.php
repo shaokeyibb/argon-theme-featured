@@ -5,10 +5,10 @@ function themeoptions_page(){
 	}
 	/*主题选项*/
 ?>
-<script src="<?php bloginfo('template_url'); ?>/assets/vendor/jquery/jquery.min.js"></script>
-	<script src="<?php bloginfo('template_url'); ?>/assets/vendor/headindex/headindex.js"></script>
-	<script>!function(n){"function"==typeof define&&define.amd?define(["jquery"],function(e){return n(e)}):"object"==typeof module&&"object"==typeof module.exports?module.exports=n(require("jquery")):n(jQuery)}(function(n){function e(n){var e=7.5625,t=2.75;return n<1/t?e*n*n:n<2/t?e*(n-=1.5/t)*n+.75:n<2.5/t?e*(n-=2.25/t)*n+.9375:e*(n-=2.625/t)*n+.984375}void 0!==n.easing&&(n.easing.jswing=n.easing.swing);var t=Math.pow,u=Math.sqrt,r=Math.sin,i=Math.cos,a=Math.PI,o=1.70158,c=1.525*o,s=2*a/3,f=2*a/4.5;return n.extend(n.easing,{def:"easeOutQuad",swing:function(e){return n.easing[n.easing.def](e)},easeInQuad:function(n){return n*n},easeOutQuad:function(n){return 1-(1-n)*(1-n)},easeInOutQuad:function(n){return n<.5?2*n*n:1-t(-2*n+2,2)/2},easeInCubic:function(n){return n*n*n},easeOutCubic:function(n){return 1-t(1-n,3)},easeInOutCubic:function(n){return n<.5?4*n*n*n:1-t(-2*n+2,3)/2},easeInQuart:function(n){return n*n*n*n},easeOutQuart:function(n){return 1-t(1-n,4)},easeInOutQuart:function(n){return n<.5?8*n*n*n*n:1-t(-2*n+2,4)/2},easeInQuint:function(n){return n*n*n*n*n},easeOutQuint:function(n){return 1-t(1-n,5)},easeInOutQuint:function(n){return n<.5?16*n*n*n*n*n:1-t(-2*n+2,5)/2},easeInSine:function(n){return 1-i(n*a/2)},easeOutSine:function(n){return r(n*a/2)},easeInOutSine:function(n){return-(i(a*n)-1)/2},easeInExpo:function(n){return 0===n?0:t(2,10*n-10)},easeOutExpo:function(n){return 1===n?1:1-t(2,-10*n)},easeInOutExpo:function(n){return 0===n?0:1===n?1:n<.5?t(2,20*n-10)/2:(2-t(2,-20*n+10))/2},easeInCirc:function(n){return 1-u(1-t(n,2))},easeOutCirc:function(n){return u(1-t(n-1,2))},easeInOutCirc:function(n){return n<.5?(1-u(1-t(2*n,2)))/2:(u(1-t(-2*n+2,2))+1)/2},easeInElastic:function(n){return 0===n?0:1===n?1:-t(2,10*n-10)*r((10*n-10.75)*s)},easeOutElastic:function(n){return 0===n?0:1===n?1:t(2,-10*n)*r((10*n-.75)*s)+1},easeInOutElastic:function(n){return 0===n?0:1===n?1:n<.5?-t(2,20*n-10)*r((20*n-11.125)*f)/2:t(2,-20*n+10)*r((20*n-11.125)*f)/2+1},easeInBack:function(n){return 2.70158*n*n*n-o*n*n},easeOutBack:function(n){return 1+2.70158*t(n-1,3)+o*t(n-1,2)},easeInOutBack:function(n){return n<.5?t(2*n,2)*(7.189819*n-c)/2:(t(2*n-2,2)*((c+1)*(2*n-2)+c)+2)/2},easeInBounce:function(n){return 1-e(1-n)},easeOutBounce:e,easeInOutBounce:function(n){return n<.5?(1-e(1-2*n))/2:(1+e(2*n-1))/2}}),n});</script>
-	<script src="<?php bloginfo('template_url'); ?>/assets/vendor/dragula/dragula.min.js"></script>
+
+
+
+
 	<div>
 		<style type="text/css">
 			h2{
@@ -53,8 +53,8 @@ function themeoptions_page(){
 						<th><label><?php _e("主题颜色", 'argon');?></label></th>
 						<td>
 							<input type="color" class="regular-text" name="argon_theme_color" value="<?php echo get_option('argon_theme_color') == "" ? "#5e72e4" : get_option('argon_theme_color'); ?>" style="height:40px;width: 80px;cursor: pointer;"/>
-							<input type="text" readonly name="argon_theme_color_hex_preview" value="<?php echo get_option('argon_theme_color') == "" ? "#5e72e4" : get_option('argon_theme_color'); ?>" style="height: 40px;width: 80px;vertical-align: bottom;background: #fff;cursor: pointer;" onclick="$('input[name=\'argon_theme_color\']').click()"/></p>
-							<p class="description"><div style="margin-top: 15px;"><?php _e("选择预置颜色 或", 'argon');?> <span onclick="$('input[name=\'argon_theme_color\']').click()" style="text-decoration: underline;cursor: pointer;"><?php _e("自定义色值", 'argon');?></span>
+							<input type="text" readonly name="argon_theme_color_hex_preview" value="<?php echo get_option('argon_theme_color') == "" ? "#5e72e4" : get_option('argon_theme_color'); ?>" style="height: 40px;width: 80px;vertical-align: bottom;background: #fff;cursor: pointer;"/></p>
+							<p class="description"><div style="margin-top: 15px;"><?php _e("选择预置颜色 或", 'argon');?> <span data-argon-color-picker style="text-decoration: underline;cursor: pointer;"><?php _e("自定义色值", 'argon');?></span>
 								<br/><br/><?php _e("预置颜色：", 'argon');?></div>
 								<div class="themecolor-preview-container">
 									<div class="themecolor-preview-box"><div class="themecolor-preview" style="background:#5e72e4;" color="#5e72e4"></div><div class="themecolor-name">Argon (<?php _e("默认", 'argon');?>)</div></div>
@@ -71,15 +71,7 @@ function themeoptions_page(){
 									<div class="themecolor-preview-box"><div class="themecolor-preview" style="background:#795547;" color="#795547"></div><div class="themecolor-name"><?php _e("棕", 'argon');?></div></div>
 								</div>
 								<br/><?php _e('主题色与 "Banner 渐变背景样式" 选项搭配使用效果更佳', 'argon');?>
-								<script>
-									$("input[name='argon_theme_color']").on("change" , function(){
-										$("input[name='argon_theme_color_hex_preview']").val($("input[name='argon_theme_color']").val());
-									});
-									$(".themecolor-preview").on("click" , function(){
-										$("input[name='argon_theme_color']").val($(this).attr("color"));
-										$("input[name='argon_theme_color']").trigger("change");
-									});
-								</script>
+
 								<style>
 									.themecolor-name{width: 100px;text-align: center;}
 									.themecolor-preview{width: 50px;height: 50px;margin: 20px 25px 5px 25px;line-height: 50px;color: #fff;margin-right: 0px;font-size: 15px;text-align: center;display: inline-block;border-radius: 50px;transition: all .3s ease;cursor: pointer;}
@@ -281,42 +273,15 @@ function themeoptions_page(){
 					<tr>
 						<th><label>CDN</label></th>
 						<td>
-							<select name="argon_assets_path">
-								<?php $argon_assets_path = get_option('argon_assets_path'); ?>
-								<option value="default" <?php if ($argon_assets_path=='default'){echo 'selected';} ?>><?php _e('不使用', 'argon');?></option>
-								<option value="jsdelivr" <?php if ($argon_assets_path=='jsdelivr'){echo 'selected';} ?>>Jsdelivr</option>
-								<option value="fastgit" <?php if ($argon_assets_path=='fastgit'){echo 'selected';} ?>>Fastgit</option>
-								<option value="sourcegcdn" <?php if ($argon_assets_path=='sourcegcdn'){echo 'selected';} ?>>Source Global CDN</option>
-								<option value="fivecdn" <?php if ($argon_assets_path=='fivecdn'){echo 'selected';} ?>>FiveCDN</option>
-								<option value="jsdelivr_gcore" <?php if ($argon_assets_path=='jsdelivr_gcore'){echo 'selected';} ?>>Jsdelivr (gcore)</option>
-								<option value="jsdelivr_fastly" <?php if ($argon_assets_path=='jsdelivr_fastly'){echo 'selected';} ?>>Jsdelivr (fastly)</option>
-								<option value="jsdelivr_cf" <?php if ($argon_assets_path=='jsdelivr_cf'){echo 'selected';} ?>>Jsdelivr (cf)</option>
-								<option value="custom" <?php if ($argon_assets_path=='custom'){echo 'selected';} ?>><?php _e('自定义...', 'argon');?></option>
-							</select>
+							<select name="argon_assets_path"><option value="local" <?php selected(get_option('argon_assets_path'), 'local'); ?>><?php esc_html_e('本地资源', 'argon'); ?></option><option value="custom" <?php selected(get_option('argon_assets_path'), 'custom'); ?>><?php esc_html_e('自定义 CDN', 'argon'); ?></option></select>
 							<input type="text" class="regular-text" name="argon_custom_assets_path" placeholder="https://" value="<?php echo get_option('argon_custom_assets_path', ''); ?>" autocomplete="off">
 							<p class="description"><?php _e('选择主题资源文件的引用地址。使用 CDN 可以加速资源文件的访问并减少服务器压力。', 'argon');?></p>
 							<p class="description custom-assets-path-desctiption"><?php _e('在自定义路径中使用 <code>%theme_version%</code> 来表示主题版本号。', 'argon');?></p>
 						</td>
-						<script>
-							$("select[name='argon_assets_path']").change(function(){
-								if ($(this).val() == 'custom') {
-									$("input[name='argon_custom_assets_path']").css('display', '');
-									$(".custom-assets-path-desctiption").css('display', '');
-								} else {
-									$("input[name='argon_custom_assets_path']").css('display', 'none');
-									$(".custom-assets-path-desctiption").css('display', 'none');
-								}
-							}).change();
-						</script>
+
 					</tr>
 					<tr><th class="subtitle"><h3><?php _e('子目录', 'argon');?></h3></th></tr>
-					<tr>
-						<th><label><?php _e('Wordpress 安装目录', 'argon');?></label></th>
-						<td>
-							<input type="text" class="regular-text" name="argon_wp_path" value="<?php echo get_option('argon_wp_path', '/'); ?>"/>
-							<p class="description"><?php _e('如果 Wordpress 安装在子目录中，请在此填写子目录地址（例如', 'argon');?> <code>/blog/</code><?php _e('），注意前后各有一个斜杠。默认为', 'argon');?> <code>/</code> <?php _e('。', 'argon');?><br/><?php _e('如果不清楚该选项的用处，请保持默认。', 'argon');?></p>
-						</td>
-					</tr>
+
 					<tr><th class="subtitle"><h3><?php _e('日期格式', 'argon');?></h3></th></tr>
 					<tr>
 						<th><label><?php _e('日期格式', 'argon');?></label></th>
@@ -666,31 +631,7 @@ function themeoptions_page(){
 								</div>
 							</div>
 						</td>
-						<script>
-							!function(){
-								let articleMeta = $("input[name='argon_article_meta']").val().split("|");
-								for (metaName of articleMeta){
-									let itemDiv = $("#article_meta_inactive .article-meta-item[meta-name='"+ metaName + "']");
-									$("#article_meta_active").append(itemDiv.prop("outerHTML"));
-									itemDiv.remove();
-								}
-							}();
-							dragula(
-								[document.querySelector('#article_meta_active'), document.querySelector('#article_meta_inactive')],
-								{
-									direction: 'vertical'
-								}
-							).on('dragend', function(){
-								let articleMeta = "";
-								$("#article_meta_active .article-meta-item").each(function(index, item) {
-									if (index != 0){
-										articleMeta += "|";
-									}
-									articleMeta += item.getAttribute("meta-name");
-								});
-								$("input[name='argon_article_meta']").val(articleMeta);
-							});
-						</script>
+
 					</tr>
 					<tr><th class="subtitle"><h4><?php _e('第二行', 'argon');?></h4></th></tr>
 					<tr>
@@ -916,15 +857,7 @@ function themeoptions_page(){
                             <input type="text" class="regular-text" name="argon_custom_openai_baseurl" placeholder="https://" value="<?php echo get_option('argon_custom_openai_baseurl', ''); ?>" autocomplete="off">
                             <p class="description"><?php _e('自定义 OpenAI API 地址。', 'argon');?></p>
                         </td>
-                        <script>
-                            $("select[name='argon_openai_baseurl']").change(function(){
-                                if ($(this).val() == 'custom') {
-                                    $("input[name='argon_custom_openai_baseurl']").css('display', '');
-                                } else {
-                                    $("input[name='argon_custom_openai_baseurl']").css('display', 'none');
-                                }
-                            }).change();
-                        </script>
+
                     </tr>
                     <tr>
                         <th><label><?php _e('OpenAI API 密钥', 'argon');?></label></th>
@@ -1103,7 +1036,7 @@ function themeoptions_page(){
 						<td>
 							<select name="argon_code_theme">
 								<?php
-								$argon_code_themes_list = array("a11y-dark", "a11y-light", "agate", "an-old-hope", "androidstudio", "arduino-light", "arta", "ascetic", "atelier-cave-dark", "atelier-cave-light", "atelier-dune-dark", "atelier-dune-light", "atelier-estuary-dark", "atelier-estuary-light", "atelier-forest-dark", "atelier-forest-light", "atelier-heath-dark", "atelier-heath-light", "atelier-lakeside-dark", "atelier-lakeside-light", "atelier-plateau-dark", "atelier-plateau-light", "atelier-savanna-dark", "atelier-savanna-light", "atelier-seaside-dark", "atelier-seaside-light", "atelier-sulphurpool-dark", "atelier-sulphurpool-light", "atom-one-dark-reasonable", "atom-one-dark", "atom-one-light", "brown-paper", "codepen-embed", "color-brewer", "darcula", "dark", "darkula", "default", "devibeans", "docco", "dracula", "far", "felipec", "foundation", "github-dark-dimmed", "github-dark", "github-gist", "github", "gml", "googlecode", "gradient-dark", "gradient-light", "grayscale", "gruvbox-dark", "gruvbox-light", "hopscotch", "hybrid", "idea", "intellij-light", "ir-black", "isbl-editor-dark", "isbl-editor-light", "kimbie-dark", "kimbie-light", "kimbie.dark", "kimbie.light", "lightfair", "lioshi", "magula", "mono-blue", "monokai-sublime", "monokai", "night-owl", "nnfx-dark", "nnfx-light", "nnfx", "nord", "obsidian", "ocean", "onedark", "paraiso-dark", "paraiso-light", "pojoaque", "pojoaque.jpg", "purebasic", "qtcreator-dark", "qtcreator-light", "railscasts", "rainbow", "routeros", "school-book", "shades-of-purple", "solarized-dark", "solarized-light", "srcery", "stackoverflow-dark", "stackoverflow-light", "sunburst", "tokyo-night-dark", "tomorrow-night-blue", "tomorrow-night-bright", "tomorrow-night-eighties", "tomorrow-night", "tomorrow", "vs", "vs2015", "xcode", "xt256", "zenburn", "base16/3024", "base16/apathy", "base16/apprentice", "base16/ashes", "base16/atelier-cave-light", "base16/atelier-cave", "base16/atelier-dune-light", "base16/atelier-dune", "base16/atelier-estuary-light", "base16/atelier-estuary", "base16/atelier-forest-light", "base16/atelier-forest", "base16/atelier-heath-light", "base16/atelier-heath", "base16/atelier-lakeside-light", "base16/atelier-lakeside", "base16/atelier-plateau-light", "base16/atelier-plateau", "base16/atelier-savanna-light", "base16/atelier-savanna", "base16/atelier-seaside-light", "base16/atelier-seaside", "base16/atelier-sulphurpool-light", "base16/atelier-sulphurpool", "base16/atlas", "base16/bespin", "base16/black-metal-bathory", "base16/black-metal-burzum", "base16/black-metal-dark-funeral", "base16/black-metal-gorgoroth", "base16/black-metal-immortal", "base16/black-metal-khold", "base16/black-metal-marduk", "base16/black-metal-mayhem", "base16/black-metal-nile", "base16/black-metal-venom", "base16/black-metal", "base16/brewer", "base16/bright", "base16/brogrammer", "base16/brush-trees-dark", "base16/brush-trees", "base16/chalk", "base16/circus", "base16/classic-dark", "base16/classic-light", "base16/codeschool", "base16/colors", "base16/cupcake", "base16/cupertino", "base16/danqing", "base16/darcula", "base16/dark-violet", "base16/darkmoss", "base16/darktooth", "base16/decaf", "base16/default-dark", "base16/default-light", "base16/dirtysea", "base16/dracula", "base16/edge-dark", "base16/edge-light", "base16/eighties", "base16/embers", "base16/equilibrium-dark", "base16/equilibrium-gray-dark", "base16/equilibrium-gray-light", "base16/equilibrium-light", "base16/espresso", "base16/eva-dim", "base16/eva", "base16/flat", "base16/framer", "base16/fruit-soda", "base16/gigavolt", "base16/github", "base16/google-dark", "base16/google-light", "base16/grayscale-dark", "base16/grayscale-light", "base16/green-screen", "base16/gruvbox-dark-hard", "base16/gruvbox-dark-medium", "base16/gruvbox-dark-pale", "base16/gruvbox-dark-soft", "base16/gruvbox-light-hard", "base16/gruvbox-light-medium", "base16/gruvbox-light-soft", "base16/hardcore", "base16/harmonic16-dark", "base16/harmonic16-light", "base16/heetch-dark", "base16/heetch-light", "base16/helios", "base16/hopscotch", "base16/horizon-dark", "base16/horizon-light", "base16/humanoid-dark", "base16/humanoid-light", "base16/ia-dark", "base16/ia-light", "base16/icy-dark", "base16/ir-black", "base16/isotope", "base16/kimber", "base16/london-tube", "base16/macintosh", "base16/marrakesh", "base16/materia", "base16/material-darker", "base16/material-lighter", "base16/material-palenight", "base16/material-vivid", "base16/material", "base16/mellow-purple", "base16/mexico-light", "base16/mocha", "base16/monokai", "base16/nebula", "base16/nord", "base16/nova", "base16/ocean", "base16/oceanicnext", "base16/one-light", "base16/onedark", "base16/outrun-dark", "base16/papercolor-dark", "base16/papercolor-light", "base16/paraiso", "base16/pasque", "base16/phd", "base16/pico", "base16/pop", "base16/porple", "base16/qualia", "base16/railscasts", "base16/rebecca", "base16/ros-pine-dawn", "base16/ros-pine-moon", "base16/ros-pine", "base16/sagelight", "base16/sandcastle", "base16/seti-ui", "base16/shapeshifter", "base16/silk-dark", "base16/silk-light", "base16/snazzy", "base16/solar-flare-light", "base16/solar-flare", "base16/solarized-dark", "base16/solarized-light", "base16/spacemacs", "base16/summercamp", "base16/summerfruit-dark", "base16/summerfruit-light", "base16/synth-midnight-terminal-dark", "base16/synth-midnight-terminal-light", "base16/tango", "base16/tender", "base16/tomorrow-night", "base16/tomorrow", "base16/twilight", "base16/unikitty-dark", "base16/unikitty-light", "base16/vulcan", "base16/windows-10-light", "base16/windows-10", "base16/windows-95-light", "base16/windows-95", "base16/windows-high-contrast-light", "base16/windows-high-contrast", "base16/windows-nt-light", "base16/windows-nt", "base16/woodland", "base16/xcode-dusk", "base16/zenburn");
+								$argon_code_themes_list = argon_code_theme_names();
 								$argon_code_theme = get_option('argon_code_theme');
 								if ($argon_code_theme == ''){
 									$argon_code_theme = "vs2015";
@@ -1156,177 +1089,16 @@ function themeoptions_page(){
 						<td>
 						</td>
 					</tr>
-					<tr><th class="subtitle"><h2><?php _e('数学公式', 'argon');?></h2></th></tr>
-					<tr>
-						<th><label><?php _e('数学公式渲染方案', 'argon');?></label></th>
-						<td>
-							<table class="form-table form-table-dense form-table-mathrender">
-								<tbody>
-									<?php $argon_math_render = (get_option('argon_math_render') == '' ? 'none' : get_option('argon_math_render')); ?>
-									<tr>
-										<th>
-											<label>
-												<input name="argon_math_render" type="radio" value="none" <?php if ($argon_math_render=='none'){echo 'checked';} ?>>
-												<?php _e('不启用', 'argon');?>
-											</label>
-										</th>
-									</tr>
-									<tr>
-										<th>
-											<label>
-												<input name="argon_math_render" type="radio" value="mathjax3" <?php if ($argon_math_render=='mathjax3'){echo 'checked';} ?>>
-												Mathjax 3
-												<div>
-													Mathjax 3 CDN <?php _e('地址', 'argon');?>:
-													<input type="text" class="regular-text" name="argon_mathjax_cdn_url" value="<?php echo get_option('argon_mathjax_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js' : get_option('argon_mathjax_cdn_url'); ?>"/>
-													<p class="description">Mathjax 3.0+<?php _e('，默认为', 'argon');?> <code>//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js</code></p>
-												</div>
-											</label>
-										</th>
-									</tr>
-									<tr>
-										<th>
-											<label>
-												<input name="argon_math_render" type="radio" value="mathjax2" <?php if ($argon_math_render=='mathjax2'){echo 'checked';} ?>>
-												Mathjax 2
-												<div>
-													Mathjax 2 CDN <?php _e('地址', 'argon');?>:
-													<input type="text" class="regular-text" name="argon_mathjax_v2_cdn_url" value="<?php echo get_option('argon_mathjax_v2_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-AMS_HTML' : get_option('argon_mathjax_v2_cdn_url'); ?>"/>
-													<p class="description">Mathjax 2.0+<?php _e('，默认为', 'argon');?> <code>//cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-AMS_HTML</code></p>
-												</div>
-											</label>
-										</th>
-									</tr>
-									<tr>
-										<th>
-											<label>
-												<input name="argon_math_render" type="radio" value="katex" <?php if ($argon_math_render=='katex'){echo 'checked';} ?>>
-												Katex
-												<div>
-													Katex CDN <?php _e('地址', 'argon');?>:
-													<input type="text" class="regular-text" name="argon_katex_cdn_url" value="<?php echo get_option('argon_katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : get_option('argon_katex_cdn_url'); ?>"/>
-													<p class="description"><?php _e('Argon 会同时引用', 'argon');?> <code>katex.min.css</code> <?php _e('和', 'argon');?> <code>katex.min.js</code> <?php _e('两个文件，所以在此填写的是上层的路径，而不是具体的文件。注意路径后要带一个斜杠。', 'argon');?><br/><?php _e('默认为', 'argon');?> <code>//cdn.jsdelivr.net/npm/katex@0.11.1/dist/</code></p>
-												</div>
-											</label>
-										</th>
-									</tr>
-								</tbody>
-							</table>
-							<p class="description"></p>
-						</td>
-					</tr>
-					<tr><th class="subtitle"><h2>Lazyload</h2></th></tr>
-					<tr>
-						<th><label><?php _e('是否启用 Lazyload', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_lazyload">
-								<?php $argon_enable_lazyload = get_option('argon_enable_lazyload'); ?>
-								<option value="true" <?php if ($argon_enable_lazyload=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
-								<option value="false" <?php if ($argon_enable_lazyload=='false'){echo 'selected';} ?>><?php _e('禁用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('是否启用 Lazyload 加载文章内图片', 'argon');?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><label><?php _e('提前加载阈值', 'argon');?></label></th>
-						<td>
-							<input type="number" name="argon_lazyload_threshold" min="0" max="2500"  value="<?php echo (get_option('argon_lazyload_threshold') == '' ? '800' : get_option('argon_lazyload_threshold')); ?>"/>
-							<p class="description"><?php _e('图片距离页面底部还有多少距离就开始提前加载', 'argon');?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><label><?php _e('LazyLoad 图片加载完成过渡', 'argon');?></label></th>
-						<td>
-							<select name="argon_lazyload_effect">
-								<?php $argon_lazyload_effect = get_option('argon_lazyload_effect'); ?>
-								<option value="fadeIn" <?php if ($argon_lazyload_effect=='fadeIn'){echo 'selected';} ?>>fadeIn</option>
-								<option value="slideDown" <?php if ($argon_lazyload_effect=='slideDown'){echo 'selected';} ?>>slideDown</option>
-								<option value="none" <?php if ($argon_lazyload_effect=='none'){echo 'selected';} ?>><?php _e('不使用过渡', 'argon');?></option>
-							</select>
-							<p class="description"></p>
-						</td>
-					</tr>
-					<tr>
-						<th><label><?php _e('LazyLoad 图片加载动效', 'argon');?></label></th>
-						<td>
-							<select name="argon_lazyload_loading_style">
-								<?php $argon_lazyload_loading_style = get_option('argon_lazyload_loading_style'); ?>
-								<option value="1" <?php if ($argon_lazyload_loading_style=='1'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 1</option>
-								<option value="2" <?php if ($argon_lazyload_loading_style=='2'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 2</option>
-								<option value="3" <?php if ($argon_lazyload_loading_style=='3'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 3</option>
-								<option value="4" <?php if ($argon_lazyload_loading_style=='4'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 4</option>
-								<option value="5" <?php if ($argon_lazyload_loading_style=='5'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 5</option>
-								<option value="6" <?php if ($argon_lazyload_loading_style=='6'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 6</option>
-								<option value="7" <?php if ($argon_lazyload_loading_style=='7'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 7</option>
-								<option value="8" <?php if ($argon_lazyload_loading_style=='8'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 8</option>
-								<option value="9" <?php if ($argon_lazyload_loading_style=='9'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 9</option>
-								<option value="10" <?php if ($argon_lazyload_loading_style=='10'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 10</option>
-								<option value="11" <?php if ($argon_lazyload_loading_style=='11'){echo 'selected';} ?>><?php _e('加载动画', 'argon');?> 11</option>
-								<option value="none" <?php if ($argon_lazyload_loading_style=='none'){echo 'selected';} ?>><?php _e('不使用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('在图片被加载之前显示的加载效果', 'argon');?> , <a target="_blank" href="<?php bloginfo('template_url'); ?>/assets/vendor/svg-loaders"><?php _e('预览所有效果', 'argon');?></a></p>
-						</td>
-					</tr>
-					<tr><th class="subtitle"><h2><?php _e('图片放大浏览', 'argon');?></h2></th></tr>
-					<tr>
-						<th><label><?php _e('是否启用图片放大浏览 (Fancybox)', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_fancybox" onchange="if (this.value == 'true'){setInputValue('argon_enable_zoomify','false');}">
-								<?php $argon_enable_fancybox = get_option('argon_enable_fancybox'); ?>
-								<option value="true" <?php if ($argon_enable_fancybox=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
-								<option value="false" <?php if ($argon_enable_fancybox=='false'){echo 'selected';} ?>><?php _e('禁用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('开启后，文章中图片被单击时会放大预览', 'argon');?></p>
-						</td>
-					</tr>
-					<tr style="opacity: 0.5;" onclick="$(this).remove();$('.zoomify-old-settings').fadeIn(500);">
-						<th><label><?php _e('展开旧版图片放大浏览 (Zoomify) 设置 ▼', 'argon');?></label></th>
-						<td>
-						</td>
-					</tr>
-					<style>
-						.zoomify-old-settings{
-							opacity: 0.65;
-						}
-						.zoomify-old-settings:hover{
-							opacity: 1;
-						}
-					</style>
-					<tr class="zoomify-old-settings" style="display: none;">
-						<th><label><?php _e('是否启用旧版图片放大浏览 (Zoomify)', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_zoomify" onchange="if (this.value == 'true'){setInputValue('argon_enable_fancybox','false');}">
-								<?php $argon_enable_zoomify = get_option('argon_enable_zoomify'); ?>
-								<option value="true" <?php if ($argon_enable_zoomify=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
-								<option value="false" <?php if ($argon_enable_zoomify=='false'){echo 'selected';} ?>><?php _e('禁用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('自 Argon 1.1.0 版本后，图片缩放预览库由 Zoomify 更换为 Fancybox，如果您还想使用旧版图片预览，请开启此选项。注意: Zoomify 和 Fancybox 不能同时开启。', 'argon');?></p>
-						</td>
-					</tr>
-					<tr class="zoomify-old-settings" style="display: none;">
-						<th><label><?php _e('缩放动画长度', 'argon');?></label></th>
-						<td>
-							<input type="number" name="argon_zoomify_duration" min="0" max="10000" value="<?php echo (get_option('argon_zoomify_duration') == '' ? '200' : get_option('argon_zoomify_duration')); ?>"/>	ms
-							<p class="description"><?php _e('图片被单击后缩放到全屏动画的时间长度', 'argon');?></p>
-						</td>
-					</tr>
-					<tr class="zoomify-old-settings" style="display: none;">
-						<th><label><?php _e('缩放动画曲线', 'argon');?></label></th>
-						<td>
-							<input type="text" class="regular-text" name="argon_zoomify_easing" value="<?php echo (get_option('argon_zoomify_easing') == '' ? 'cubic-bezier(0.4,0,0,1)' : get_option('argon_zoomify_easing')); ?>"/>
-							<p class="description">
-								<?php _e('例：', 'argon');?> <code>ease</code> , <code>ease-in-out</code> , <code>ease-out</code> , <code>linear</code> , <code>cubic-bezier(0.4,0,0,1)</code><br/><?php _e('如果你不知道这是什么，参考', 'argon');?><a href="https://www.w3school.com.cn/cssref/pr_animation-timing-function.asp" target="_blank"><?php _e('这里', 'argon');?></a>
-							</p>
-						</td>
-					</tr>
-					<tr class="zoomify-old-settings" style="display: none;">
-						<th><label><?php _e('图片最大缩放比例', 'argon');?></label></th>
-						<td>
-							<input type="number" name="argon_zoomify_scale" min="0.01" max="1" step="0.01" value="<?php echo (get_option('argon_zoomify_scale') == '' ? '0.9' : get_option('argon_zoomify_scale')); ?>"/>
-							<p class="description"><?php _e('图片相对于页面的最大缩放比例 (0 ~ 1 的小数)', 'argon');?></p>
-						</td>
-					</tr>
-					<tr><th class="subtitle"><h2>Pangu.js</h2></th></tr>
+					<tr><th class="subtitle"><h2><?php esc_html_e('数学公式和图片', 'argon'); ?></h2></th></tr>
+<tr><th><?php esc_html_e('数学公式', 'argon'); ?></th><td><select name="argon_math_render">
+<option value="none" <?php selected(get_option('argon_math_render'), 'none'); ?>><?php esc_html_e('关闭', 'argon'); ?></option>
+<option value="katex" <?php selected(get_option('argon_math_render'), 'katex'); ?>>KaTeX</option>
+</select></td></tr>
+<tr><th><?php esc_html_e('图片放大浏览', 'argon'); ?></th><td><select name="argon_enable_lightbox">
+<option value="true" <?php selected(get_option('argon_enable_lightbox', 'true'), 'true'); ?>>PhotoSwipe</option>
+<option value="false" <?php selected(get_option('argon_enable_lightbox'), 'false'); ?>><?php esc_html_e('关闭', 'argon'); ?></option>
+</select><p class="description"><?php esc_html_e('WordPress 图片区块的原生灯箱优先。图片加载由 WordPress 自动优化。', 'argon'); ?></p></td></tr>
+<tr><th class="subtitle"><h2>Pangu.js</h2></th></tr>
 					<tr>
 						<th><label><?php _e('启用 Pangu.js (自动在中英文之间添加空格)', 'argon');?></label></th>
 						<td>
@@ -1348,15 +1120,7 @@ function themeoptions_page(){
 					<tr>
 						<th><label><strong style="color:#ff0000;"><?php _e('注意', 'argon');?></strong></label></th>
 						<td>
-							<p class="description"><strong style="color:#ff0000;"><?php _e('Argon 使用 pjax 方式加载页面 (无刷新加载) , 所以除非页面手动刷新，否则您的脚本只会被执行一次。', 'argon');?><br/>
-							<?php _e('如果您想让每次页面跳转(加载新页面)时都执行脚本，请将脚本写入', 'argon');?> <code>window.pjaxLoaded</code> <?php _e('中', 'argon');?></strong> ，<?php _e('示例写法', 'argon');?>:
-							<pre>
-window.pjaxLoaded = function(){
-	//<?php _e('页面每次跳转都会执行这里的代码', 'argon');?>
-	//do something...
-}
-							</pre>
-							<strong style="color:#ff0000;"><?php _e('当页面第一次载入时，', 'argon');?><code>window.pjaxLoaded</code> <?php _e('中的脚本不会执行，所以您可以手动执行', 'argon');?> <code>window.pjaxLoaded();</code> <?php _e('来让页面初次加载时也执行脚本', 'argon');?></strong></p>
+							<p class="description"><?php _e('页面使用浏览器原生导航，页头和页尾脚本会在每次访问页面时重新执行。需要访问页面元素的代码请放在页尾，或监听 DOMContentLoaded。旧版 window.pjaxLoaded 回调请迁移为标准页面初始化代码。', 'argon');?></p>
 						</td>
 					</tr>
 					<tr>
@@ -1374,42 +1138,9 @@ window.pjaxLoaded = function(){
 						</td>
 					</tr>
 					<tr><th class="subtitle"><h2><?php _e('动画', 'argon');?></h2></th></tr>
-					<tr>
-						<th><label><?php _e('是否启用平滑滚动', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_smoothscroll_type">
-								<?php $enable_smoothscroll_type = get_option('argon_enable_smoothscroll_type'); ?>
-								<option value="1" <?php if ($enable_smoothscroll_type=='1'){echo 'selected';} ?>><?php _e('使用平滑滚动方案 1 (平滑) (推荐)', 'argon');?></option>
-								<option value="1_pulse" <?php if ($enable_smoothscroll_type=='1_pulse'){echo 'selected';} ?>><?php _e('使用平滑滚动方案 1 (脉冲式滚动) (仿 Edge) (推荐)', 'argon');?></option>
-								<option value="2" <?php if ($enable_smoothscroll_type=='2'){echo 'selected';} ?>><?php _e('使用平滑滚动方案 2 (较稳)', 'argon');?></option>
-								<option value="3" <?php if ($enable_smoothscroll_type=='3'){echo 'selected';} ?>><?php _e('使用平滑滚动方案 3', 'argon');?></option>
-								<option value="disabled" <?php if ($enable_smoothscroll_type=='disabled'){echo 'selected';} ?>><?php _e('不使用平滑滚动', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('能增强浏览体验，但可能出现一些小问题，如果有问题请切换方案或关闭平滑滚动', 'argon');?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><label><?php _e('是否启用进入文章动画', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_into_article_animation">
-								<?php $argon_enable_into_article_animation = get_option('argon_enable_into_article_animation'); ?>
-								<option value="false" <?php if ($argon_enable_into_article_animation=='false'){echo 'selected';} ?>><?php _e('不启用', 'argon');?></option>
-								<option value="true" <?php if ($argon_enable_into_article_animation=='true'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('从首页或分类目录进入文章时，使用平滑过渡（可能影响加载文章时的性能）', 'argon');?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><label><?php _e('禁用 Pjax 加载后的页面滚动动画', 'argon');?></label></th>
-						<td>
-							<select name="argon_disable_pjax_animation">
-								<?php $argon_disable_pjax_animation = get_option('argon_disable_pjax_animation'); ?>
-								<option value="false" <?php if ($argon_disable_pjax_animation=='false'){echo 'selected';} ?>><?php _e('不禁用', 'argon');?></option>
-								<option value="true" <?php if ($argon_disable_pjax_animation=='true'){echo 'selected';} ?>><?php _e('禁用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('Pjax 替换页面内容后会平滑滚动到页面顶部，如果你不喜欢，可以禁用这个选项', 'argon');?></p>
-						</td>
-					</tr>
+
+
+
 					<tr><th class="subtitle"><h2><?php _e('评论', 'argon');?></h2></th></tr>
 					<tr><th class="subtitle"><h3><?php _e('评论分页', 'argon');?></h3></th></tr>
 					<tr>
@@ -1425,17 +1156,9 @@ window.pjaxLoaded = function(){
 								<?php _e('页码：显示页码来分页。', 'argon');?><br/>
 								<span class="go-to-wp-comment-settings"><?php _e('选择"无限加载"时，如果开启了评论分页，请将 Wordpress 的讨论设置设为 "默认显示<b>最后</b>一页，在每个页面顶部显示<b>新的</b>评论"。', 'argon');?> <a href="./options-discussion.php" target="_blank"><?php _e('去设置', 'argon');?>&gt;&gt;&gt;</a></span>
 								<?php if (get_option('page_comments') == '1' && get_option('default_comments_page') != 'newest' && get_option('comment_order') != 'desc') {
-									echo '<script>$(".go-to-wp-comment-settings").addClass("wrong-options");</script>';
+									echo '';
 								};?>
-								<script>
-									$("select[name='argon_comment_pagination_type']").change(function(){
-										if ($(this).val() == 'feed') {
-											$(".go-to-wp-comment-settings").addClass("using-feed");
-										} else {
-											$(".go-to-wp-comment-settings").removeClass("using-feed");
-										}
-									}).change();
-								</script>
+
 								<style>
 									.go-to-wp-comment-settings a{
 										display: none;
@@ -1643,7 +1366,7 @@ window.pjaxLoaded = function(){
 						<th><label>Gravatar CDN</label></th>
 						<td>
 							<input type="text" class="regular-text" name="argon_gravatar_cdn" value="<?php echo get_option('argon_gravatar_cdn' , ''); ?>"/>
-							<p class="description"><?php _e('使用 CDN 来加速 Gravatar 在某些地区的访问，填写 CDN 地址，留空则不使用。', 'argon');?><br/><?php _e('在中国速度较快的一些 CDN :', 'argon');?><code onclick="$('input[name=\'argon_gravatar_cdn\']').val(this.innerText);" style="cursor: pointer;">gravatar.pho.ink/avatar/</code> , <code onclick="$('input[name=\'argon_gravatar_cdn\']').val(this.innerText);" style="cursor: pointer;">cdn.v2ex.com/gravatar/</code> , <code onclick="$('input[name=\'argon_gravatar_cdn\']').val(this.innerText);" style="cursor: pointer;">dn-qiniu-avatar.qbox.me/avatar/</code></p>
+							<p class="description"><?php _e('使用 CDN 来加速 Gravatar 在某些地区的访问，填写 CDN 地址，留空则不使用。', 'argon');?><br/><?php _e('在中国速度较快的一些 CDN :', 'argon');?><code data-argon-gravatar style="cursor: pointer;">gravatar.pho.ink/avatar/</code> , <code data-argon-gravatar style="cursor: pointer;">cdn.v2ex.com/gravatar/</code> , <code data-argon-gravatar style="cursor: pointer;">dn-qiniu-avatar.qbox.me/avatar/</code></p>
 						</td>
 					</tr>
 					<tr>
@@ -1670,15 +1393,7 @@ window.pjaxLoaded = function(){
 							<p class="description"><?php _e('开启后，将会在搜索结果界面显示一个过滤器，支持搜索说说及其他类型文章', 'argon');?></p>
 						</td>
 					</tr>
-					<script>
-						$("select[name='argon_enable_search_filters']").change(function(){
-							if ($(this).val() == 'true') {
-								$(".argon-search-filters-type").css('display', '');
-							} else {
-								$(".argon-search-filters-type").css('display', 'none');
-							}
-						}).change();
-					</script>
+
 					<tr class="argon-search-filters-type">
 						<th><label><?php _e('过滤器类型', 'argon');?></label></th>
 						<style>
@@ -1743,59 +1458,15 @@ window.pjaxLoaded = function(){
 								</div>
 							</div>
 						</td>
-						<script>
-							function updateSearchFilters(){
-								let searchFilters = "";
-								$("#search_filters_active .search-filter-item").each(function(index, item) {
-									if (index != 0){ searchFilters += ",";}
-									if ($(item).hasClass('active')){ searchFilters += "*"; }
-									searchFilters += item.getAttribute("filter-name");
-								});
-								$("input[name='argon_search_filters_type']").val(searchFilters);
-							}
-							!function(){
-								let searchFilters = $("input[name='argon_search_filters_type']").val().split(",");
-								for (let filter of searchFilters){
-									if (filter[0] == "*"){
-										$(".search-filter-item[filter-name='"+ filter.substring(1) +"']").addClass('active');
-										filter = filter.substring(1);
-									}
-									let itemDiv = $("#search_filters_inactive .search-filter-item[filter-name='"+ filter + "']");
-									$("#search_filters_active").append(itemDiv.prop("outerHTML"));
-									itemDiv.remove();
-								}
-							}();
-							$(document).on("click", "#search_filters_active .search-filter-item", function(){
-								$(this).toggleClass("active");
-								updateSearchFilters();
-							});
-							dragula(
-								[document.querySelector('#search_filters_active'), document.querySelector('#search_filters_inactive')],
-								{
-									direction: 'vertical'
-								}
-							).on('dragend', function(){
-								updateSearchFilters();
-							});
-						</script>
+
 					</tr>
 					<tr><th class="subtitle"><h2><?php _e('杂项', 'argon');?></h2></th></tr>
-					<tr>
-						<th><label><?php _e('是否启用 Pjax', 'argon');?></label></th>
-						<td>
-							<select name="argon_pjax_disabled">
-								<?php $argon_pjax_disabled = get_option('argon_pjax_disabled'); ?>
-								<option value="false" <?php if ($argon_pjax_disabled=='false'){echo 'selected';} ?>><?php _e('启用', 'argon');?></option>
-								<option value="true" <?php if ($argon_pjax_disabled=='true'){echo 'selected';} ?>><?php _e('不启用', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('Pjax 可以增强页面的跳转体验', 'argon');?></p>
-						</td>
-					</tr>
+
 					<tr>
 						<th><label><?php _e('首页隐藏特定 分类/Tag 下的文章', 'argon');?></label></th>
 						<td>
 							<input type="text" class="regular-text" name="argon_hide_categories" value="<?php echo get_option('argon_hide_categories'); ?>"/>
-							<p class="description"><?php _e('输入要隐藏的 分类/Tag 的 ID，用英文逗号分隔，留空则不隐藏', 'argon');?><br/><a onclick="$('#id_of_categories_and_tags').slideDown(500);" style="cursor: pointer;"><?php _e('点此查看', 'argon');?></a><?php _e('所有分类和 Tag 的 ID', 'argon');?>
+							<p class="description"><?php _e('输入要隐藏的 分类/Tag 的 ID，用英文逗号分隔，留空则不隐藏', 'argon');?><br/><a data-argon-show-ids style="cursor: pointer;"><?php _e('点此查看', 'argon');?></a><?php _e('所有分类和 Tag 的 ID', 'argon');?>
 								<?php
 									echo "<div id='id_of_categories_and_tags' style='display: none;'><div style='font-size: 22px;margin-bottom: 10px;margin-top: 10px;'>分类</div>";
 									$categories = get_categories(array(
@@ -1872,17 +1543,7 @@ window.pjaxLoaded = function(){
 							<p class="description"><?php _e('开启后，长说说在预览状态下会被折叠，需要手动展开', 'argon');?></p>
 						</td>
 					</tr>
-					<tr>
-						<th><label><?php _e('是否修正时区错误', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_timezone_fix">
-								<?php $argon_enable_timezone_fix = get_option('argon_enable_timezone_fix'); ?>
-								<option value="false" <?php if ($argon_enable_timezone_fix=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
-								<option value="true" <?php if ($argon_enable_timezone_fix=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
-							</select>
-							<p class="description"><?php _e('如遇到时区错误（例如一条刚发的评论显示 8 小时前），这个选项', 'argon');?><strong><?php _e('可能', 'argon');?></strong><?php _e('可以修复这个问题', 'argon');?></p>
-						</td>
-					</tr>
+
 					<tr>
 						<th><label><?php _e('是否在文章列表内容预览中隐藏短代码', 'argon');?></label></th>
 						<td>
@@ -1901,17 +1562,7 @@ window.pjaxLoaded = function(){
 							<p class="description"><?php _e('设为 0 来隐藏文章内容预览', 'argon');?></p>
 						</td>
 					</tr>
-					<tr>
-						<th><label><?php _e('是否允许移动端缩放页面', 'argon');?></label></th>
-						<td>
-							<select name="argon_enable_mobile_scale">
-								<?php $argon_enable_mobile_scale = get_option('argon_enable_mobile_scale'); ?>
-								<option value="false" <?php if ($argon_enable_mobile_scale=='false'){echo 'selected';} ?>><?php _e('否', 'argon');?></option>
-								<option value="true" <?php if ($argon_enable_mobile_scale=='true'){echo 'selected';} ?>><?php _e('是', 'argon');?></option>
-							</select>
-							<p class="description"></p>
-						</td>
-					</tr>
+
 					<tr>
 						<th><label><?php _e('禁用 Google 字体', 'argon');?></label></th>
 						<td>
@@ -1948,14 +1599,7 @@ window.pjaxLoaded = function(){
 					<tr>
 						<th><label><?php _e('检测更新源', 'argon');?></label></th>
 						<td>
-							<select name="argon_update_source">
-								<?php $argon_update_source = get_option('argon_update_source'); ?>
-								<option value="github" <?php if ($argon_update_source=='github'){echo 'selected';} ?>>Github</option>
-								<option value="fastgit" <?php if ($argon_update_source=='fastgit'){echo 'selected';} ?>>Fastgit</option>
-								<option value="cfworker" <?php if ($argon_update_source=='cfworker'){echo 'selected';} ?>>CF Worker</option>
-								<option value="solstice23top" <?php if ($argon_update_source=='solstice23top'){echo 'selected';} ?>>solstice23.top</option>
-								<option value="stop" <?php if ($argon_update_source=='stop'){echo 'selected';} ?>><?php _e('暂停更新 (不推荐)', 'argon');?></option>
-							</select>
+							<select name="argon_update_source"><option value="stop" <?php selected(get_option('argon_update_source', 'stop'), 'stop'); ?>><?php esc_html_e('手动更新', 'argon'); ?></option><option value="github" <?php selected(get_option('argon_update_source'), 'github'); ?>>GitHub: Argon Featured</option></select>
 							<p class="description"><?php _e('如更新主题速度较慢，可考虑更换更新源。', 'argon');?></p>
 						</td>
 					</tr>
@@ -1980,11 +1624,11 @@ window.pjaxLoaded = function(){
 		</form>
 	</div>
 	<div id="headindex_box">
-		<button id="headindex_toggler" onclick="$('#headindex_box').toggleClass('folded');"><?php _e('收起', 'argon');?></button>
+		<button id="headindex_toggler"><?php _e('收起', 'argon');?></button>
 		<div id="headindex"></div>
 	</div>
-	<div id="scroll_navigation"><button onclick="$('body,html').animate({scrollTop: 0}, 300);"><?php _e('到顶部', 'argon');?></button><button onclick="$('body,html').animate({scrollTop: $(document).height()-$(window).height()+10}, 300);"><?php _e('到底部', 'argon');?></button></div>
-	<div id="exported_settings_json_box" class="closed"><div><?php _e('请复制并保存导出后的 JSON', 'argon');?></div><textarea id="exported_settings_json" readonly="true" onclick="$(this).select();"></textarea><div style="width: 100%;margin: auto;margin-top: 15px;cursor: pointer;user-select: none;" onclick="$('#exported_settings_json_box').addClass('closed');"><?php _e('确定', 'argon');?></div></div>
+	<div id="scroll_navigation"><button type="button" data-argon-scroll="top"><?php _e('到顶部', 'argon');?></button><button type="button" data-argon-scroll="bottom"><?php _e('到底部', 'argon');?></button></div>
+	<div id="exported_settings_json_box" class="closed"><div><?php _e('请复制并保存导出后的 JSON', 'argon');?></div><textarea id="exported_settings_json" readonly="true"></textarea><div data-argon-close-export style="width: 100%;margin: auto;margin-top: 15px;cursor: pointer;user-select: none;"><?php _e('确定', 'argon');?></div></div>
 	<style>
 		.radio-with-img {
 			display: inline-block;
@@ -2154,97 +1798,7 @@ window.pjaxLoaded = function(){
 			max-width: calc(100% - 180px);
 		}
 	</style>
-	<script type="text/javascript">
-		$(document).on("click" , ".radio-with-img .radio-img" , function(){
-			$("input", this.parentNode).click();
-		});
-		$(function () {
-			$(document).headIndex({
-				articleWrapSelector: '#main_form',
-				indexBoxSelector: '#headindex',
-				subItemBoxClass: "index-subItem-box",
-				itemClass: "index-item",
-				linkClass: "index-link",
-				offset: 80,
-			});
-		});
-		function setInputValue(name, value){
-			let input = $("*[name='" + name + "']");
-			let inputType = input.attr("type");
-			if (inputType == "checkbox"){
-				if (value == "true"){
-					value = true;
-				}else if (value == "false"){
-					value = false;
-				}
-				input[0].checked = value;
-			}else if (inputType == "radio"){
-				$("input[name='" + name + "'][value='" + value + "']").click();
-			}else{
-				input.val(value);
-			}
-		}
-		function getInputValue(input){
-			let inputType = input.attr("type");
-			if (inputType == "checkbox"){
-				return input[0].checked;
-			}else if (inputType == "radio"){
-				let name = input.attr("name");
-				let value;
-				$("input[name='" + name + "']").each(function(){
-					if (this.checked){
-						value = $(this).attr("value");
-					}
-				});
-				return value;
-			}else{
-				return input.val();
-			}
-		}
-		function exportArgonSettings(){
-			let json = {};
-			let pushIntoJson = function (){
-				name = $(this).attr("name");
-				value = getInputValue($(this));
-				json[name] = value;
-			};
-			$("#main_form > .form-table input:not([name='submit']) , #main_form > .form-table select , #main_form > .form-table textarea").each(function(){
-				name = $(this).attr("name");
-				value = getInputValue($(this));
-				json[name] = value;
-			});
-			return JSON.stringify(json);
-		}
-		function importArgonSettings(json){
-			if (typeof(json) == "string"){
-				json = JSON.parse(json);
-			}
-			let info = "";
-			for (let name in json){
-				try{
-					if ($("*[name='" + name + "']").length == 0){
-						throw "Input Not Found";
-					}
-					setInputValue(name, json[name]);
-				}catch{
-					info += name + " <?php _e('字段导入失败', 'argon');?>\n";
-				}
-			}
-			return info;
-		}
-		function exportSettings(){
-			$("#exported_settings_json").val(exportArgonSettings());
-			$("#exported_settings_json").select();
-			$("#exported_settings_json_box").removeClass("closed");
-		}
-		function importSettings(){
-			let json = prompt("<?php _e('请输入要导入的备份 JSON', 'argon');?>");
-			if (json){
-				let res = importArgonSettings(json);
-				alert("<?php _e('已导入，请保存更改', 'argon');?>\n" + res)
-			}
-		}
-	</script>
+
 <?php
 }
 add_action('admin_menu', 'themeoptions_admin_menu');
@@ -2295,7 +1849,6 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_banner_background_url');
 		argon_update_option('argon_banner_background_color_type');
 		argon_update_option_checkbox('argon_banner_background_hide_shapes');
-		argon_update_option('argon_enable_smoothscroll_type');
 		argon_update_option('argon_gravatar_cdn');
 		argon_update_option_allow_tags('argon_footer_html');
 		argon_update_option('argon_show_readingtime');
@@ -2303,13 +1856,10 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_reading_speed_en');
 		argon_update_option('argon_reading_speed_code');
 		argon_update_option('argon_show_sharebtn');
-		argon_update_option('argon_enable_timezone_fix');
 		argon_update_option('argon_donate_qrcode_url');
 		argon_update_option('argon_hide_shortcode_in_preview');
 		argon_update_option('argon_show_thumbnail_in_banner_in_content_page');
 		argon_update_option('argon_update_source');
-		argon_update_option('argon_enable_into_article_animation');
-		argon_update_option('argon_disable_pjax_animation');
 		argon_update_option('argon_fab_show_darkmode_button');
 		argon_update_option('argon_fab_show_settings_button');
 		argon_update_option('argon_fab_show_gotocomment_button');
@@ -2318,7 +1868,6 @@ function argon_update_themeoptions(){
 		argon_update_option_checkbox('argon_show_customize_theme_color_picker');
 		argon_update_option_allow_tags('argon_seo_description');
 		argon_update_option('argon_seo_keywords');
-		argon_update_option('argon_enable_mobile_scale');
 		argon_update_option('argon_page_background_url');
 		argon_update_option('argon_page_background_dark_url');
 		argon_update_option('argon_page_background_opacity');
@@ -2329,7 +1878,6 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_hide_footer_author');
 		argon_update_option('argon_card_radius');
 		argon_update_option('argon_comment_avatar_vcenter');
-		argon_update_option('argon_pjax_disabled');
 		argon_update_option('argon_comment_allow_markdown');
 		argon_update_option('argon_comment_allow_editing');
 		argon_update_option('argon_comment_allow_privatemode');
@@ -2355,7 +1903,6 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_assets_path');
 		argon_update_option('argon_custom_assets_path');
 		argon_update_option('argon_comment_ua');
-		argon_update_option('argon_wp_path');
 		argon_update_option('argon_dateformat');
 		argon_update_option('argon_font');
 		argon_update_option('argon_card_shadow');
@@ -2397,23 +1944,12 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_sidebar_width');
 
 		//LazyLoad 相关
-		argon_update_option('argon_enable_lazyload');
-		argon_update_option('argon_lazyload_effect');
-		argon_update_option('argon_lazyload_threshold');
-		argon_update_option('argon_lazyload_loading_style');
 
 		//图片缩放预览相关
-		argon_update_option('argon_enable_fancybox');
-		argon_update_option('argon_enable_zoomify');
-		argon_update_option('argon_zoomify_duration');
-		argon_update_option('argon_zoomify_easing');
-		argon_update_option('argon_zoomify_scale');
 
 		//数学公式相关配置项
 		argon_update_option('argon_math_render');
-		argon_update_option('argon_mathjax_cdn_url');
-		argon_update_option('argon_mathjax_v2_cdn_url');
-		argon_update_option('argon_katex_cdn_url');
+		argon_update_option('argon_enable_lightbox');
 
 		//页头页尾脚本
 		argon_update_option_allow_tags('argon_custom_html_head');
@@ -2443,5 +1979,5 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_view_counter');
 	}
 }
-argon_update_themeoptions();
+add_action('admin_init', 'argon_update_themeoptions');
 ?>

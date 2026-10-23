@@ -16,7 +16,7 @@ import {
 } from '@wordpress/components';
 import { isWhitespaceCharacter } from 'is-whitespace-character'
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 registerBlockType('argon/alert', {
 	title: __('提示'),

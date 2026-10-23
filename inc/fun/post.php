@@ -1,8 +1,8 @@
 <?php
 //文章特色图片
-function argon_get_first_image_of_article(){
-	global $post;
-	if (post_password_required()){
+function argon_get_first_image_of_article($post_id = 0){
+	$post = get_post($post_id ?: null);
+	if (!$post || post_password_required($post)){
 		return false;
 	}
 	$document = argon_html_document_parts($post);
@@ -48,9 +48,8 @@ function argon_get_first_image_of_article(){
 		}
 	}
 	
-	// 方法2：如果无法获取附件ID，使用处理后的内容提取URL
-	// 注意：这里使用 'the_content' 过滤器，会触发图片优化插件
-	$post_content_full = apply_filters('the_content', preg_replace( '<!--more(.*?)-->', '', $content));
+	// Inspect stored markup without rendering every shortcode/block again for each thumbnail.
+	$post_content_full = apply_filters('argon_first_image_source', $content, $post);
 	
 	// 优先查找 data-original 属性（lazyload 场景）
 	if (preg_match('/<img[^>]+data-original=["\']([^"\']+)["\'][^>]*>/i', $post_content_full, $match)) {
@@ -69,7 +68,7 @@ function argon_has_post_thumbnail($postID = 0){
 		global $post;
 		$postID = $post -> ID;
 	}
-	if (has_post_thumbnail()){
+	if (has_post_thumbnail($postID)){
 		return true;
 	}
 	$argon_first_image_as_thumbnail = get_post_meta($postID, 'argon_first_image_as_thumbnail', true);
@@ -77,7 +76,7 @@ function argon_has_post_thumbnail($postID = 0){
 		$argon_first_image_as_thumbnail = "default";
 	}
 	if ($argon_first_image_as_thumbnail == "true" || ($argon_first_image_as_thumbnail == "default" && get_option("argon_first_image_as_thumbnail_by_default", "false") == "true")){
-		if (argon_get_first_image_of_article() != false){
+		if (argon_get_first_image_of_article($postID) != false){
 			return true;
 		}
 	}
@@ -88,7 +87,7 @@ function argon_get_post_thumbnail($postID = 0){
 		global $post;
 		$postID = $post -> ID;
 	}
-	if (has_post_thumbnail()){
+	if (has_post_thumbnail($postID)){
 		// 获取附件 ID
 		$attachment_id = get_post_thumbnail_id($postID);
 		// 使用 wp_get_attachment_image_src 获取图片信息，这会触发相关的过滤器
@@ -97,7 +96,7 @@ function argon_get_post_thumbnail($postID = 0){
 		$url = $image_data ? $image_data[0] : '';
 		return apply_filters("argon_post_thumbnail", $url, $postID, $attachment_id);
 	}
-	return apply_filters("argon_post_thumbnail", argon_get_first_image_of_article());
+	return apply_filters("argon_post_thumbnail", argon_get_first_image_of_article($postID), $postID, 0);
 }
 // 获取文章缩略图的完整 <img> 标签（推荐使用，支持 WebP 等现代图片格式插件）
 function argon_get_post_thumbnail_image($postID = 0, $size = 'full', $attr = array()){
@@ -120,7 +119,7 @@ function argon_get_post_thumbnail_image($postID = 0, $size = 'full', $attr = arr
 	}
 	
 	// 如果没有特色图片，尝试获取文章中的第一张图片
-	$first_image_url = argon_get_first_image_of_article();
+	$first_image_url = argon_get_first_image_of_article($postID);
 	if ($first_image_url){
 		$class = isset($attr['class']) ? esc_attr($attr['class']) : 'post-thumbnail';
 		$alt = isset($attr['alt']) ? esc_attr($attr['alt']) : get_the_title($postID);
@@ -160,57 +159,9 @@ function get_og_image(){
 }
 //页面浏览量
 function get_post_views($post_id){
-	$count_key = 'views';
-	$count = get_post_meta($post_id, $count_key, true);
-	if ($count==''){
-		delete_post_meta($post_id, $count_key);
-		add_post_meta($post_id, $count_key, '0');
-		$count = '0';
-	}
-	return number_format_i18n($count);
+	// Historical counts remain readable; counting belongs to a cache-aware plugin.
+	return number_format_i18n((int) get_post_meta($post_id, 'views', true));
 }
-function set_post_views(){
-	if (!is_single() && !is_page()) {
-		return;
-	}
-	if (!isset($post_id)){
-		global $post;
-		$post_id = $post -> ID;
-	}
-	if (post_password_required($post_id)){
-		return;
-	}
-	if (isset($_GET['preview'])){
-		if ($_GET['preview'] == 'true'){
-			if (current_user_can('publish_posts')){
-				return;
-			}
-		}
-	}
-	$noPostView = 'false';
-	if (isset($_POST['no_post_view'])){
-		$noPostView = $_POST['no_post_view'];
-	}
-	if ($noPostView == 'true'){
-		return;
-	}
-	global $post;
-	if (!isset($post -> ID)){
-		return;
-	}
-	$post_id = $post -> ID;
-	$count_key = 'views';
-	$count = get_post_meta($post_id, $count_key, true);
-	if (is_single() || is_page()) {
-		if ($count==''){
-			delete_post_meta($post_id, $count_key);
-			add_post_meta($post_id, $count_key, '0');
-		} else {
-			update_post_meta($post_id, $count_key, $count + 1);
-		}
-	}
-}
-add_action('get_header', 'set_post_views');
 //字数和预计阅读时间
 function get_article_words($str){
 	preg_match_all('/<pre(.*?)>[\S\s]*?<code(.*?)>([\S\s]*?)<\/code>[\S\s]*?<\/pre>/im', $str, $codeSegments, PREG_PATTERN_ORDER);
@@ -446,204 +397,7 @@ function get_banner_background_url(){
 	}
 }
 //Lazyload 对 <img> 标签预处理以加载 Lazyload
-function argon_lazyload($content){
-	// 如果启用了 fancybox，lazyload 的处理会在 argon_fancybox 中一起完成
-	// 这样可以避免 DOM 操作冲突
-	if (get_option('argon_enable_fancybox') != 'false' && get_option('argon_enable_zoomify') == 'false'){
-		return $content;
-	}
-	
-	$lazyload_loading_style = get_option('argon_lazyload_loading_style');
-	if ($lazyload_loading_style == ''){
-		$lazyload_loading_style = 'none';
-	}
-	$lazyload_loading_style = "lazyload-style-" . $lazyload_loading_style;
 
-	if(!is_feed() && !is_robots() && !is_home()){
-		$content = preg_replace('/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|(<\/img>))/i',"<img class=\"lazyload " . $lazyload_loading_style . "\" src=\"data:image/svg+xml;base64,PCEtLUFyZ29uTG9hZGluZy0tPgo8c3ZnIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmZmZmMDAiPjxnPjwvZz4KPC9zdmc+\" \$1data-original=\"\$2\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC\"\$3$4" , $content);
-		$content = preg_replace('/<img(.*?)data-full-url=[\'"]([^\'"]+)[\'"](.*)>/i',"<img$1data-full-url=\"$2\" data-original=\"$2\"$3>" , $content);
-		$content = preg_replace('/<img(.*?)srcset=[\'"](.*?)[\'"](.*?)>/i',"<img$1$3>" , $content);
-	}
-	return $content;
-}
-function argon_fancybox($content){
-	// 如果内容为空，直接返回，避免 DOMDocument::loadHTML() 报错
-	if (empty(trim($content))) {
-		return $content;
-	}
-	
-	if(!is_feed() && !is_robots() && !is_home()){
-		// 使用 DOMDocument 来更精确地处理 HTML 结构
-		$previous_libxml_errors = libxml_use_internal_errors(true); // 忽略HTML5标签的警告
-		$dom = new DOMDocument();
-		
-		// 将内容包装在一个临时容器中，避免 DOMDocument 将第一个元素作为根节点
-		// 这样可以保持原有的 HTML 结构层次
-		$wrapped_content = '<div class="argon-temp-wrapper">' . $content . '</div>';
-		
-		$dom->loadHTML(mb_encode_numericentity($wrapped_content, array(0x80, 0x10ffff, 0, 0x1fffff), 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
-		libxml_clear_errors();
-		
-		$images = $dom->getElementsByTagName('img');
-		$is_lazyload = (get_option('argon_enable_lazyload') != 'false');
-		
-		// 获取 lazyload 加载样式
-		$lazyload_loading_style = '';
-		if ($is_lazyload) {
-			$lazyload_loading_style = get_option('argon_lazyload_loading_style');
-			if ($lazyload_loading_style == ''){
-				$lazyload_loading_style = 'none';
-			}
-			$lazyload_loading_style = "lazyload-style-" . $lazyload_loading_style;
-		}
-		
-		// 需要从后向前处理，避免修改DOM时索引变化
-		$images_array = array();
-		foreach ($images as $img) {
-			$images_array[] = $img;
-		}
-		
-		foreach ($images_array as $img) {
-			// 检查图片是否已经被 fancybox-wrapper 包裹
-			if ($img->parentNode && $img->parentNode->getAttribute('class') && 
-			    strpos($img->parentNode->getAttribute('class'), 'fancybox-wrapper') !== false) {
-				continue;
-			}
-
-			$should_skip_fancybox = false;
-			$skip_keywords = array('friend-link-avatar', 'no-fancybox');
-			$parent_skip_keywords = array('friend-links', 'friend-links-simple', 'friend-link-container', 'friend-link-avatar', 'friend-link-content');
-
-			if ($img->hasAttribute('data-no-fancybox') && $img->getAttribute('data-no-fancybox') !== 'false') {
-				$should_skip_fancybox = true;
-			}
-
-			if (!$should_skip_fancybox) {
-				$img_class_attr = $img->getAttribute('class');
-				if (!empty($img_class_attr)) {
-					foreach ($skip_keywords as $keyword) {
-						if (strpos(' ' . $img_class_attr . ' ', ' ' . $keyword . ' ') !== false) {
-							$should_skip_fancybox = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if (!$should_skip_fancybox) {
-				$ancestor = $img->parentNode;
-				while ($ancestor && $ancestor->nodeType === XML_ELEMENT_NODE) {
-					if ($ancestor->hasAttribute('data-no-fancybox') && $ancestor->getAttribute('data-no-fancybox') !== 'false') {
-						$should_skip_fancybox = true;
-						break;
-					}
-					$ancestor_class_attr = $ancestor->getAttribute('class');
-					if (!empty($ancestor_class_attr)) {
-						foreach ($parent_skip_keywords as $keyword) {
-							if (strpos(' ' . $ancestor_class_attr . ' ', ' ' . $keyword . ' ') !== false) {
-								$should_skip_fancybox = true;
-								break 2;
-							}
-						}
-					}
-					$ancestor = $ancestor->parentNode;
-				}
-			}
-
-			if ($should_skip_fancybox) {
-				continue;
-			}
-			
-			// 获取图片URL
-			$img_url = $img->getAttribute('src');
-			
-			// 处理 data-full-url 属性（高清图）
-			if ($img->hasAttribute('data-full-url')) {
-				$data_full_url = $img->getAttribute('data-full-url');
-				if (!empty($data_full_url)) {
-					if ($is_lazyload && !$img->hasAttribute('data-original')) {
-						$img->setAttribute('data-original', $data_full_url);
-					}
-				}
-			}
-			
-			if (!empty($img_url) && strpos($img_url, 'data:image') === false) {
-				// 如果启用了 lazyload，处理图片属性
-				if ($is_lazyload) {
-					// 获取现有的 class 属性
-					$existing_classes = $img->getAttribute('class');
-					$classes_array = array_filter(explode(' ', $existing_classes));
-					
-					// 添加 lazyload 相关的类（如果还没有）
-					if (!in_array('lazyload', $classes_array)) {
-						$classes_array[] = 'lazyload';
-					}
-					if (!in_array($lazyload_loading_style, $classes_array)) {
-						$classes_array[] = $lazyload_loading_style;
-					}
-					
-					// 设置新的 class 属性
-					$img->setAttribute('class', implode(' ', $classes_array));
-					
-					// 设置 data-original 属性
-					if (!$img->hasAttribute('data-original')) {
-						$img->setAttribute('data-original', $img_url);
-					}
-					
-					// 替换 src 为占位图（使用 SVG 占位图以触发 CSS 动画）
-					$img->setAttribute('src', 'data:image/svg+xml;base64,PCEtLUFyZ29uTG9hZGluZy0tPgo8c3ZnIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmZmZmMDAiPjxnPjwvZz4KPC9zdmc+');
-					
-					// 移除 srcset 属性（如果有）
-					if ($img->hasAttribute('srcset')) {
-						$img->removeAttribute('srcset');
-					}
-				}
-				
-				// 获取图片URL（用于 fancybox）
-				$fancybox_url = $is_lazyload ? $img->getAttribute('data-original') : $img_url;
-				
-				// 创建 fancybox wrapper div
-				$wrapper = $dom->createElement('div');
-				$wrapper_class = $is_lazyload ? 'fancybox-wrapper lazyload-container-unload' : 'fancybox-wrapper';
-				$wrapper->setAttribute('class', $wrapper_class);
-				$wrapper->setAttribute('data-fancybox', 'post-images');
-				$wrapper->setAttribute('href', $fancybox_url);
-				
-				// 将图片插入到wrapper中
-				$img->parentNode->insertBefore($wrapper, $img);
-				$wrapper->appendChild($img);
-			}
-		}
-		
-		// 提取包装容器内的内容，移除临时包装 div
-		// 使用 XPath 查找包装容器，更精确
-		$xpath = new DOMXPath($dom);
-		$wrapper = $xpath->query("//div[@class='argon-temp-wrapper']")->item(0);
-		
-		if ($wrapper) {
-			$content = '';
-			foreach ($wrapper->childNodes as $child) {
-				$content .= $dom->saveHTML($child);
-			}
-		} else {
-			// 如果找不到包装容器，尝试从文档根元素提取（向后兼容）
-			$body = $dom->documentElement;
-			if ($body) {
-				$content = '';
-				foreach ($body->childNodes as $child) {
-					$content .= $dom->saveHTML($child);
-				}
-			} else {
-				// 最后的回退方案
-				$content = $dom->saveHTML();
-			}
-		}
-		
-		libxml_use_internal_errors($previous_libxml_errors);
-	}
-	return $content;
-}
-//外链点击量统计
 function argon_is_external_url($url){
 	if (empty($url) || $url[0] === '#'){
 		return false;
@@ -730,7 +484,7 @@ function argon_external_link_clicks_filter($content){
 	if (!argon_external_link_clicks_is_enabled()){
 		return $content;
 	}
-	if (empty(trim($content))){
+	if (empty(trim($content)) || stripos($content, '<a') === false){
 		return $content;
 	}
 	global $post;
@@ -740,55 +494,20 @@ function argon_external_link_clicks_filter($content){
 	if (!is_array($clicks)){
 		$clicks = array();
 	}
-	$previous_libxml_errors = libxml_use_internal_errors(true);
-	$dom = new DOMDocument();
-	$wrapped_content = '<div class="argon-temp-wrapper">' . $content . '</div>';
-	$dom->loadHTML(mb_encode_numericentity($wrapped_content, array(0x80, 0x10ffff, 0, 0x1fffff), 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
-	libxml_clear_errors();
-	$anchors = $dom->getElementsByTagName('a');
-	$anchors_array = array();
-	foreach ($anchors as $anchor){
-		$anchors_array[] = $anchor;
-	}
-	$modified = false;
-	foreach ($anchors_array as $anchor){
-		$href = $anchor->getAttribute('href');
-		if (empty($href) || !argon_is_external_url($href)){
-			continue;
-		}
+	// Edit only anchor attributes; retain core block markup, scripts and image hints byte-for-byte.
+	$processor = new WP_HTML_Tag_Processor($content);
+	while ($processor->next_tag('a')) {
+		$href = $processor->get_attribute('href');
+		if (!is_string($href) || !argon_is_external_url($href)) continue;
 		$url_key = esc_url_raw($href);
-		$count = isset($clicks[$url_key]) ? intval($clicks[$url_key]) : 0;
-		$wrapper = $dom->createElement('span');
-		$wrapper->setAttribute('class', 'external-link-click-wrapper');
-		$anchor->parentNode->replaceChild($wrapper, $anchor);
-		$wrapper->appendChild($anchor);
-		$anchor->setAttribute('data-url', $url_key);
-		$anchor->setAttribute('data-click-nonce', wp_create_nonce('argon_external_link_' . $post_id . '_' . md5($url_key)));
-		$anchor->setAttribute('no-pjax', '');
-		if ($count > 0){
-			$badge = $dom->createElement('span', argon_format_click_count($count));
-			$badge->setAttribute('class', 'external-link-click-badge');
-			$badge->setAttribute('data-count', $count);
-			$wrapper->appendChild($badge);
-		}
-		$modified = true;
+		$count = isset($clicks[$url_key]) ? max(0, (int) $clicks[$url_key]) : 0;
+		$processor->add_class('argon-external-link');
+		$processor->set_attribute('data-argon-click', 'true');
+		$processor->set_attribute('data-url', $url_key);
+		$processor->set_attribute('data-click-nonce', wp_create_nonce('argon_external_link_' . $post_id . '_' . md5($url_key)));
+		if ($count > 0) $processor->set_attribute('data-argon-click-count', argon_format_click_count($count));
 	}
-	if (!$modified){
-		libxml_use_internal_errors($previous_libxml_errors);
-		return $content;
-	}
-	$xpath = new DOMXPath($dom);
-	$wrapper_node = $xpath->query("//div[@class='argon-temp-wrapper']")->item(0);
-	if ($wrapper_node){
-		$result = '';
-		foreach ($wrapper_node->childNodes as $child){
-			$result .= $dom->saveHTML($child);
-		}
-	}else{
-		$result = $content;
-	}
-	libxml_use_internal_errors($previous_libxml_errors);
-	return $result;
+	return $processor->get_updated_html();
 }
 function argon_click_external_link(){
 	if (!wp_verify_nonce(argon_request_string($_POST, '_wpnonce'), 'argon_external_link_clicks')){
@@ -832,14 +551,8 @@ add_action('wp_ajax_argon_click_external_link', 'argon_click_external_link');
 add_action('wp_ajax_nopriv_argon_click_external_link', 'argon_click_external_link');
 
 function the_content_filter($content){
-	if (get_option('argon_enable_lazyload') != 'false'){
-		$content = argon_lazyload($content);
-	}
-	if (get_option('argon_enable_fancybox') != 'false' && get_option('argon_enable_zoomify') == 'false'){
-		$content = argon_fancybox($content);
-	}
 	global $post;
-	$custom_css = get_post_meta($post -> ID, 'argon_custom_css', true);
+	$custom_css = $post instanceof WP_Post ? get_post_meta($post->ID, 'argon_custom_css', true) : '';
 	if (!empty($custom_css)){
 		$content .= "<style>" . $custom_css . "</style>";
 	}

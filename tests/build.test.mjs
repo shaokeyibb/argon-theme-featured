@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
+import { root, verifyRelease, releaseFiles } from '../scripts/release-files.mjs';
+test('release contains every manifest resource and excludes development dependencies', () => {
+  const {files} = verifyRelease();
+  assert(files.length > 50);
+  assert(!files.some(file => /(^|\/)(node_modules|vendor|tests|temp|src|theme-update-checker)\//.test(file)));
+  assert(files.includes('inc/lib/parsedown.php'));
+});
+test('every local CSS URL in the deployable assets resolves', () => {
+  for (const file of releaseFiles().filter(name => /^(assets\/dist|gutenberg\/build)\/.+\.css$/.test(name))) {
+    const css = readFileSync(join(root,file),'utf8');
+    for (const match of css.matchAll(/url\(\s*['"]?([^'"\s)]+)['"]?\s*\)/g)) {
+      if (/^(data:|https?:|#)/.test(match[1])) continue;
+      assert(existsSync(resolve(dirname(join(root,file)),match[1].split(/[?#]/)[0])), `${file}: ${match[1]}`);
+    }
+  }
+});
+test('block metadata uses API 3 and actual WordPress JSON types', () => {
+  const directories = readdirSync(join(root,'gutenberg/metadata'));
+  assert.equal(directories.length,8);
+  for (const directory of directories) {
+    const block = JSON.parse(readFileSync(join(root,'gutenberg/metadata',directory,'block.json'),'utf8'));
+    assert.equal(block.apiVersion,3);
+    for (const schema of Object.values(block.attributes)) assert(['string','boolean','number','integer','object','array','null'].includes(schema.type), `${block.name}: ${schema.type}`);
+  }
+});
+test('production bundle cannot accidentally restore retired runtimes', () => {
+  const manifest=JSON.parse(readFileSync(join(root,'assets/dist/manifest.json'),'utf8'));
+  const entry=readFileSync(join(root,'assets/dist',manifest['src/modern/index.js'].file),'utf8');
+  for (const pattern of [/jQuery\.fn/, /pjax:start/, /Zoomify\.prototype/, /MathJax\.Hub/, /window\._?\$\s*=/]) assert(!pattern.test(entry), String(pattern));
+  assert(!existsSync(join(root,'assets/vendor/jquery')));
+});

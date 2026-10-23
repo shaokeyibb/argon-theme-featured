@@ -1,0 +1,7 @@
+.editor-styles-wrapper { color: #32325d; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.8; }
+.editor-styles-wrapper a { color: #5e72e4; }
+.editor-styles-wrapper img { max-width: 100%; height: auto; }
+.editor-styles-wrapper pre { white-space: pre-wrap; }
+.editor-styles-wrapper .wp-block { max-width: 900px; }
+.editor-styles-wrapper .wp-block[data-align="wide"] { max-width: 1200px; }
+.editor-styles-wrapper .wp-block[data-align="full"] { max-width: none; }

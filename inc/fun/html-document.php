@@ -279,7 +279,12 @@ add_action('_wp_put_post_revision', static function($id) {
 function argon_html_dom(string $html): DOMDocument {
 	$previous = libxml_use_internal_errors(true);
 	$dom = new DOMDocument('1.0', 'UTF-8');
-	$dom->loadHTML(mb_encode_numericentity($html, array(0x80, 0x10ffff, 0, 0x1fffff), 'UTF-8'), LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+	// Encoding the entire source as entities corrupts non-ASCII script/style text.
+	// The processing instruction tells libxml the encoding without rewriting source.
+	$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+	foreach (iterator_to_array($dom->childNodes) as $node) {
+		if ($node->nodeType === XML_PI_NODE) $dom->removeChild($node);
+	}
 	libxml_clear_errors();
 	libxml_use_internal_errors($previous);
 	return $dom;
@@ -635,9 +640,9 @@ add_action('template_redirect', 'argon_html_dispatch_document', -100);
 function argon_html_enqueue_assets(): void {
 	$directory = get_template_directory();
 	$url = get_template_directory_uri() . '/assets/html-document/';
-	// These small assets are present on the first page, so PJAX navigation also works.
+	if (!is_singular() || !argon_html_has_document(get_queried_object())) { return; }
 	wp_enqueue_style('argon-html-document', $url . 'style.css', array(), (string) filemtime($directory . '/assets/html-document/style.css'));
-	wp_enqueue_script('argon-html-document', $url . 'host.js', array('jquery'), (string) filemtime($directory . '/assets/html-document/host.js'), true);
+	wp_enqueue_script('argon-html-document', $url . 'host.js', array(), (string) filemtime($directory . '/assets/html-document/host.js'), array('in_footer' => true, 'strategy' => 'defer'));
 }
 add_action('wp_enqueue_scripts', 'argon_html_enqueue_assets');
 

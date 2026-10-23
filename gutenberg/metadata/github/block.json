@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "argon/github",
+  "title": "Github Repo 信息卡",
+  "category": "argon",
+  "textdomain": "argon",
+  "attributes": {
+    "author": {
+      "type": "string",
+      "default": ""
+    },
+    "project": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "argon-blocks",
+  "editorStyle": "argon-blocks-editor",
+  "supports": {
+    "html": false
+  }
+}

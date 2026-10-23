@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.6/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "900px", "wideSize": "1200px" },
+    "color": {
+      "defaultPalette": true,
+      "palette": [
+        { "slug": "primary", "name": "Argon", "color": "#5e72e4" },
+        { "slug": "base", "name": "Base", "color": "#ffffff" },
+        { "slug": "contrast", "name": "Text", "color": "#32325d" }
+      ]
+    },
+    "spacing": { "units": ["px", "em", "rem", "%", "vw", "vh"] },
+    "typography": { "fluid": true },
+    "useRootPaddingAwareAlignments": false,
+    "blocks": { "core/image": { "lightbox": { "allowEditing": true } } }
+  }
+}

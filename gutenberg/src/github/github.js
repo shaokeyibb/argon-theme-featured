@@ -16,7 +16,7 @@ import {
 	Panel, PanelBody, PanelRow
 } from '@wordpress/components';
 
-const { registerBlockType } = wp.blocks;
+import { registerArgonBlock as registerBlockType } from '../register.js';
 
 const getStyleClass = (className = "") => {
 	if (className.includes("mini")){
