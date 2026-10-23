@@ -9,5 +9,7 @@
 
 echo argon_get_post_outdated_info();
 do_action( 'argon_before_the_content' );
-the_content();
+if (!argon_html_render_article()) {
+	the_content();
+}
 do_action( 'argon_after_the_content' );

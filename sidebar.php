@@ -100,6 +100,7 @@
 								<div id="leftbar_catalog"></div>
 								<script type="text/javascript">
 									$(function () {
+										if (document.querySelector('.argon-html-frame')) { return; }
 										$(document).headIndex({
 											articleWrapSelector: '#post_content',
 											indexBoxSelector: '#leftbar_catalog',

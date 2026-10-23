@@ -32,8 +32,10 @@ function argon_generate_article_summary( int $post_id, WP_Post $post ): string {
 		"system" );
 	$client->addMessage( "The title of the article：" . $post->post_title );
 
-	$content = $post->post_content;
-	$content = wp_strip_all_tags(apply_filters('the_content', $content));
+	$content = argon_html_has_document($post) ? argon_html_document_text($post) : wp_strip_all_tags(apply_filters('the_content', $post->post_content));
+	if (argon_html_has_document($post) && trim($content) === '') {
+		throw new RuntimeException('HTML articles need readable HTML text or alternative article content for an AI summary.');
+	}
 	$max_content_length = get_option( 'argon_ai_max_content_length', 4000 );
 	if ($max_content_length > 0){
 		$content = mb_substr($content, 0, (int) $max_content_length, 'UTF-8');

@@ -1,0 +1,15 @@
+.argon-html-document { width: 100%; min-width: 0; }
+.argon-html-frame { display: block; width: 100%; max-width: 100%; min-width: 0; border: 0; background: transparent; }
+.post-content:has(> .argon-html-document) { padding-left: 0; padding-right: 0; }
+.argon-html-text { margin: 1rem 0; padding: .75rem 1rem; border: 1px solid rgba(128,128,128,.25); border-radius: .4rem; }
+.argon-html-text > summary { cursor: pointer; }
+.argon-html-text > div { margin-top: 1rem; overflow-wrap: anywhere; }
+.argon-html-notice { padding: .75rem; border-left: 3px solid #fb6340; }
+.argon-html-block textarea, #argon-html-classic-tools textarea { font-family: Consolas, Menlo, monospace; width: 100%; tab-size: 2; }
+.argon-html-block .argon-html-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
+.argon-html-block { border: 1px solid #ccc; padding: 1rem; }
+.argon-html-block iframe, #argon-html-classic-tools iframe { background: #fff; }
+@media (max-width: 600px) {
+    .argon-html-text { padding: .6rem; }
+    .argon-html-block { padding: .6rem; }
+}

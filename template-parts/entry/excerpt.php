@@ -10,6 +10,9 @@
     if ($trim_words_count > 0): ?>
         <div class="post-content">
             <?php
+                if (argon_html_has_document()) {
+                    echo esc_html(argon_html_excerpt(get_post(), (int) $trim_words_count));
+                } else {
                 $content = get_post_meta( get_post()->ID, "argon_ai_summary", true );
                 if ( get_option( 'argon_ai_post_summary', false ) == 'false' || get_post_meta( get_post()->ID, "argon_ai_post_summary", true ) == 'false' || get_option('argon_ai_show_post_summary_in_home', true) == 'false' || $content == '' ) {
                     $content = get_the_content( '...' );
@@ -25,10 +28,11 @@
                 if ($preview == ""){
                     $preview = __("这篇文章没有摘要", 'argon');
                 }
-                if ($post -> post_excerpt){
+                if (!post_password_required() && $post -> post_excerpt){
                     $preview = $post -> post_excerpt;
                 }
                 echo $preview;
+                }
             ?>
         </div>
     <?php endif ?>

@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/inc/fun/security.php';
+require_once __DIR__ . '/inc/fun/html-document.php';
 
 // 载入主题检测更新、兼容性
 require get_template_directory() . '/inc/argon.php';

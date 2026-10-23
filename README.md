@@ -9,6 +9,7 @@
 ## 特性
 
 - AI 文章摘要
+- [HTML 文档文章](docs/html-document.md)：完整 HTML、媒体库文件与内联源码，支持 WP Githuber MD 和古腾堡
 - WP Statistics 阅读量支持
 - Discourse 内嵌评论区集成
 - 更多...

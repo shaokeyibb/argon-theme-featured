@@ -5,6 +5,21 @@ function argon_get_first_image_of_article(){
 	if (post_password_required()){
 		return false;
 	}
+	$document = argon_html_document_parts($post);
+	if (is_array($document)) {
+		if (!argon_html_document_approved($document)) {
+			return false;
+		}
+		$dom = argon_html_dom($document['html']);
+		foreach ($dom->getElementsByTagName('img') as $image) {
+			$url = $image->getAttribute('src');
+			if ($url !== '' && !preg_match('/^(data|blob|javascript):/i', $url)) {
+				$base = argon_html_document_base($document);
+				return esc_url_raw(WP_Http::make_absolute_url($url, $base), array('http', 'https'));
+			}
+		}
+		return false;
+	}
 	
 	// 方法1：尝试从文章内容中查找附件ID（最佳实践）
 	// 这样可以使用 WordPress 标准函数获取优化后的图片
@@ -271,6 +286,9 @@ function have_catalog(){
 	if (post_password_required()){
 		return false;
 	}
+	if (argon_html_has_document()) {
+		return argon_html_enabled() && strpos(argon_html_sandbox(), 'allow-scripts') !== false;
+	}
 	if (is_page() && is_page_template('timeline.php')){
 		return true;
 	}
@@ -354,6 +372,9 @@ function get_article_meta($type){
 }
 //获取文章字数统计和预计阅读时间
 function get_article_reading_time_meta($post_content_full){
+	if (argon_html_has_document()) {
+		$post_content_full = argon_html_document_text();
+	}
 	$post_content_full = apply_filters("argon_html_before_wordcount", $post_content_full);
 	$words = get_article_words($post_content_full);
 	$res = '</br><div class="post-meta-detail post-meta-detail-words">

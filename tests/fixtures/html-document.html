@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HTML 文档测试</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font: 16px/1.7 system-ui, sans-serif; color: #18243b; background: #f4f7fb; }
+        main { max-width: 960px; padding: 28px; margin: auto; }
+        h1 { font-size: clamp(24px, 5vw, 42px); line-height: 1.2; }
+        .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+        .card { padding: 20px; border-radius: 16px; background: white; border: 1px solid #dde5f1; }
+        button { padding: 12px 20px; border: 0; border-radius: 8px; background: var(--argon-primary-color, #5e72e4); color: white; cursor: pointer; }
+        #expanded { display: none; height: 500px; margin-top: 20px; background: #dce6ff; border-radius: 12px; }
+        [data-argon-theme="dark"] body { background: #172033; color: #edf2fa; }
+        [data-argon-theme="dark"] .card { background: #26324b; border-color: #43506a; }
+        @media (max-width: 600px) { main { padding: 16px; } .cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<main>
+    <p>ARGON · HTML DOCUMENT</p>
+    <h1>完整 HTML，保留主题外壳</h1>
+    <p>这是一篇用于验证隔离、响应式布局与交互行为的文档。</p>
+    <div class="cards">
+        <section class="card"><h2>独立样式</h2><p>文档样式仅作用于当前页面。</p></section>
+        <section class="card"><h2>响应式布局</h2><p>手机上卡片变为单列。</p></section>
+        <section class="card"><h2>交互内容</h2><p>按钮可以改变文档高度。</p></section>
+    </div>
+    <h2>交互测试</h2>
+    <button id="expand" type="button">展开内容</button>
+    <button id="popup" type="button">测试弹窗</button>
+    <div id="expanded">动态加载的内容</div>
+    <p id="script-status">脚本尚未执行</p>
+</main>
+<script>
+    window.artifactExecuted = true;
+    document.getElementById('script-status').textContent = '脚本已执行';
+    try { window.parent.document.getElementById('argon-html-escape-target').textContent = 'escaped'; window.parentAccessBlocked = false; }
+    catch (_) { window.parentAccessBlocked = true; }
+    try { window.document.cookie; window.cookieAccessBlocked = false; }
+    catch (_) { window.cookieAccessBlocked = true; }
+    document.getElementById('expand').addEventListener('click', function () { document.getElementById('expanded').style.display = 'block'; });
+    document.getElementById('popup').addEventListener('click', function () { window.open('about:blank', '_blank'); });
+</script>
+</body>
+</html>

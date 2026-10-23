@@ -6,6 +6,9 @@ function get_seo_description(){
 		if (post_password_required()){
 			return __('这是一个加密页面，需要密码来查看', 'argon');
 		}
+		if (argon_html_has_document($post)) {
+			return mb_substr(argon_html_excerpt($post, 160), 0, 160, 'UTF-8');
+		}
 		if ( $post->post_excerpt != "" ) {
 			return preg_replace( '/ \[&hellip;]$/', '&hellip;', $post->post_excerpt );
 		}

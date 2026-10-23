@@ -1085,6 +1085,7 @@ function themeoptions_page(){
 							<p class="description"><?php _e('HTML , 支持 script 等标签', 'argon');?></p>
 						</td>
 					</tr>
+					<?php argon_html_settings_fields(); ?>
 					<tr><th class="subtitle"><h2><?php _e('代码高亮', 'argon');?></h2></th></tr>
 					<tr>
 						<th><label><?php _e('启用 Highlight.js 代码高亮', 'argon');?></label></th>
@@ -2280,6 +2281,7 @@ function argon_update_themeoptions(){
 			return;
 		}
 		//配置项
+		argon_html_save_options();
 		argon_update_option('argon_toolbar_icon');
 		argon_update_option('argon_toolbar_icon_link');
 		argon_update_option('argon_toolbar_title');
