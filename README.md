@@ -4,7 +4,9 @@
 
 延续 [Argon](https://github.com/solstice23/argon-theme) 轻盈、简洁的外观，把写作、阅读和互动能力带到现代 WordPress：原生 JavaScript 前台、现代区块编辑器、可交互的 HTML 文档文章、AI 摘要、丰富的评论功能，以及更完善的系统与浏览器识别。
 
-[下载 3.0.7 正式版](https://github.com/shaokeyibb/argon-theme-featured/releases/tag/v3.0.7) · [安装与升级](#安装与升级) · [功能一览](#功能一览) · [开发与测试](#开发与测试) · [完整文档](#文档与支持)
+[下载 3.0.8 正式版](https://github.com/shaokeyibb/argon-theme-featured/releases/tag/v3.0.8) · [安装与升级](#安装与升级) · [功能一览](#功能一览) · [开发与测试](#开发与测试) · [完整文档](#文档与支持)
+
+3.0.8 修复暗色模式下说说、站点统计、文章 metadata、评论和设置面板文字过暗的问题，让公共组件与正文使用一致的暗色配色。详见[暗色文字修复说明](docs/3.0.8.md)。
 
 3.0.7 修复 HTML 文章在宽窄屏切换后的高度与内部滚动条问题，移除移动端文档外层的重复留白，并更新 AI 摘要图标。详见[HTML 响应式修复说明](docs/3.0.7.md)。
 

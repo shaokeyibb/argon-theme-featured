@@ -2,6 +2,9 @@
 body {
   --wp--preset--color--primary: var(--themecolor, #5e72e4);
   --wp--preset--color--base: var(--color-foreground, #fff);
+  /* Bootstrap 5 cards/modal bodies set their own text color. Keep them on
+     the same palette as WordPress content instead of its light-only root. */
+  --bs-body-color: var(--wp--preset--color--contrast, #525f7f);
 }
 .post-content {
   font-family: var(--font);
@@ -27,4 +30,19 @@ body {
 .post-content h5 { font-size: var(--wp--custom--argon--heading--h5, 1rem); }
 .post-content h6 { font-size: var(--wp--custom--argon--heading--h6, .875rem); }
 .card.shadow-sm { box-shadow: var(--wp--custom--argon--surface--shadow, 0 1px 3px #32325d14) !important; }
-html.darkmode body { --wp--preset--color--contrast: #eee; }
+html.darkmode body {
+  --wp--preset--color--contrast: #eee;
+  --bs-body-color-rgb: 238, 238, 238;
+  --bs-heading-color: var(--wp--preset--color--contrast);
+  --bs-emphasis-color: var(--wp--preset--color--contrast);
+  --bs-emphasis-color-rgb: 238, 238, 238;
+  --bs-secondary-color: rgba(238, 238, 238, .75);
+  --bs-secondary-color-rgb: 238, 238, 238;
+  --bs-tertiary-color: rgba(238, 238, 238, .5);
+  --bs-tertiary-color-rgb: 238, 238, 238;
+  /* Tables and list groups consume these alongside the text tokens. */
+  --bs-body-bg: var(--color-foreground);
+  --bs-secondary-bg: var(--color-widgets);
+  --bs-tertiary-bg: var(--color-background);
+  --bs-border-color: var(--color-border-on-foreground-deeper);
+}

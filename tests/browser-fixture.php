@@ -40,6 +40,13 @@ update_option('argon_fold_long_shuoshuo', 'true');
 update_option('argon_fold_long_comments', 'true');
 update_option('argon_toolbar_blur', 'true');
 update_option('argon_get_captcha_by_ajax', 'true');
+// Use the actual sidebar wrapper: its text-black heading used to override dark mode.
+update_option('widget_text', array(2 => array(
+	'title' => '站点统计', 'text' => '<ul><li><label>文章数:</label> 3</li></ul>', 'filter' => false,
+), '_multiwidget' => 1));
+$sidebars = get_option('sidebars_widgets', array());
+$sidebars['leftbar-siteinfo-extra-tools'] = array('text-2');
+update_option('sidebars_widgets', $sidebars);
 $posts['folding'] = wp_insert_post(wp_slash(array('post_type' => 'shuoshuo', 'post_title' => 'Delayed image folding', 'post_content' => '<p>Delayed image</p><img src="' . esc_url(home_url('/folding-delayed.svg')) . '" alt="Delayed tall image">', 'post_status' => 'publish', 'post_date' => date('Y-m-d H:i:s', time() - 1))));
 $posts['home'] = wp_insert_post(wp_slash(array('post_title' => 'Pagination cover', 'post_content' => '<p>Navigate to the next page to check image folding.</p>', 'post_status' => 'publish', 'post_date' => date('Y-m-d H:i:s', time()))));
 // Stable dates keep the folding fixture on page two regardless of insert speed.
