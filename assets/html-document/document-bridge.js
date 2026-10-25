@@ -17,7 +17,8 @@
         // body.scrollHeight can be clamped to the iframe viewport, preventing shrinkage or causing
         // scrollbar-driven growth. Measure content bounds instead, including positioned descendants.
         var bodyBox = document.body.getBoundingClientRect();
-        var height = Math.max(document.body.offsetHeight, bodyBox.bottom + window.scrollY);
+        var height = Math.max(document.body.offsetHeight, bodyBox.bottom + window.scrollY)
+            + Math.max(0, parseFloat(getComputedStyle(document.body).marginBottom) || 0);
         var elements = document.body.querySelectorAll('*');
         for (var i = 0; i < Math.min(elements.length, 3000); i++) {
             var node = elements[i];
@@ -29,10 +30,11 @@
         var items = headings.map(function (heading) {
             return { text: heading.textContent.trim().slice(0, 200), level: Number(heading.tagName.slice(1)), top: Math.round(heading.getBoundingClientRect().top + window.scrollY) };
         });
-        var layout = JSON.stringify({ height: height, headings: items });
+        var width = window.innerWidth;
+        var layout = JSON.stringify({ height: height, width: width, headings: items });
         if (layout === lastLayout) return;
         lastLayout = layout;
-        send('layout', { height: height, headings: items });
+        send('layout', { height: height, width: width, headings: items });
     }
     function schedule() {
         if (scheduled) return;
@@ -42,6 +44,11 @@
     window.addEventListener('message', function (event) {
         var message = event.data;
         if (event.source !== window.parent || event.origin !== config.parentOrigin || !message || message.instance !== config.instance) return;
+        if (message.type === 'argon-html:measure') schedule();
+        if ((message.type === 'argon-html:theme' || message.type === 'argon-html:sizing') && typeof message.autoHeight === 'boolean') {
+            document.documentElement.toggleAttribute('data-argon-auto-height', message.autoHeight);
+            schedule();
+        }
         if (message.type === 'argon-html:theme') {
             var root = document.documentElement;
             root.dataset.argonTheme = message.dark ? 'dark' : 'light';

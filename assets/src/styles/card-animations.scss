@@ -9,9 +9,8 @@
 		transform: none;
 	}
 }
-#primary {
-	transition: all 0.3s ease;
-}
+/* Responsive widths must settle immediately: interpolating the sidebar width
+   across breakpoints can briefly squeeze embedded documents almost to zero. */
 .card {
 	animation: card-show 0.25s ease-out;
 	transform-origin: center top;

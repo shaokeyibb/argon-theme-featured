@@ -10,6 +10,14 @@
 .argon-html-block { border: 1px solid #ccc; padding: 1rem; }
 .argon-html-block iframe, #argon-html-classic-tools iframe { background: #fff; }
 @media (max-width: 600px) {
+    html.single-column .post-full:has(> .post-content > .argon-html-document) { margin-inline: -5px; }
+    /* Full HTML pages already own their inner spacing. Let only their document
+       extend through the card's 20px mobile inset; keep the title readable. */
+    .post-full > .post-content > .argon-html-document {
+        width: calc(100% + 40px);
+        margin-inline: -20px;
+    }
     .argon-html-text { padding: .6rem; }
+    .post-full > .post-content > .argon-html-document > .argon-html-text { margin-inline: 20px; }
     .argon-html-block { padding: .6rem; }
 }

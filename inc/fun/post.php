@@ -593,7 +593,7 @@ function argon_get_ai_post_summary(): string {
 
 	return trim( strtr( '<div class="post-ai-summary">
 			<div class="post-ai-summary_title">
-				<i class="fa fa-android" aria-hidden="true"></i>
+				<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
 				<span>$title</span>
 			</div>
 			<div class="post-ai-summary_content">

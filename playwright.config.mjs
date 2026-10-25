@@ -7,7 +7,7 @@ export default defineConfig({
     { name: 'chromium', use: { browserName: 'chromium', channel: process.env.ARGON_BROWSER_CHANNEL || undefined, launchOptions: { ignoreDefaultArgs: ['--disable-back-forward-cache'] } } },
     ...['firefox', 'webkit'].map(browserName => ({
       name: browserName,
-      testMatch: ['header.spec.mjs', 'layout.spec.mjs', 'palette.spec.mjs', 'design.spec.mjs', 'navigation.spec.mjs'],
+      testMatch: ['header.spec.mjs', 'layout.spec.mjs', 'palette.spec.mjs', 'design.spec.mjs', 'navigation.spec.mjs', 'html-document.spec.mjs'],
       use: { browserName }
     })),
     { name: 'visual-chromium', testMatch: 'visual.spec.mjs', testIgnore: [], use: { browserName: 'chromium', viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' } }

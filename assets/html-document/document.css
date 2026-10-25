@@ -4,3 +4,8 @@
 :where(pre) { max-inline-size: 100%; overflow-x: auto; }
 :where(img, video, canvas, svg) { max-inline-size: 100%; }
 :where(img, video) { height: auto; }
+/* Auto height scrolls with the host page. Removing the inner vertical scrollbar
+   keeps its width from changing text wrapping during measurement (WebKit).
+   The bridge enables this only after the host handshake; fixed/viewport modes
+   and documents without scripts retain their own scrolling. */
+:root[data-argon-auto-height] { overflow-y: hidden !important; }
