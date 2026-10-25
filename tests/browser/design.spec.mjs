@@ -2,6 +2,26 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const fixture = () => JSON.parse(readFileSync('temp/browser-fixture.json', 'utf8'));
 
+test('short articles and HTML documents fill the available card width', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const post of [fixture().home, fixture().html]) {
+    await page.goto(`/?p=${post}`, { waitUntil: 'domcontentloaded' });
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect.poll(() => page.locator('.post-content').evaluate(content => {
+        const card = content.parentElement;
+        const style = getComputedStyle(card);
+        const available = card.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return Math.abs(content.getBoundingClientRect().width - available);
+      })).toBeLessThanOrEqual(1);
+      const frame = page.locator('.argon-html-frame');
+      if (await frame.count()) {
+        expect(await frame.evaluate(el => Math.abs(el.getBoundingClientRect().width - el.parentElement.clientWidth))).toBeLessThanOrEqual(1);
+      }
+    }
+  }
+});
+
 test('existing reader colors, fonts and radius also style native blocks', async ({ page, context }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

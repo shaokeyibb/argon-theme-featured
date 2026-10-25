@@ -9,6 +9,7 @@ body {
   line-height: var(--wp--custom--argon--content--line-height, 1.8);
   font-weight: var(--wp--custom--argon--content--font-weight, 400);
   color: var(--wp--preset--color--contrast, #525f7f);
+  inline-size: 100%;
   max-inline-size: var(--wp--custom--argon--content--measure, 100%);
   margin-inline: auto;
 }
