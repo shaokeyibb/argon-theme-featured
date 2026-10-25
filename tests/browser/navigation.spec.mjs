@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const fixture = () => JSON.parse(readFileSync('temp/browser-fixture.json', 'utf8'));
 
-for (const reducedMotion of ['no-preference', 'reduce']) test(`back and forward restore scroll, theme and a usable toolbar (${reducedMotion})`, async ({ page }, testInfo) => {
+for (const reducedMotion of ['no-preference', 'reduce']) test(`back, reload and forward restore scroll, theme and a usable toolbar (${reducedMotion})`, async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion });
   await page.addInitScript(() => {
     sessionStorage.setItem('Argon_Enable_Dark_Mode', 'true');
@@ -24,6 +24,8 @@ for (const reducedMotion of ['no-preference', 'reduce']) test(`back and forward 
   const destination = page.url();
   await page.goBack({ waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(source);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(scroll, 0);
+  await page.reload({ waitUntil: 'load' });
   await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(scroll, 0);
   await expect(page.locator('html')).toHaveClass(/darkmode/);
   await expect(page.locator('#navbar-main')).toHaveCSS('backdrop-filter', 'blur(16px)');

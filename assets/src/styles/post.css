@@ -100,19 +100,22 @@
 	left: 0;
 	width: 100%;
 	color: #fff;
-	opacity: 0.9;
 	padding-bottom: 35px;
-	padding-top: 35px;
-	background: rgba(0, 0, 0, 0.05);
-	background: linear-gradient(to top, rgba(0, 0, 0, 0.3) 20%, rgba(0, 0, 0, 0));
+	padding-top: 70px;
+	/* Only layout 1 places this container over a thumbnail. Keep the image
+	   visible above it, with a solid-enough scrim behind every line of text. */
+	background: linear-gradient(to bottom, rgba(12, 16, 24, 0), rgba(12, 16, 24, 0.68) 64px, rgba(12, 16, 24, 0.84));
 }
 .post-header.post-header-with-thumbnail .post-header-text-container .post-title {
-	color: rgba(255, 255, 255, 0.95) !important;
-	/*text-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);*/
-	filter: drop-shadow(0px 1px 5px #0005);
+	color: #fff !important;
+	font-weight: 600;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .post-header.post-header-with-thumbnail .post-header-text-container .post-meta {
 	text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+.post-header.post-header-with-thumbnail .post-header-text-container .post-meta a {
+	color: inherit;
 }
 .post-outdated-info {
 	color: var(--themecolor);

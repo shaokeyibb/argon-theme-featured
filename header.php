@@ -145,8 +145,8 @@
 	<script>
 		function argonSafeStorage(name){ return {getItem: function(key){try{return window[name].getItem(key);}catch(e){return null;}},setItem: function(key,value){try{window[name].setItem(key,value);}catch(e){}}}; }
 		var argonSession = argonSafeStorage('sessionStorage'), argonLocal = argonSafeStorage('localStorage');
-		// Entrance transforms distort the browser's scroll anchor on history restores.
-		if (performance.getEntriesByType('navigation')[0]?.type === 'back_forward') document.documentElement.classList.add('history-navigation');
+		// Entrance transforms distort native scroll restoration on history and reload.
+		if (['back_forward', 'reload'].includes(performance.getEntriesByType('navigation')[0]?.type)) document.documentElement.classList.add('history-navigation');
 		var argonSerifPreference = argonLocal.getItem('Argon_Use_Serif');
 		if (argonSerifPreference === 'true' || argonSerifPreference === 'false') {
 			document.documentElement.classList.toggle('use-serif', argonSerifPreference === 'true');
