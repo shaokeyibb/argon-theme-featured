@@ -43,6 +43,34 @@ modern_test('build manifests and extracted dependencies resolve', function() {
 	modern_assert(isset($manifest['src/modern/index.js'], $manifest['src/modern/admin.js']), 'Entrypoints missing');
 	modern_assert(in_array('wp-block-editor', wp_scripts()->registered['argon-blocks']->deps, true), 'WordPress dependency extraction missing');
 });
+modern_test('existing color and appearance options reach WordPress global styles without visitor leakage', function() {
+	$keys = array('argon_theme_color', 'argon_font', 'argon_card_radius', 'argon_card_shadow');
+	$previous = array();
+	foreach ($keys as $key) $previous[$key] = get_option($key, null);
+	$cookie = $_COOKIE['argon_custom_theme_color'] ?? null;
+	try {
+		$expected = array('#5e72e4', '#fa7298', '#009688', '#607d8b', '#2196f3', '#3f51b5', '#ff9700', '#109d58', '#dc4437', '#673bb7', '#212121', '#795547');
+		modern_assert(array_column(argon_theme_color_presets(), 'color') === $expected, 'Existing color swatches changed');
+		$_COOKIE['argon_custom_theme_color'] = '#ff0000';
+		update_option('argon_font', 'serif'); update_option('argon_card_radius', 9.5); update_option('argon_card_shadow', 'big');
+		foreach ($expected as $color) {
+			update_option('argon_theme_color', $color);
+			$source = wp_json_file_decode(get_template_directory() . '/theme.json', array('associative' => true));
+			$source['settings']['color']['palette'][] = array('slug' => 'child-color', 'name' => 'Child color', 'color' => '#123456');
+			$data = argon_design_theme_json(new WP_Theme_JSON_Data($source, 'theme'))->get_theme_json()->get_data();
+			$palette = array_column($data['settings']['color']['palette'], 'color', 'slug');
+			modern_assert($palette['primary'] === $color && $palette['child-color'] === '#123456', 'Site/child palette lost or reader cookie leaked');
+			modern_assert($palette['argon-teal'] === '#009688', 'Existing preset missing from editor');
+			$design = $data['settings']['custom']['argon'];
+			modern_assert($design['content']['font-family'] === 'var(--wp--preset--font-family--serif)', 'Site font ignored');
+			modern_assert($design['surface']['radius'] === '9.5px' && str_contains($design['surface']['shadow'], '35px'), 'Existing card settings ignored');
+		}
+		modern_assert(in_array('argon-icons', wp_styles()->registered['argon-blocks-editor']->deps, true), 'Editor does not share the official icon stylesheet');
+	} finally {
+		foreach ($previous as $key => $value) { if ($value === null) delete_option($key); else update_option($key, $value); }
+		if ($cookie === null) unset($_COOKIE['argon_custom_theme_color']); else $_COOKIE['argon_custom_theme_color'] = $cookie;
+	}
+});
 modern_test('historical view reads do not write database', function() use ($post_id) {
 	delete_post_meta($post_id, 'views');
 	get_post_views($post_id);

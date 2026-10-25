@@ -19,9 +19,9 @@ export const rgb2hsl = (R,G,B) => {
 			S = del_Max / (2 - var_Max - var_Min);
 		}
 
-		del_R = (((var_Max - r) / 6) + (del_Max / 2)) / del_Max;
-		del_G = (((var_Max - g) / 6) + (del_Max / 2)) / del_Max;
-		del_B = (((var_Max - b) / 6) + (del_Max / 2)) / del_Max;
+		const del_R = (((var_Max - r) / 6) + (del_Max / 2)) / del_Max;
+		const del_G = (((var_Max - g) / 6) + (del_Max / 2)) / del_Max;
+		const del_B = (((var_Max - b) / 6) + (del_Max / 2)) / del_Max;
 
 		if (r == var_Max){
 			H = del_B - del_G;
@@ -98,26 +98,19 @@ export const rgb2hex = (r,g,b) => {
 	}
 	return "#" + rh + gh + bh;
 }
-export const hex2rgb = (hex) => {
-	//hex: #XXXXXX
-	let dec = {
-		'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15
-	};
-	return {
-		'R': (dec[hex.substr(1,1)] * 16 + dec[hex.substr(2,1)]),//0~255
-		'G': (dec[hex.substr(3,1)] * 16 + dec[hex.substr(4,1)]),
-		'B': (dec[hex.substr(5,1)] * 16 + dec[hex.substr(6,1)]),
-		'r': (dec[hex.substr(1,1)] * 16 + dec[hex.substr(2,1)]) / 255,//0~1
-		'g': (dec[hex.substr(3,1)] * 16 + dec[hex.substr(4,1)]) / 255,
-		'b': (dec[hex.substr(5,1)] * 16 + dec[hex.substr(6,1)]) / 255
-	};
+export const hex2rgb = hex => {
+	if (typeof hex !== 'string' || !/^#[0-9a-f]{6}$/i.test(hex)) throw new TypeError('Expected a six-digit hex color');
+	const R = Number.parseInt(hex.slice(1, 3), 16);
+	const G = Number.parseInt(hex.slice(3, 5), 16);
+	const B = Number.parseInt(hex.slice(5, 7), 16);
+	return { R, G, B, r: R / 255, g: G / 255, b: B / 255 };
 }
 export const rgb2gray = (R,G,B) => {
 	return Math.round(R * 0.299 + G * 0.587 + B * 0.114);
 }
 export const hex2gray = (hex) => {
 	let rgb_array = hex2rgb(hex);
-	return hex2gray(rgb_array['R'], rgb_array['G'], rgb_array['B']);
+	return rgb2gray(rgb_array['R'], rgb_array['G'], rgb_array['B']);
 }
 export const rgb2str = (rgb) => {
 	return rgb['R'] + "," + rgb['G'] + "," + rgb['B'];

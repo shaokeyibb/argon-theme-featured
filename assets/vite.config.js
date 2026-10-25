@@ -20,7 +20,7 @@ export default defineConfig({
       // Cache plugins may append a query to the entry URL. Keep shared exports
       // in a separate chunk so lazy imports cannot execute that entry twice.
       preserveEntrySignatures: 'strict',
-      input: { theme: 'src/modern/index.js', admin: 'src/modern/admin.js' },
+      input: { theme: 'src/modern/index.js', admin: 'src/modern/admin.js', icons: 'src/styles/icons.scss' },
       output: { entryFileNames: '[name]-[hash].js', chunkFileNames: '[name]-[hash].js', assetFileNames: '[name]-[hash][extname]' }
     }
   }

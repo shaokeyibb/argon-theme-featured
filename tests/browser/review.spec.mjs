@@ -65,6 +65,8 @@ test('gallery uses full image dimensions and leaves core lightbox in control', a
 
 test('AI regeneration stops after the editor fails to save', async ({page}) => {
   await page.goto('/wp-login.php', {waitUntil:'domcontentloaded'});
+  // Core focuses this field on a 200 ms timer; wait before typing passwords.
+  await expect(page.locator('#user_login')).toBeFocused();
   await page.locator('#user_login').fill('admin'); await page.locator('#user_pass').fill('argon-browser-local-test');
   await Promise.all([page.waitForURL('**/wp-admin/**', {waitUntil:'domcontentloaded'}), page.locator('#wp-submit').click()]);
   await page.goto(`/wp-admin/post.php?post=${fixture().normal}&action=edit`, {waitUntil:'domcontentloaded'});

@@ -1,0 +1,2 @@
+/* Capture article typography without unrelated fixed toolbar overlays. */
+#float_action_buttons { display: none !important; }

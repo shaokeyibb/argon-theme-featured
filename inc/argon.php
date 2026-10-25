@@ -12,5 +12,6 @@ $GLOBALS['openai_baseurl'] = get_option('argon_openai_baseurl') === 'custom'
     ? untrailingslashit((string) get_option('argon_custom_openai_baseurl'))
     : 'https://api.openai.com';
 require_once __DIR__ . '/setup.php';
+require_once __DIR__ . '/design.php';
 require_once __DIR__ . '/assets.php';
 require_once __DIR__ . '/updates.php';

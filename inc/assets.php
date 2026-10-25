@@ -15,6 +15,14 @@ function argon_asset_url(string $file): string {
 	return trailingslashit($GLOBALS['assets_path']) . 'assets/dist/' . ltrim($file, '/');
 }
 
+function argon_register_icon_assets(): void {
+	$icons = argon_asset_manifest()['src/styles/icons.scss'] ?? null;
+	if ($icons && !empty($icons['file'])) {
+		wp_register_style('argon-icons', argon_asset_url($icons['file']), array(), null);
+	}
+}
+add_action('init', 'argon_register_icon_assets', 5);
+
 function argon_code_theme_names(): array {
 	$root = get_template_directory() . '/assets/dist/highlight/';
 	$files = array_merge(glob($root . '*.css'), glob($root . 'base16/*.css'));
@@ -29,7 +37,7 @@ function argon_enqueue_assets(): void {
 		return;
 	}
 	foreach ($entry['css'] ?? array() as $index => $css) {
-		wp_enqueue_style('argon-theme-' . $index, argon_asset_url($css), array(), null);
+		wp_enqueue_style('argon-theme-' . $index, argon_asset_url($css), array('argon-icons'), null);
 	}
 	// pagereveal runs before the first render: its listener must be a classic
 	// head script, not a deferred module. Only optional transition rejections

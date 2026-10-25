@@ -301,7 +301,7 @@
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-BlA3h3la.js",
+    "file": "theme-wOB-rhNP.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
@@ -317,13 +317,7 @@
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-0l31EKPh.css"
-    ],
-    "assets": [
-      "fa-solid-900-IAB4Droh.woff2",
-      "fa-regular-400-DRN8N0d1.woff2",
-      "fa-brands-400-Bs6tcqqs.woff2",
-      "fa-v4compatibility-CErXDOsT.woff2"
+      "theme-KOQPA6GJ.css"
     ]
   },
   "src/modern/math.js": {
@@ -394,6 +388,21 @@
       "KaTeX_Typewriter-Regular-CO6r4hn1.woff2",
       "KaTeX_Typewriter-Regular-C0xS9mPB.woff",
       "KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf"
+    ]
+  },
+  "src/styles/icons.scss": {
+    "file": "icons-CRlelXR3.css",
+    "name": "icons",
+    "names": [
+      "icons.css"
+    ],
+    "src": "src/styles/icons.scss",
+    "isEntry": true,
+    "assets": [
+      "fa-solid-900-IAB4Droh.woff2",
+      "fa-regular-400-DRN8N0d1.woff2",
+      "fa-brands-400-Bs6tcqqs.woff2",
+      "fa-v4compatibility-CErXDOsT.woff2"
     ]
   }
 }

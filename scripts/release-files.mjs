@@ -20,7 +20,7 @@ export function releaseFiles() {
 }
 export function verifyRelease(files = releaseFiles()) {
   const manifest = JSON.parse(readFileSync(join(root,'assets/dist/manifest.json'),'utf8'));
-  for (const source of ['src/modern/index.js','src/modern/admin.js']) if (!manifest[source]) throw new Error(`Missing entry ${source}; run npm run build`);
+  for (const source of ['src/modern/index.js','src/modern/admin.js','src/styles/icons.scss']) if (!manifest[source]) throw new Error(`Missing entry ${source}; run npm run build`);
   for (const entry of Object.values(manifest)) {
     for (const name of [entry.file, ...(entry.css || []), ...(entry.assets || [])]) {
       if (!files.includes(`assets/dist/${name}`)) throw new Error(`Unpackaged build asset: ${name}`);

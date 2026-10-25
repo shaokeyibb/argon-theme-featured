@@ -14,6 +14,8 @@ test.beforeEach(async ({page}) => {
 test.afterEach(() => expect(errors).toEqual([]));
 async function login(page) {
   await page.goto('/wp-login.php', {waitUntil:'domcontentloaded'});
+  // Core focuses this field on a 200 ms timer; wait before typing passwords.
+  await expect(page.locator('#user_login')).toBeFocused();
   await page.locator('#user_login').fill('admin');
   await page.locator('#user_pass').fill('argon-browser-local-test');
   await Promise.all([page.waitForURL('**/wp-admin/**', {waitUntil:'domcontentloaded'}), page.locator('#wp-submit').click()]);
@@ -221,6 +223,9 @@ test('block editor registers API 3 blocks and saves revision-aware settings', as
     wp.data.dispatch('core/block-editor').insertBlocks(blocks);
   });
   const canvas = page.frameLocator('iframe[name="editor-canvas"]');
+  await expect(canvas.locator('link[href*="/assets/dist/icons-"]')).toHaveCount(1);
+  await expect(canvas.locator('.editor-styles-wrapper')).toHaveCSS('font-family', /Open Sans/);
+  expect(await canvas.locator('.editor-styles-wrapper').evaluate(el => getComputedStyle(el).getPropertyValue('--wp--preset--color--argon-teal').trim())).toBe('#009688');
   for (const item of result.cases) await expect(canvas.locator(`[data-type="${item.name}"]`).first()).toBeVisible();
   await page.evaluate(async () => {
     wp.data.dispatch('core/editor').editPost({meta:{argon_show_post_outdated_info:'never'}});

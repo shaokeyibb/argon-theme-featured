@@ -7,7 +7,7 @@ function argon_init_gutenberg_blocks() {
     if (!is_readable($dir . 'blocks.asset.php')) return;
     $asset = require $dir . 'blocks.asset.php';
     wp_register_script('argon-blocks', $url . 'blocks.js', $asset['dependencies'], $asset['version'], true);
-    wp_register_style('argon-blocks-editor', $url . 'blocks.css', array(), $asset['version']);
+    wp_register_style('argon-blocks-editor', $url . 'blocks.css', array('argon-icons'), $asset['version']);
     wp_set_script_translations('argon-blocks', 'argon', get_template_directory() . '/languages');
     foreach (glob(get_template_directory() . '/gutenberg/metadata/*/block.json') as $metadata) {
         register_block_type($metadata);

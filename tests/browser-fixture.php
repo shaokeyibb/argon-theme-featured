@@ -51,6 +51,17 @@ set_theme_mod('nav_menu_locations', array('leftbar_menu' => $menu));
 update_option('argon_ai_post_summary', 'true');
 update_option('argon_openai_api_key', '');
 $posts['site'] = home_url('/');
+$posts['design'] = wp_insert_post(wp_slash(array(
+	'post_type' => 'page', 'post_title' => 'Design system', 'post_status' => 'publish',
+	'post_content' => '<!-- wp:heading --><h2 class="wp-block-heading">A consistent reading experience</h2><!-- /wp:heading -->'
+		. '<!-- wp:paragraph --><p>Typography, spacing and colors follow the same settings in the editor and on the page. <a href="#design-secondary">Explore the details</a>.</p><!-- /wp:paragraph -->'
+		. '<!-- wp:paragraph {"textColor":"primary"} --><p id="design-primary" class="has-primary-color has-text-color">The site accent follows your existing theme color.</p><!-- /wp:paragraph -->'
+		. '<!-- wp:heading {"level":3} --><h3 id="design-secondary" class="wp-block-heading">Familiar colors and icons</h3><!-- /wp:heading -->'
+		. '<p id="design-icons"><i class="fa fa-bath" aria-hidden="true"></i> Legacy icon &nbsp; <i class="fa fa-envelope-o" aria-hidden="true"></i> Regular icon &nbsp; <i class="fa-brands fa-github" aria-hidden="true"></i> Brand icon</p>'
+		. '<!-- wp:quote --><blockquote class="wp-block-quote"><p>Existing choices remain useful when the whole theme speaks the same design language.</p></blockquote><!-- /wp:quote -->'
+		. '<!-- wp:paragraph {"style":{"typography":{"fontSize":"22px"}}} --><p id="design-custom-size" style="font-size:22px">An author can still choose a custom size.</p><!-- /wp:paragraph -->'
+		. '<!-- wp:paragraph --><p><strong>Strong text</strong>, <em>emphasis</em> and <code>inline code</code> stay readable.</p><!-- /wp:paragraph -->',
+)));
 $fixture_dir = dirname(__DIR__) . '/temp';
 if (!wp_mkdir_p($fixture_dir) || file_put_contents($fixture_dir . '/browser-fixture.json', wp_json_encode($posts)) === false) {
 	throw new RuntimeException('Could not write browser fixture data');

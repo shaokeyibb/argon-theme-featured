@@ -6,6 +6,5 @@ import './timeline/timeline.js';
 import './progressbar/progressbar.js';
 import './todolist/todolist.js';
 import './tabpanel/tabpanel.js';
-import '../../assets/src/styles/fonts.js';
 
 import './post-settings.js';

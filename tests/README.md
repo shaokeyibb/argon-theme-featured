@@ -13,7 +13,7 @@ npm test
 npm audit
 ```
 
-不再需要 Composer、pnpm、Parcel 或全局 PHP。`npm test` 检查发行文件白名单、manifest 引用、全部本地 CSS 资源路径、孤立字体、区块 metadata、旧运行库意外回归，以及评论时间格式与更新边界。
+不再需要 Composer、pnpm、Parcel 或全局 PHP。`npm test` 检查发行文件白名单、manifest 引用、全部本地 CSS 资源路径、孤立字体、区块 metadata、旧运行库意外回归，颜色转换、资源体积预算，以及评论时间格式与更新边界。
 
 ## PHP 集成测试
 
@@ -44,7 +44,7 @@ ARGON_TEST_WP=6.6 ARGON_TEST_PHP=8.2 npm run test:php
 | --- | ---: | --- |
 | security | 102 | nonce、缓存页面 nonce 刷新和同源限制、对象权限、匿名入口、元数据白名单、KSES/XSS、验证码、评论写入/编辑/历史/点赞/置顶、远程请求失败 |
 | html-document | 50 | HTML 文档权限、媒体源码保护、短代码和区块、修订预览、替代正文、隔离桥接、索引与摘要 |
-| modernization | 27 | PHP 语法与启动期诊断、原生主题支持与 Logo、API 3、资源构建、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI 保存时序/撤回/失败、动态首图、主查询范围、分享链接编码和平台筛选 |
+| modernization | 28 | PHP 语法与启动期诊断、原生主题支持与 Logo、API 3、资源构建、现有配色与外观选项到 Global Styles 的映射、REST 修订元数据、无读取计数写入、Unicode 保真、图片/交互属性、AI 保存时序/撤回/失败、动态首图、主查询范围、分享链接编码和平台筛选 |
 | user-agent | 127 | 123 个 UA/Client Hints 样本，以及评论请求头保存、旧评论回退、转义、隐藏选项与 PHP 8.5 空字段处理 |
 
 现代化测试在主题加载前安装诊断 MU 插件，启用 E_ALL 并收集主题调用栈产生的 PHP 警告、弃用和 WordPress doing_it_wrong 通知；这些诊断均视为失败。AI 测试验证请求与响应处理，不代表实际服务凭据、配额或特定模型可用。
@@ -52,17 +52,30 @@ ARGON_TEST_WP=6.6 ARGON_TEST_PHP=8.2 npm run test:php
 ## 浏览器集成测试
 
 ```sh
-npx playwright install chromium
+npx playwright install --with-deps chromium firefox webkit
 npm run test:browser
 ```
 
 自动启动 `127.0.0.1:9400` 的一次性 WordPress 站点，使用 6 个 PHP worker，禁止 WP-Cron。测试等待 Playground 完成全部初始化步骤并输出就绪消息后开始，避免首页已响应但测试数据尚未生成的启动竞态。初始化脚本使用不含 `..` 的绝对路径创建输出目录，并检查写入结果，因此全新检出也无需预建 `temp/`。每次运行创建新站点，请保持测试端口空闲。Windows 已有 Chrome 时可设置 `$env:ARGON_BROWSER_CHANNEL = 'chrome'`。该站点的测试账号只用于此隔离实例。
 
-二十六个流程覆盖桌面和手机页面及搜索、Banner 与分页几何尺寸、滚动导航、浮动按钮、目录分支跟随/折叠与锚点跳转、延迟图片加载后的折叠、响应式宽度过渡中的短内容与缩短后的自动取消折叠、展开按钮边界与键盘操作、缓存 nonce 刷新、分类菜单点击、日间/夜间组件配色、实际评论点赞前后的图标颜色、展开/收起和淡入淡出动画、快速反向操作与减少动态效果偏好、分享平台地址与无脚本回退、系统分享成功/取消/失败、带缓存查询参数的脚本与单次复制、无 jQuery/无 randomUUID 的前台、代码折行/行号/复制/全屏降级、公式、折叠块/下拉/标签页、混合尺寸画廊及核心灯箱、自动空格、深色模式持久化、评论提交与编辑/回复/管理、HTML 文档沙箱、嵌套网格在手机/桌面与无脚本时的宽度、长代码局部滚动、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存、保存失败阻止 AI 请求及无 JavaScript 阅读。旧区块和配色基准来自旧版真实构建产物，避免使用新实现生成自己的兼容性期望。
+基础流程覆盖桌面和手机页面及搜索、Banner 与分页几何尺寸、滚动导航、浮动按钮、目录分支跟随/折叠与锚点跳转、延迟图片加载后的折叠、响应式宽度过渡中的短内容与缩短后的自动取消折叠、展开按钮边界与键盘操作、缓存 nonce 刷新、分类菜单点击、日间/夜间组件配色、实际评论点赞前后的图标颜色、展开/收起和淡入淡出动画、快速反向操作与减少动态效果偏好、分享平台地址与无脚本回退、系统分享成功/取消/失败、带缓存查询参数的脚本与单次复制、无 jQuery/无 randomUUID 的前台、代码折行/行号/复制/全屏降级、公式、折叠块/下拉/标签页、混合尺寸画廊及核心灯箱、自动空格、深色模式持久化、评论提交与编辑/回复/管理、HTML 文档沙箱、嵌套网格在手机/桌面与无脚本时的宽度、长代码局部滚动、设置导入导出、区块编辑器与旧序列化兼容、文章元数据保存、保存失败阻止 AI 请求及无 JavaScript 阅读。旧区块和配色基准来自旧版真实构建产物，避免使用新实现生成自己的兼容性期望。
 
-截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
+截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。Chromium 执行完整功能套件；Firefox 和 WebKit 执行 Header、布局、配色、外观选项及历史导航回归。WebKit 引擎测试不等同于真实 iOS/Safari 设备测试；所有插件组合和真实 CDN 环境不在自动验证范围内。
 
 `tests/browser/header.spec.mjs` 另含 5 项 Header 回归：从首页真实文章链接导航，并暂停目标页的主题模块下载，在 `DOMContentLoaded` 前检查透明背景、无阴影和高度，覆盖桌面/手机及日间/夜间模式；恢复脚本后检查滚动着色、模糊和返回顶部/后退，并验证禁用 JavaScript 时保留可读的有色导航。PHP 现代化套件同时检查隐藏 Banner 时输出有色导航的初始状态。
+
+## 视觉与资源回归
+
+`visual-chromium` 项目在 Ubuntu 24.04 / 锁定版本 Chromium 上对桌面、手机、日间、夜间的 Header 和正文作截图比对。基线位于 `tests/browser/snapshots/`。有意修改外观后，在同一操作系统和字体环境生成并人工审阅新基线：
+
+```sh
+npx playwright test --project=visual-chromium --update-snapshots
+npx playwright test --project=visual-chromium
+```
+
+`navigation.spec.mjs` 检查后退/前进后的滚动、工具栏交互、配色状态，以及重载时资源 URL 和字体偏好稳定；附件记录浏览器实际的 `pageshow.persisted` 和资源传输大小。Playground 不保证 HTTP 缓存或 BFCache 命中，不能把通过导航测试解读成生产缓存命中测试。
+
+`npm test` 同时限制前台基础 CSS（主题主样式与共享图标）、静态导入的 JavaScript、编辑器专有 CSS 和编辑器总 CSS 的原始/gzip 体积。计量口径与本次结果见[资源与视觉规范化](../docs/PERFORMANCE-AND-DESIGN.md)。
 
 ## 官方性能插件集成
 

@@ -58,7 +58,7 @@ test('Argon layout keeps its banner geometry, toolbar position and circular pagi
   await page.setViewportSize({width:390,height:844});
   await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
   await expect(nav).toHaveCSS('position','fixed');
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await expect(page.locator('.pagination-mobile .page-link').first()).toHaveCSS('width','36px');
 });
 
@@ -89,7 +89,7 @@ test('page two folds after delayed images load and respects explicit expansion',
 
 for (const loggedIn of [false,true]) test(`cached article nonce is refreshed for ${loggedIn?'a signed-in reader':'a guest'}`, async ({page}) => {
   if(loggedIn){
-    await page.goto('/wp-login.php');await page.locator('#user_login').fill('admin');await page.locator('#user_pass').fill('argon-browser-local-test');
+    await page.goto('/wp-login.php');await expect(page.locator('#user_login')).toBeFocused();await page.locator('#user_login').fill('admin');await page.locator('#user_pass').fill('argon-browser-local-test');
     await Promise.all([page.waitForURL('**/wp-admin/**'),page.locator('#wp-submit').click()]);
   }
   // Model an old cached document while keeping real WordPress AJAX validation.
@@ -141,9 +141,11 @@ test('header and sidebar search open independently and do not cover category lin
   await expect(page.locator('#leftbar_search_container')).not.toHaveClass(/open/);
   await page.locator('#navbar_search_input').press('Tab');
   const search=page.locator('#leftbar_search_container'),input=page.locator('#leftbar_search_input');
-  const buttonRect=await search.boundingBox(),inputRect=await input.boundingBox();
-  expect(inputRect.width).toBeLessThanOrEqual(buttonRect.width+2);
-  expect(inputRect.height).toBeLessThanOrEqual(buttonRect.height+2);
+  // Measure both boxes in one frame while the sidebar entrance animates.
+  await expect.poll(() => search.evaluate(el => {
+    const button = el.getBoundingClientRect(), input = el.querySelector('input').getBoundingClientRect();
+    return input.width <= button.width + 2 && input.height <= button.height + 2;
+  })).toBe(true);
   const category=page.locator('#leftbar_part1_menu a').first();
   const target=await category.getAttribute('href');
   await category.click();

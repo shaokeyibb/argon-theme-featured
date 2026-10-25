@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   browser-and-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.1.0
@@ -16,7 +16,7 @@ jobs:
       - run: npm audit
       - run: npm run build
       - run: npm test
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:browser
       - run: node scripts/test-php.mjs media
       - run: node scripts/test-php.mjs markdown-shortcodes

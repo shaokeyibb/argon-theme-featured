@@ -3,18 +3,183 @@
   "version": 3,
   "settings": {
     "appearanceTools": true,
-    "layout": { "contentSize": "900px", "wideSize": "1200px" },
+    "layout": {
+      "contentSize": "900px",
+      "wideSize": "1200px"
+    },
     "color": {
       "defaultPalette": true,
       "palette": [
-        { "slug": "primary", "name": "Argon", "color": "#5e72e4" },
-        { "slug": "base", "name": "Base", "color": "#ffffff" },
-        { "slug": "contrast", "name": "Text", "color": "#32325d" }
+        {
+          "slug": "primary",
+          "name": "Argon",
+          "color": "#5e72e4"
+        },
+        {
+          "slug": "base",
+          "name": "Base",
+          "color": "#ffffff"
+        },
+        {
+          "slug": "contrast",
+          "name": "Text",
+          "color": "#525f7f"
+        }
       ]
     },
-    "spacing": { "units": ["px", "em", "rem", "%", "vw", "vh"] },
-    "typography": { "fluid": true },
+    "spacing": {
+      "units": [
+        "px",
+        "em",
+        "rem",
+        "%",
+        "vw",
+        "vh"
+      ]
+    },
+    "typography": {
+      "fluid": true,
+      "fontFamilies": [
+        {
+          "slug": "sans",
+          "name": "Sans serif",
+          "fontFamily": "\"Open Sans\", -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", SimSun, sans-serif"
+        },
+        {
+          "slug": "serif",
+          "name": "Serif",
+          "fontFamily": "\"Noto Serif SC\", serif, system-ui"
+        }
+      ]
+    },
     "useRootPaddingAwareAlignments": false,
-    "blocks": { "core/image": { "lightbox": { "allowEditing": true } } }
+    "blocks": {
+      "core/image": {
+        "lightbox": {
+          "allowEditing": true
+        }
+      }
+    },
+    "custom": {
+      "argon": {
+        "content": {
+          "font-family": "var(--wp--preset--font-family--sans)",
+          "font-size": "1rem",
+          "line-height": "1.8",
+          "font-weight": "300",
+          "measure": "100%"
+        },
+        "heading": {
+          "font-family": "inherit",
+          "font-weight": "600",
+          "line-height": "1.5",
+          "h1": "1.875rem",
+          "h2": "1.625rem",
+          "h3": "1.375rem",
+          "h4": "1.125rem",
+          "h5": "0.9375rem",
+          "h6": "0.8125rem"
+        },
+        "spacing": {
+          "paragraph": "15px",
+          "heading": "18px"
+        },
+        "surface": {
+          "radius": "var(--card-radius, 4px)",
+          "shadow": "0 0.125rem 0.25rem #00000013"
+        }
+      }
+    }
+  },
+  "styles": {
+    "typography": {
+      "fontFamily": "var:custom|argon|content|font-family",
+      "fontSize": "var:custom|argon|content|font-size",
+      "lineHeight": "var:custom|argon|content|line-height",
+      "fontWeight": "var:custom|argon|content|font-weight"
+    },
+    "color": {
+      "text": "var:preset|color|contrast"
+    },
+    "elements": {
+      "link": {
+        "color": {
+          "text": "var:preset|color|primary"
+        }
+      },
+      "heading": {
+        "typography": {
+          "fontFamily": "var:custom|argon|heading|font-family",
+          "fontWeight": "var:custom|argon|heading|font-weight",
+          "lineHeight": "var:custom|argon|heading|line-height"
+        }
+      },
+      "h1": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h1"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      },
+      "h2": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h2"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      },
+      "h3": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h3"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      },
+      "h4": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h4"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      },
+      "h5": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h5"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      },
+      "h6": {
+        "typography": {
+          "fontSize": "var:custom|argon|heading|h6"
+        },
+        "spacing": {
+          "margin": {
+            "top": "var:custom|argon|spacing|heading",
+            "bottom": "var:custom|argon|spacing|paragraph"
+          }
+        }
+      }
+    }
   }
 }

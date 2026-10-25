@@ -2,6 +2,8 @@
 html { scroll-behavior: smooth; scroll-padding-top: 90px; }
 body { overflow-x: clip; }
 #content { display: flow-root; }
+/* Keep restored scroll positions independent of the first-frame card scale. */
+html.history-navigation .card { animation: none; }
 .skip-link { position: fixed; top: -100px; left: 1rem; z-index: 100000; background: #fff; color: #16234b; padding: 1rem; border-radius: .4rem; }
 .skip-link:focus { top: 1rem; }
 :focus-visible { outline: 3px solid var(--themecolor, #5e72e4); outline-offset: 3px; }

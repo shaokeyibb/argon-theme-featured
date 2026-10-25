@@ -2,7 +2,8 @@
 // aliases below preserve Argon's templates and previously saved post markup.
 @use 'sass:color';
 @use 'sass:map';
-@use 'bootstrap/scss/bootstrap' with (
+@use './bootstrap' with (
+  $enable-dark-mode: false,
   $blue: #5e72e4,
   $indigo: #5603ad,
   $purple: #8965e0,

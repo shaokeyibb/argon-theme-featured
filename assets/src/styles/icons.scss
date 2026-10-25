@@ -1,0 +1,12 @@
+// One cacheable icon stylesheet shared by the frontend and block editor.
+// Keep the complete official name/alias maps: authors can save arbitrary icons.
+@use '@fortawesome/fontawesome-free/scss/variables' with (
+  $font-path: '@fortawesome/fontawesome-free/webfonts',
+  $font-display: swap
+);
+@use '@fortawesome/fontawesome-free/scss/fontawesome';
+@use '@fortawesome/fontawesome-free/scss/solid';
+@use '@fortawesome/fontawesome-free/scss/regular';
+@use '@fortawesome/fontawesome-free/scss/brands';
+@use '@fortawesome/fontawesome-free/scss/v4-shims';
+@use '@fortawesome/fontawesome-free/css/v4-font-face.css';
