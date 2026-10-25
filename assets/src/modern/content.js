@@ -1,6 +1,7 @@
 import { $, $$, on, config, __, notify, copyText, button, storage, request, reducedMotion, randomID } from './dom.js';
 import { fadeIn, fadeOut } from './motion.js';
 import { spaceContent } from './typography.js';
+import { enhanceImageLayout } from './image-layout.js';
 
 export function enhanceContent() {
   $$('.clamp').forEach(el => { el.style.setProperty('--clamp-lines', Number(el.getAttribute('clamp-line')) || 3); });
@@ -22,6 +23,7 @@ export function enhanceContent() {
   initGithubCards();
   initShare();
   initExternalClicks();
+  enhanceImageLayout();
   if (config.lightbox) initLightbox();
   if (config.code_highlight?.enable && $('article pre')) import('./highlight.js').then(module => module.highlight()).catch(() => {});
   if (config.math && /\$|\\\(|\\\[/.test($('#post_content')?.textContent || '')) import('./math.js').then(module => module.renderMath($('#post_content'))).catch(() => {});
@@ -50,10 +52,10 @@ function initGithubCards() {
 
 function initLightbox() {
   const excluded = '.wp-lightbox-container, [data-wp-interactive], .no-fancybox, [data-no-fancybox="true"], .friend-link-avatar, .comment-sticker';
-  const imageLink = link => /\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(link?.href || '');
+  const imageLink = link => link?.matches('.argon-image-view') || /\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(link?.href || '');
   const eligible = img => !img.closest(excluded) && (!img.closest('a') || img.closest('a').matches('.comment-image') || imageLink(img.closest('a')));
   // WordPress Image blocks with core's lightbox retain their own Interactivity API.
-  on('click', '#post_content img, .shuoshuo-content img, a.comment-image', async (event, el) => {
+  on('click', '#post_content img, .shuoshuo-content img, a.argon-image-view, a.comment-image', async (event, el) => {
     if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     if (el.closest(excluded)) return;
     const link = el.closest('a'), image = el.matches('img') ? el : $('img', el);

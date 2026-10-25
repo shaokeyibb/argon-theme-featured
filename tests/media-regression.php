@@ -69,6 +69,15 @@ media_test('explicit image attributes and core block identities survive', functi
 	$result=argon_prepare_content_images($html);
 	foreach(array('width="300"','height="169"','loading="eager"','fetchpriority="high"') as $attribute) media_assert(str_contains($result,$attribute),'Explicit attribute lost');
 	media_assert(!str_contains($result,'argon-image-inset'),'Explicitly sized image inset');
+	foreach (array('', ' class="wp-image-'.$attachment_id.'"') as $identity) {
+		$html='<img src="'.$url.'"'.$identity.' height="300">';
+		$result=argon_prepare_content_images($html);
+		media_assert(!str_contains($result,'argon-image-inset') && str_contains($result,'height="300"'),'Authored height-only image inset');
+	}
+	$html='<p><img src="'.$url.'" class="wp-image-'.$attachment_id.'" alt="Existing attachment"></p>';
+	$result=argon_prepare_content_images($html);
+	media_assert(str_contains($result,'argon-image-inset'),'Existing attachment without authored width lost inset');
+	media_assert(argon_prepare_content_images($result)===$result,'Layout hint is not idempotent');
 });
 media_test('external thumbnail attributes are escaped exactly once', function() {
 	$url='https://example.com/image.jpg?a=1&b=2';

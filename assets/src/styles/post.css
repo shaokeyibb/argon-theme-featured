@@ -223,20 +223,207 @@ article.post-preview-layout-3 .post-thumbnail {
 	max-height: 20vh;
 }
 
-/* Preserve the inset of classic/Markdown article images without putting
-   viewport-sized padding inside small thumbnails or native image blocks. */
-#post_content > p > img:only-child:is(:not([width]), .argon-image-inset),
-#post_content > p > a:only-child > img:only-child:is(:not([width]), .argon-image-inset),
-#post_content > p > picture:only-child > img.argon-image-inset,
-#post_content > p > a:only-child > picture:only-child > img.argon-image-inset {
+/* Classic/Markdown images keep their inset through picture/link wrappers.
+   Authored sizes and native image/gallery blocks retain their own layout. */
+:is(#post_content, .shuoshuo-content) > p > img:only-child:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > p > a:only-child > img:only-child:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > p > picture:only-child > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > p > a:only-child > picture:only-child > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > picture > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > a > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]),
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > a > picture > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]) {
 	display: block;
-	max-width: calc(100% - min(20vw, 40%));
+	max-width: var(--argon-content-image-width, calc(100% - min(20vw, 40%)));
+	max-height: var(--argon-content-image-height, none);
+	width: auto;
 	height: auto;
 	margin-inline: auto;
 }
-#post_content > p:has(> img:only-child:is(:not([width]), .argon-image-inset)),
-#post_content > p:has(> a:only-child > img:only-child:is(:not([width]), .argon-image-inset)),
-#post_content > p:has(> picture:only-child > img.argon-image-inset),
-#post_content > p:has(> a:only-child > picture:only-child > img.argon-image-inset) {
+/* Resolve the image's percentage width against the paragraph, not an inline
+   link's shrink-to-fit box (which would apply the inset a second time). */
+:is(#post_content, .shuoshuo-content) > p > a:only-child:has(> img:only-child:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]), > picture:only-child > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])),
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > a:has(> img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i]), > picture > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])) {
+	display: block;
+}
+#post_content > p:has(> img:only-child:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])),
+#post_content > p:has(> a:only-child > img:only-child:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])),
+#post_content > p:has(> picture:only-child > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])),
+#post_content > p:has(> a:only-child > picture:only-child > img:is(:not([width], [height]), .argon-image-inset):not([style*="width" i], [style*="height" i])) {
 	margin-bottom: 0;
+}
+@media screen and (min-width: 901px) {
+	:is(#post_content, .shuoshuo-content) {
+		/* Width alone cannot bound a portrait or a very long screenshot. */
+		--argon-content-image-height: 75vh;
+	}
+}
+@media screen and (max-width: 900px) {
+	.shuoshuo-content {
+		--argon-content-image-width: 100%;
+	}
+}
+
+/* Progressive layout: original paragraphs, pictures and links stay intact. */
+.argon-image-layout {
+	container-type: inline-size;
+	--argon-image-preview-height: 60vh;
+	width: 100%;
+	margin: 1rem auto;
+}
+@media screen and (min-width: 901px) {
+	.argon-image-layout {
+		/* Bound the whole gallery once; keep two readable columns when space allows. */
+		width: min(100%, max(520px, 60%));
+	}
+}
+.argon-image-grid {
+	--argon-image-columns: 1;
+	--argon-image-gap: 12px;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--argon-image-gap);
+	align-items: start;
+}
+.argon-image-grid.is-masonry {
+	grid-auto-rows: 1px;
+	row-gap: 0;
+}
+@container (min-width: 520px) {
+	.argon-image-grid {
+		--argon-image-columns: 2;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+.argon-image-layout .argon-image-paragraph {
+	display: contents;
+}
+.argon-image-paragraph > br {
+	display: none;
+}
+.argon-image-cell {
+	display: block;
+	min-width: 0;
+}
+/* Excluding only the gallery still lets following prose become the anchor. */
+html:has(.argon-image-layout.is-changing) {
+	overflow-anchor: none;
+}
+.argon-image-figure {
+	margin: 0;
+	max-width: 100%;
+}
+.argon-image-figure .argon-image-caption,
+:is(#post_content, .shuoshuo-content) > figure:not(.wp-block-image, .alignleft, .alignright, [style*="width" i], [style*="height" i]) > figcaption {
+	display: block;
+	margin: 8px 0 0;
+	max-width: 100%;
+	max-height: none;
+	text-align: center;
+	white-space: normal;
+	overflow: visible;
+	overflow-wrap: anywhere;
+	word-break: normal;
+	text-overflow: clip;
+	-webkit-line-clamp: unset;
+	line-clamp: unset;
+}
+.argon-image-frame {
+	display: block;
+	position: relative;
+	width: 100%;
+	max-width: var(--argon-image-natural-width, 100%);
+	margin-inline: auto;
+	overflow: hidden;
+	border-radius: var(--card-radius, 8px);
+}
+.argon-image-frame > a,
+.argon-image-frame picture {
+	display: block;
+	height: 100%;
+}
+.argon-image-layout .argon-image-cell .argon-image-frame img {
+	display: block;
+	margin: 0 auto;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	max-height: none;
+}
+.argon-image-single .argon-image-frame {
+	width: 100%;
+}
+.argon-image-layout .argon-image-single .argon-image-frame img {
+	width: auto;
+	max-height: var(--argon-content-image-height, none);
+}
+.argon-image-grid .argon-image-frame {
+	background: var(--color-widgets);
+}
+.argon-image-layout .argon-image-grid .argon-image-frame img {
+	height: auto;
+	object-fit: contain;
+}
+.argon-image-grid .is-unavailable .argon-image-frame {
+	min-height: 120px;
+}
+.argon-image-layout .is-long .argon-image-frame {
+	width: 100%;
+	aspect-ratio: auto;
+	max-height: var(--argon-image-preview-size, var(--argon-image-preview-height));
+}
+.argon-image-layout .is-long .argon-image-frame img {
+	width: 100%;
+	height: auto;
+	max-height: none;
+}
+.argon-image-cell.is-long .argon-image-frame::after {
+	content: "";
+	position: absolute;
+	inset: auto 0 0;
+	height: 40px;
+	background: linear-gradient(transparent, var(--color-foreground));
+	pointer-events: none;
+	opacity: 1;
+	transition: opacity .3s ease;
+}
+.argon-image-cell.is-expanded .argon-image-frame::after {
+	opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+	.argon-image-cell .argon-image-frame::after { transition: none; }
+}
+.argon-image-layout .is-long.is-expanded .argon-image-frame {
+	max-height: none;
+}
+.argon-image-toggle {
+	display: block;
+	margin: 8px auto 0;
+	padding: 6px 16px;
+	border: 1px solid var(--color-border-on-foreground-deeper);
+	border-radius: 999px;
+	background: var(--color-foreground);
+	color: var(--color-text-deeper);
+	font: inherit;
+	font-size: 13px;
+	line-height: 1.5;
+	cursor: pointer;
+}
+.argon-image-toggle[hidden] {
+	display: none;
+}
+.argon-image-toggle:hover {
+	background: var(--color-widgets-disabled);
+}
+.argon-image-view:focus-visible {
+	outline-offset: -3px;
+}
+@media print {
+	.argon-image-layout { container-type: normal; }
+	.argon-image-grid.is-masonry { display: block; }
+	.argon-image-grid .argon-image-cell { margin-block-end: 12px; }
+	.argon-image-layout .argon-image-cell .argon-image-frame,
+	.argon-image-layout .argon-image-cell.is-long .argon-image-frame { aspect-ratio: auto; max-height: none; }
+	.argon-image-layout .argon-image-cell .argon-image-frame img { height: auto; max-height: none; }
+	.argon-image-toggle, .argon-image-cell .argon-image-frame::after { display: none; }
 }

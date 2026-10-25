@@ -68,12 +68,18 @@ function argon_prepare_content_images(string $content): string {
 		if ($tags->get_tag() === 'PICTURE') { $in_picture = !$tags->is_tag_closer(); continue; }
 		if ($tags->get_tag() !== 'IMG' || $in_picture) continue;
 		$src = $tags->get_attribute('src');
-		if (!is_string($src) || preg_match('/(?:^|\s)wp-image-\d+(?:\s|$)/', (string) $tags->get_attribute('class'))) continue;
+		if (!is_string($src)) continue;
+		if (preg_match('/(?:^|\s)wp-image-\d+(?:\s|$)/', (string) $tags->get_attribute('class'))) {
+			// Existing attachment identities still need the layout hint before
+			// core supplies intrinsic dimensions and plugins wrap the image.
+			if ($tags->get_attribute('width') === null && $tags->get_attribute('height') === null) $tags->add_class('argon-image-inset');
+			continue;
+		}
 		$id = argon_image_attachment_id($src);
 		if (!$id) continue;
 		$tags->add_class('wp-image-' . $id);
 		// Preserve the theme's existing inset after core supplies intrinsic width.
-		if ($tags->get_attribute('width') === null) $tags->add_class('argon-image-inset');
+		if ($tags->get_attribute('width') === null && $tags->get_attribute('height') === null) $tags->add_class('argon-image-inset');
 	}
 	return $tags->get_updated_html();
 }
