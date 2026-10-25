@@ -45,7 +45,10 @@ for (const mobile of [false, true]) for (const dark of [false, true]) {
       await expect(nav).toHaveCSS('backdrop-filter', 'blur(16px)');
       await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
       await expect(nav).toHaveCSS('background-color', transparent);
-      await page.goBack({ waitUntil: 'domcontentloaded' });
+      await page.goBack({ waitUntil: 'load' });
+      // Clicking a card can scroll the source page (96px on mobile in CI).
+      // History restores that position; check transparency after returning to top.
+      await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
       await expect(nav).toHaveCSS('background-color', transparent);
     } finally {
       release();
