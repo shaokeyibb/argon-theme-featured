@@ -80,6 +80,12 @@ html.darkmode #navbar-main {
 	padding-top: 1rem;
 	padding-bottom: 1rem;
 }
+/* Server-rendered top state must already match initScroll's first frame.
+   Keep the solid fallback when scripts are disabled or the banner is hidden. */
+html:not(.no-js):not(.no-banner) #navbar-main.navbar-ontop {
+	background-color: transparent !important;
+	box-shadow: none;
+}
 body.leftbar-can-headroom.headroom---unpinned #navbar-main {
 	transform: translateY(-100%);
 }

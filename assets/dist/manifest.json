@@ -301,7 +301,7 @@
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-gCo0MJa6.js",
+    "file": "theme-BlA3h3la.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
@@ -317,7 +317,7 @@
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-BIMY-ngt.css"
+      "theme-0l31EKPh.css"
     ],
     "assets": [
       "fa-solid-900-IAB4Droh.woff2",

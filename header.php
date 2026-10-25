@@ -264,7 +264,8 @@
 <a class="skip-link" href="#main"><?php esc_html_e('跳转到内容', 'argon'); ?></a>
 <div id="toolbar">
 	<header class="header-global">
-		<nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light bg-primary headroom--not-bottom headroom--not-top headroom--pinned">
+		<?php // Match the top-of-page appearance before deferred modules or navigation snapshots run. ?>
+		<nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light bg-primary headroom--not-bottom headroom--not-top headroom--pinned navbar-no-blur<?php echo $banner_size !== 'hide' ? ' navbar-ontop' : ''; ?>">
 			<div class="container">
 				<button id="open_sidebar" class="navbar-toggler" type="button" aria-expanded="false" aria-label="Toggle sidebar">
 					<span class="navbar-toggler-icon"></span>

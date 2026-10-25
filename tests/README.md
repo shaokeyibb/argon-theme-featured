@@ -62,6 +62,8 @@ npm run test:browser
 
 截图为 `temp/browser-desktop.png`、`temp/browser-mobile.png` 和 `temp/browser-editor.png`；失败 trace 位于 `temp/browser-results/`。默认测试浏览器为 Chromium；Firefox、Safari、所有插件组合和真实 CDN 环境不在本次自动验证范围内。
 
+`tests/browser/header.spec.mjs` 另含 5 项 Header 回归：从首页真实文章链接导航，并暂停目标页的主题模块下载，在 `DOMContentLoaded` 前检查透明背景、无阴影和高度，覆盖桌面/手机及日间/夜间模式；恢复脚本后检查滚动着色、模糊和返回顶部/后退，并验证禁用 JavaScript 时保留可读的有色导航。PHP 现代化套件同时检查隐藏 Banner 时输出有色导航的初始状态。
+
 ## 官方性能插件集成
 
 ```sh

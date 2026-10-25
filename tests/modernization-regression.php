@@ -203,21 +203,29 @@ modern_test('settings page renders without jQuery or retired controls', function
 	modern_assert(!str_contains($html, 'name="argon_enable_zoomify"'), 'Retired setting remains');
 	modern_assert(str_contains($html, 'name="argon_enable_lightbox"'), 'New lightbox setting missing');
 });
-modern_test('native custom logo renders when the toolbar title option has never been saved', function() {
+modern_test('native custom logo renders without a saved title and hidden banners keep a solid toolbar', function() {
 	$previous_title = get_option('argon_toolbar_title', null);
+	$previous_banner = get_option('argon_banner_size', null);
 	$previous_logo = get_theme_mod('custom_logo');
 	$logo = wp_insert_attachment(array('post_title' => 'Logo fixture', 'post_mime_type' => 'image/png', 'guid' => 'https://example.com/logo.png'));
 	update_post_meta($logo, '_wp_attached_file', 'logo.png');
 	wp_update_attachment_metadata($logo, array('width' => 100, 'height' => 100, 'file' => 'logo.png', 'sizes' => array()));
 	delete_option('argon_toolbar_title'); set_theme_mod('custom_logo', $logo);
+	update_option('argon_banner_size', 'hide');
 	ob_start();
 	try {
 		get_header();
 		$html = ob_get_contents();
 		modern_assert(str_contains($html, 'class="custom-logo"'), 'Registered native logo was ignored without a legacy title option');
+		$processor = new WP_HTML_Tag_Processor($html);
+		while ($processor->next_tag('nav') && $processor->get_attribute('id') !== 'navbar-main') {}
+		modern_assert($processor->get_attribute('id') === 'navbar-main', 'Missing toolbar');
+		modern_assert(!$processor->has_class('navbar-ontop'), 'Hidden banner starts with a transparent toolbar');
+		modern_assert($processor->has_class('navbar-no-blur'), 'Toolbar starts blurred');
 	} finally {
 		ob_end_clean();
 		if ($previous_title !== null) update_option('argon_toolbar_title', $previous_title);
+		if ($previous_banner === null) delete_option('argon_banner_size'); else update_option('argon_banner_size', $previous_banner);
 		if ($previous_logo) set_theme_mod('custom_logo', $previous_logo); else remove_theme_mod('custom_logo');
 		wp_delete_attachment($logo, true);
 	}
