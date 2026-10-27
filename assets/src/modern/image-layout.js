@@ -3,6 +3,10 @@ import { $$, __, button, config, randomID, scrollToElement, reducedMotion } from
 const imageLink = link => /\.(?:avif|webp|png|jpe?g|gif|svg)(?:[?#]|$)/i.test(link?.href || '');
 const excluded = '.wp-block-image, .wp-block-gallery, .no-fancybox, [data-no-fancybox="true"], [data-wp-interactive], .alignleft, .alignright';
 const excludedContainers = `${excluded}, .argon-image-layout, figure, .wp-caption, pre, code, table, a, button, summary, [contenteditable="true"]`;
+// iOS Chrome changes innerHeight as its toolbars move. Resizing images above
+// the reader then shifts the page bottom and can repeatedly reverse that motion.
+// The layout viewport stays stable through those visual viewport changes.
+const layoutViewportHeight = () => document.documentElement.clientHeight;
 
 // Accept the original media wrapper without cloning picture sources or links.
 function mediaNode(node, block) {
@@ -131,7 +135,7 @@ export function enhanceImageLayout() {
         { height: `${before.height}px` }, { height: `${after.height}px` }
       ], options));
       if (!animations.length) { complete(); return; }
-      const state = motion = { animations, width: items.clientWidth, viewportHeight: innerHeight };
+      const state = motion = { animations, width: items.clientWidth, viewportHeight: layoutViewportHeight() };
       layout.classList.add('is-animating');
       Promise.all(animations.map(animation => animation.finished)).then(() => {
         if (motion !== state) return;
@@ -147,7 +151,7 @@ export function enhanceImageLayout() {
         // Animated height and caption wrapping trigger ResizeObserver too.
         // Only a viewport change should interrupt the current transition.
         if (motion) {
-          if (items.clientWidth === motion.width && innerHeight === motion.viewportHeight && !reducedMotion()) return;
+          if (items.clientWidth === motion.width && layoutViewportHeight() === motion.viewportHeight && !reducedMotion()) return;
           stopMotion();
         }
         const before = transitionFrom; transitionFrom = undefined;
@@ -207,7 +211,8 @@ export function enhanceImageLayout() {
       const columns = isGrid ? Number(style.getPropertyValue('--argon-image-columns')) || 1 : 1;
       const gap = parseFloat(style.getPropertyValue('--argon-image-gap')) || 12;
       const columnWidth = (items.clientWidth - (columns - 1) * gap) / columns;
-      const heights = Array(columns).fill(0), previewLimit = innerHeight * .6, longLimit = innerHeight * .75;
+      const viewportHeight = layoutViewportHeight();
+      const heights = Array(columns).fill(0), previewLimit = viewportHeight * .6, longLimit = viewportHeight * .75;
       if (isGrid) items.classList.add('is-masonry');
       cells.forEach(({ cell, frame, image, toggle }, index) => {
         const failed = image.complete && !image.naturalWidth;
@@ -223,8 +228,8 @@ export function enhanceImageLayout() {
         const long = width > 0 && mediaWidth * height / width > longLimit;
         cell.classList.toggle('is-long', long); cell.classList.toggle('is-unavailable', failed);
         toggle.hidden = !long;
-        // Mobile CSS vh can differ from innerHeight while browser chrome is
-        // visible. Use the same measured viewport for singles and grid items.
+        // Use the same stable viewport for both classification and preview
+        // height, including updates triggered by lazy images or captions.
         cell.style.setProperty('--argon-image-preview-size', `${previewLimit}px`);
         if (!isGrid) return;
         const expanded = long && cell.classList.contains('is-expanded');
@@ -247,9 +252,16 @@ export function enhanceImageLayout() {
     finishers.push(() => { if (motion) { stopMotion(); arrange(); complete(); } });
     updates.set(layout, update); resize.observe(layout); update();
   }
-  // Viewport height changes can change the preview limit without changing width.
+  // Real height-only resizes still change previews, but moving browser toolbars
+  // must not reflow images or interrupt an in-progress expand/collapse animation.
   if (groups.length) {
-    window.addEventListener('resize', () => updates.forEach(update => update()), { passive: true });
+    let width = document.documentElement.clientWidth, height = layoutViewportHeight();
+    window.addEventListener('resize', () => {
+      const nextWidth = document.documentElement.clientWidth, nextHeight = layoutViewportHeight();
+      if (width === nextWidth && height === nextHeight) return;
+      width = nextWidth; height = nextHeight;
+      updates.forEach(update => update());
+    }, { passive: true });
     const finish = () => finishers.forEach(done => done());
     window.addEventListener('beforeprint', finish);
     matchMedia('print').addEventListener('change', finish);

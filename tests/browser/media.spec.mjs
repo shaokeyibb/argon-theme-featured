@@ -76,7 +76,8 @@ test('image layout long previews expand, collapse and open the full image with k
     expect((await frame.boundingBox()).height).toBeGreaterThan(560);
     await page.setViewportSize({width:390,height:844});await expect(toggle).toHaveAttribute('aria-expanded','true');
     await toggle.focus();await page.keyboard.press('Space');await expect(toggle).toHaveAttribute('aria-expanded','false');
-    expect((await frame.boundingBox()).height).toBeLessThanOrEqual(507);
+    // aria-expanded updates in the click handler; image geometry follows in rAF.
+    await expect.poll(async()=>(await frame.boundingBox()).height).toBeLessThanOrEqual(507);
     const link=cell.locator('a.argon-image-view');await link.focus();await page.keyboard.press('Enter');
     await expect(page.locator('.pswp')).toBeVisible();
     const full=page.locator('.pswp__item[aria-hidden="false"] img.pswp__img:not(.pswp__img--placeholder)');
@@ -275,6 +276,9 @@ test('official image plugins optimize Markdown, linked images and native blocks'
   await trigger.scrollIntoViewIfNeeded();
   const triggerBox=await trigger.boundingBox();expect(triggerBox.x).toBeGreaterThanOrEqual(0);expect(triggerBox.x+triggerBox.width).toBeLessThanOrEqual(390);
   await trigger.click();await expect(page.locator('.wp-lightbox-overlay.active')).toBeVisible();
+  // Core transfers keyboard focus after its opening animation. Sending Escape
+  // while the trigger still owns focus never reaches the overlay's handler.
+  await expect(page.locator('.wp-lightbox-overlay.active')).toBeFocused();
   await page.keyboard.press('Escape');await expect(page.locator('.wp-lightbox-overlay.active')).toHaveCount(0);
   await expect(page.locator('#linked-media').locator('..').locator('..')).toHaveJSProperty('tagName','A');
   const legacy=page.locator('#legacy-media');await legacy.scrollIntoViewIfNeeded();
@@ -424,9 +428,9 @@ test('image layout masonry mixes long, portrait, small and failed images and ref
   expect(errors).toEqual([]);
 });
 
-async function captionFixture(page) {
+async function captionFixture(page, imageSizes={}) {
   const fixture=JSON.parse(readFileSync('temp/media-browser-fixture.json','utf8'));
-  const sizes={photo:[768,1024],screen:[603,1304],wide:[1200,675]};
+  const sizes={photo:[768,1024],screen:[603,1304],wide:[1200,675],...imageSizes};
   await page.route('**/caption-*.svg',route=>{
     const kind=new URL(route.request().url()).pathname.match(/caption-(\w+)\.svg/)[1], [width,height]=sizes[kind];
     return route.fulfill({contentType:'image/svg+xml',body:`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="teal"/></svg>`});
@@ -511,6 +515,40 @@ test('image layout bounds tall displayed photos below the old ratio cutoff witho
   }
   await cell.locator('a.argon-image-view').focus();await page.keyboard.press('Enter');await expect(page.locator('.pswp')).toBeVisible();await page.keyboard.press('Escape');
   await page.emulateMedia({media:'print'});await expect(frame).toHaveCSS('max-height','none');await expect(toggle).toBeHidden();await expect(caption).toBeVisible();
+});
+
+test('image layout keeps document height stable while iOS browser toolbars resize the visual viewport',async({page})=>{
+  // This portrait also crosses the old dynamic folding threshold, so fixing
+  // only the preview height cannot accidentally make the regression pass.
+  await captionFixture(page,{photo:[768,1152]});
+  await page.setViewportSize({width:402,height:681});await settleMasonry(page);
+  const geometry=()=>page.evaluate(()=>({
+    height:document.documentElement.scrollHeight,
+    frames:[...document.querySelectorAll('.argon-image-frame')].map(el=>el.getBoundingClientRect().height),
+    long:[...document.querySelectorAll('.argon-image-cell')].map(el=>el.classList.contains('is-long')),
+  }));
+  await expect(page.locator('.argon-image-cell.is-long')).not.toHaveCount(0);
+  const before=await geometry();
+  const innerHeightDescriptor=await page.evaluateHandle(()=>Object.getOwnPropertyDescriptor(window,'innerHeight'));
+  // Replay the captured iPhone Chrome dimensions: layout height stays 681px
+  // while innerHeight changes as browser toolbars retract and reappear.
+  for(const height of [780,742,702,681,780,681]) {
+    await page.evaluate(height=>{
+      Object.defineProperty(window,'innerHeight',{configurable:true,value:height});
+      dispatchEvent(new Event('resize'));
+      // Lazy loads and ResizeObserver updates must use the stable height too,
+      // even when the window resize listener correctly ignores browser chrome.
+      document.querySelector('#caption-single').dispatchEvent(new Event('load'));
+    },height);
+    await settleMasonry(page);
+    expect(await page.evaluate(()=>document.documentElement.clientHeight)).toBe(681);
+    expect(await geometry()).toEqual(before);
+  }
+  await page.evaluate(descriptor=>Object.defineProperty(window,'innerHeight',descriptor),innerHeightDescriptor);
+  await innerHeightDescriptor.dispose();
+  // A real viewport resize still needs to resize previews.
+  await page.setViewportSize({width:402,height:520});await settleMasonry(page);
+  expect((await geometry()).frames).not.toEqual(before.frames);
 });
 
 async function pauseImageAnimation(group, time) {
