@@ -18,9 +18,10 @@ export function on(type, selector, handler) {
     if (target && !target.disabled) handler(event, target);
   });
 }
+export const safeAreaTop = () => parseFloat(getComputedStyle(document.body).paddingTop) || 0;
 export function scrollToElement(element) {
   if (!element) return;
-  window.scrollTo({ top: element.getBoundingClientRect().top + scrollY - 90, behavior: reducedMotion() ? 'instant' : 'smooth' });
+  window.scrollTo({ top: element.getBoundingClientRect().top + scrollY - 90 - safeAreaTop(), behavior: reducedMotion() ? 'instant' : 'smooth' });
 }
 export const storage = {
   get(key) { try { return localStorage.getItem(key); } catch { return null; } },

@@ -64,6 +64,10 @@ npm run test:browser
 
 `tests/browser/header.spec.mjs` 另含 5 项 Header 回归：从首页真实文章链接导航，并暂停目标页的主题模块下载，在 `DOMContentLoaded` 前检查透明背景、无阴影和高度，覆盖桌面/手机及日间/夜间模式；恢复脚本后检查滚动着色、模糊和返回顶部/后退，并验证禁用 JavaScript 时保留可读的有色导航。PHP 现代化套件同时检查隐藏 Banner 时输出有色导航的初始状态。
 
+安全区回归另覆盖 `viewport-fit=cover`、顶部不透明背景的明暗模式、导航隐藏/绝对定位、隐藏 Banner 的正文间距、原生锚点定位、横竖屏切换、两侧菜单和抽屉、左右浮动按钮、底部设置面板，以及安全区归零后的布局。桌面测试通过覆盖 `--argon-safe-*` 注入非零边距，验证真实主题的布局与交互；这些测试不模拟 iOS 浏览器工具栏或系统状态栏的绘制。发布前仍需在真实 Safari/Chrome 上检查页面滚动、工具栏收放、横竖屏、搜索键盘和主屏幕模式。实现遵循 [WebKit 的安全区适配方式](https://webkit.org/blog/7929/designing-websites-for-iphone-x/)，不依赖机型、UA 或固定的状态栏高度。
+
+Safari 状态栏背景还依赖浏览器对固定元素的边缘取色，不能仅凭页面内的遮挡层尺寸断言真机已修复。iOS 特性查询启用整块实色导航栏并移除导航栏自身的背景模糊，让导航本身参与取色；独立顶部背景严格使用实际安全区高度，顶部安全区为零时不绘制任何额外色带。布局和锚点偏移均只使用浏览器实际提供的安全区高度。新增回归模拟 iOS 的 CSS 输入，检查明暗模式、滚动与返回顶部时导航保持实色且没有模糊、零安全区没有额外背景条、顶部命中实际导航，并对比导航高度、标题、Banner 与正文位置保持一致。依据见 [WebKit 边缘取色实现](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/LocalFrameView.cpp)及[模糊固定栏影响 Safari 取色的问题报告](https://bugs.webkit.org/show_bug.cgi?id=319479)；桌面 WebKit 通过这些检查仍不代表实际 Safari 状态栏取色效果。
+
 ## 视觉与资源回归
 
 `visual-chromium` 项目在 Ubuntu 24.04 / 锁定版本 Chromium 上对桌面、手机、日间、夜间的 Header 和正文作截图比对。基线位于 `tests/browser/snapshots/`。有意修改外观后，在同一操作系统和字体环境生成并人工审阅新基线：

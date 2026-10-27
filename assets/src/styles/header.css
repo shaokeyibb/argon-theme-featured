@@ -71,7 +71,7 @@ html.darkmode #navbar-main {
 }
 #navbar-main {
 	transition: background 0s, padding 0.15s ease;
-	background-color: rgba(var(--toolbar-color), 0.85) !important;
+	background-color: rgba(var(--toolbar-color), max(var(--argon-toolbar-min-opacity, 0), 0.85)) !important;
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
 	transition: all 0.3s ease;
@@ -83,7 +83,7 @@ html.darkmode #navbar-main {
 /* Server-rendered top state must already match initScroll's first frame.
    Keep the solid fallback when scripts are disabled or the banner is hidden. */
 html:not(.no-js):not(.no-banner) #navbar-main.navbar-ontop {
-	background-color: transparent !important;
+	background-color: rgba(var(--toolbar-color), var(--argon-toolbar-min-opacity, 0)) !important;
 	box-shadow: none;
 }
 body.leftbar-can-headroom.headroom---unpinned #navbar-main {
@@ -133,15 +133,15 @@ html.navbar-absolute:not(.no-banner) #navbar-main {
 	box-shadow: none;
 }
 html.no-banner #navbar-main {
-	background-color: rgba(var(--themecolor-rgbstr), 0.85) !important;
+	background-color: rgba(var(--themecolor-rgbstr), max(var(--argon-toolbar-min-opacity, 0), 0.85)) !important;
 }
 html.no-banner.toolbar-blur #navbar-main {
-	background-color: rgba(var(--themecolor-rgbstr), 0.65) !important;
-	backdrop-filter: blur(16px);
+	background-color: rgba(var(--themecolor-rgbstr), max(var(--argon-toolbar-min-opacity, 0), 0.65)) !important;
+	backdrop-filter: var(--argon-toolbar-backdrop, blur(16px));
 }
 html.no-banner.toolbar-blur #navbar-main.navbar-no-blur {
-	background-color: rgba(var(--themecolor-rgbstr), 0.85) !important;
-	backdrop-filter: blur(0px);
+	background-color: rgba(var(--themecolor-rgbstr), max(var(--argon-toolbar-min-opacity, 0), 0.85)) !important;
+	backdrop-filter: var(--argon-toolbar-backdrop, blur(0px));
 }
 .banner {
 	margin-bottom: 25px;

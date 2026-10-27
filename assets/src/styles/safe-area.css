@@ -1,0 +1,138 @@
+/* Use the browser's geometry, including rotation and standalone display mode.
+   Custom properties also let browser tests exercise non-zero insets. */
+:root {
+	--argon-safe-top: env(safe-area-inset-top, 0px);
+	--argon-safe-right: env(safe-area-inset-right, 0px);
+	--argon-safe-bottom: env(safe-area-inset-bottom, 0px);
+	--argon-safe-left: env(safe-area-inset-left, 0px);
+	--argon-toolbar-min-opacity: 0;
+}
+
+/* A single solid toolbar lets iOS derive its chrome color without painting
+   a separate minimum-height strip over page content. */
+@supports (-webkit-touch-callout: none) {
+	:root {
+		--argon-toolbar-min-opacity: 1;
+		--argon-toolbar-backdrop: none;
+	}
+}
+
+@media screen {
+	html {
+		scroll-padding-top: calc(90px + var(--argon-safe-top));
+	}
+	body {
+		padding: var(--argon-safe-top) var(--argon-safe-right) var(--argon-safe-bottom) var(--argon-safe-left);
+	}
+	.skip-link:focus {
+		top: calc(1rem + var(--argon-safe-top));
+		left: calc(1rem + var(--argon-safe-left));
+	}
+	/* Keep scrolling text out of the status bar, even with a transparent,
+	   auto-hiding or absolute header. Use the toolbar palette at full opacity;
+	   unlike blur, this prevents legible text bleeding into the system chrome.
+	   This must stay outside the transformed Headroom navigation. */
+	#argon-viewport-top-surface {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: var(--argon-safe-top);
+		background: rgb(var(--themecolor-rgbstr));
+		/* Above the legacy full-screen dark-mode dimming pseudo-element so
+		   Safari samples this opaque surface rather than the dimming layer. */
+		z-index: 1000000000;
+		/* Only cover the actual hardware inset; a zero inset paints no strip. */
+		pointer-events: auto;
+	}
+	html.darkmode #argon-viewport-top-surface {
+		background: rgb(var(--color-darkmode-toolbar));
+	}
+	html.no-banner #argon-viewport-top-surface {
+		background: rgb(var(--themecolor-rgbstr));
+	}
+	#navbar-main {
+		padding-top: calc(.5rem + var(--argon-safe-top));
+		padding-left: var(--argon-safe-left);
+		padding-right: var(--argon-safe-right);
+	}
+	#navbar-main.navbar-ontop {
+		padding-top: calc(1rem + var(--argon-safe-top));
+	}
+	#float_action_buttons {
+		bottom: calc(35px + var(--argon-safe-bottom));
+		right: calc(20px + var(--argon-safe-right));
+	}
+	#float_action_buttons.fabtns-float-left {
+		left: calc(20px + var(--argon-safe-left));
+		right: auto;
+	}
+	.cover-scroll-down {
+		bottom: calc(10px + var(--argon-safe-bottom));
+	}
+	html.is-home.banner-as-cover.banner-as-cover .banner {
+		height: calc(100vh - var(--argon-safe-top));
+	}
+	.modal {
+		padding: var(--argon-safe-top) var(--argon-safe-right) var(--argon-safe-bottom) var(--argon-safe-left);
+	}
+}
+
+@media print {
+	#argon-viewport-top-surface {
+		display: none;
+	}
+}
+
+@media screen and (min-width: 900px) {
+	#leftbar_part2.sticky {
+		top: calc(80px + var(--argon-safe-top));
+	}
+	#leftbar_part2_inner {
+		max-height: calc(100vh - 110px - var(--argon-safe-top) - var(--argon-safe-bottom));
+	}
+	body.leftbar-can-headroom.headroom---unpinned #leftbar_part2.sticky {
+		top: calc(10px + var(--argon-safe-top));
+	}
+	html.navbar-absolute #leftbar_part2.sticky {
+		top: calc(10px + var(--argon-safe-top)) !important;
+	}
+}
+
+@media screen and (max-width: 1000px) {
+	#navbar-main {
+		padding-left: calc(10px + var(--argon-safe-left));
+		padding-right: calc(10px + var(--argon-safe-right));
+	}
+}
+
+@media screen and (max-width: 900px) {
+	#leftbar {
+		/* Border-box keeps the drawer within the viewport in landscape. */
+		width: min(calc(var(--sidebar-width) + 40px + var(--argon-safe-left)), 100vw);
+		left: calc(0px - var(--sidebar-width) - 45px - var(--argon-safe-left));
+		padding: var(--argon-safe-top) var(--argon-safe-right) var(--argon-safe-bottom) var(--argon-safe-left);
+	}
+	.leftbar-opened #leftbar {
+		left: 0;
+	}
+}
+
+@media screen and (max-width: 899.98px) {
+	#navbar_global {
+		top: var(--argon-safe-top);
+		left: var(--argon-safe-left);
+		right: var(--argon-safe-right);
+		width: calc(100% - 1.4rem - var(--argon-safe-left) - var(--argon-safe-right));
+		max-height: calc(100dvh - var(--argon-safe-top) - var(--argon-safe-bottom) - 1.4rem);
+		overflow-y: auto;
+	}
+}
+
+@media screen and (max-width: 450px) {
+	#fabtn_blog_settings_popup {
+		padding-left: calc(25px + var(--argon-safe-left));
+		padding-right: calc(25px + var(--argon-safe-right));
+		padding-bottom: calc(10px + var(--argon-safe-bottom));
+	}
+}

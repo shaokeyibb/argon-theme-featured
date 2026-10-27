@@ -276,8 +276,8 @@
       "_rolldown-runtime-BWaJ3C7D.js"
     ]
   },
-  "_dom-VhzTHHLU.js": {
-    "file": "dom-VhzTHHLU.js",
+  "_dom-DLkm3N6T.js": {
+    "file": "dom-DLkm3N6T.js",
     "name": "dom"
   },
   "_rolldown-runtime-BWaJ3C7D.js": {
@@ -291,23 +291,23 @@
     "isEntry": true
   },
   "src/modern/highlight.js": {
-    "file": "highlight-BVGtXR4X.js",
+    "file": "highlight-DhtBR50i.js",
     "name": "highlight",
     "src": "src/modern/highlight.js",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-BWaJ3C7D.js",
-      "_dom-VhzTHHLU.js"
+      "_dom-DLkm3N6T.js"
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-RH_IL7X3.js",
+    "file": "theme-CKEyWwt2.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-BWaJ3C7D.js",
-      "_dom-VhzTHHLU.js"
+      "_dom-DLkm3N6T.js"
     ],
     "dynamicImports": [
       "../node_modules/pangu/dist/browser/index.js",
@@ -317,7 +317,7 @@
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-DRTpyoC_.css"
+      "theme-OIN6Gzis.css"
     ]
   },
   "src/modern/math.js": {

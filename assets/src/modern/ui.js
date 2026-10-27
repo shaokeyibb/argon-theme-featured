@@ -3,7 +3,7 @@ import Collapse from 'bootstrap/js/dist/collapse';
 import Dropdown from 'bootstrap/js/dist/dropdown';
 import Tab from 'bootstrap/js/dist/tab';
 import Popover from 'bootstrap/js/dist/popover';
-import { $, $$, on, config, __, storage, setCookie, scrollToElement, reducedMotion } from './dom.js';
+import { $, $$, on, config, __, storage, setCookie, scrollToElement, safeAreaTop, reducedMotion } from './dom.js';
 import { hex2rgb, rgb2hsl, rgb2gray } from './color.js';
 import { slide } from './motion.js';
 
@@ -232,8 +232,9 @@ function initCatalog() {
     scheduled = false;
     const visible = headings.filter(heading => heading.getClientRects().length);
     let current = visible[0];
+    const headingTop = 91 + safeAreaTop();
     for (const heading of visible) {
-      if (heading.getBoundingClientRect().top > 91) break;
+      if (heading.getBoundingClientRect().top > headingTop) break;
       current = heading;
     }
     if (scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 2) current = visible.at(-1);
@@ -257,17 +258,18 @@ function initScroll() {
   const update = () => {
     scheduled = false;
     const y = scrollY;
+    const inset = safeAreaTop();
     $('#fabtn_back_to_top')?.classList.toggle('fabtn-hidden', y < 400);
     if (toolbar) {
       toolbar.classList.toggle('navbar-no-blur', y < 30);
       if (banner && content && !document.documentElement.classList.contains('no-banner')) {
-        const start = banner.getBoundingClientRect().top + y - 75;
-        const end = content.getBoundingClientRect().top + y - 75;
+        const start = banner.getBoundingClientRect().top + y - 75 - inset;
+        const end = content.getBoundingClientRect().top + y - 75 - inset;
         const amount = config.headroom === 'absolute' ? 0 : Math.max(0, Math.min(1, (y - start) / Math.max(1, end - start)));
         const blur = document.documentElement.classList.contains('toolbar-blur');
-        toolbar.style.setProperty('background-color', `rgba(var(--toolbar-color), ${amount * (blur ? .65 : .85)})`, 'important');
+        toolbar.style.setProperty('background-color', `rgba(var(--toolbar-color), max(var(--argon-toolbar-min-opacity, 0), ${amount * (blur ? .65 : .85)}))`, 'important');
         toolbar.style.boxShadow = amount === 0 ? 'none' : '';
-        if (blur) toolbar.style.backdropFilter = `blur(${amount > .3 ? 16 : 0}px)`;
+        if (blur) toolbar.style.backdropFilter = `var(--argon-toolbar-backdrop, blur(${amount > .3 ? 16 : 0}px))`;
         toolbar.classList.toggle('navbar-ontop', amount === 0);
       }
       if (config.headroom === 'true') {
@@ -280,14 +282,14 @@ function initScroll() {
     }
     if (part1 && part2) {
       const bottom = part1.getBoundingClientRect().bottom + 10;
-      part2.classList.toggle('sticky', bottom <= (config.headroom === 'absolute' ? 18 : 90));
-      document.body.classList.toggle('leftbar-can-headroom', bottom <= 20);
+      part2.classList.toggle('sticky', bottom <= (config.headroom === 'absolute' ? 18 : 90) + inset);
+      document.body.classList.toggle('leftbar-can-headroom', bottom <= 20 + inset);
     } else if (content) {
-      document.body.classList.toggle('leftbar-can-headroom', content.getBoundingClientRect().top <= 30);
+      document.body.classList.toggle('leftbar-can-headroom', content.getBoundingClientRect().top <= 30 + inset);
     }
     if (article) {
       const height = article.offsetHeight + 50 - innerHeight;
-      const progress = (80 - article.getBoundingClientRect().top) / height;
+      const progress = (80 + inset - article.getBoundingClientRect().top) / height;
       $('#fabtn_reading_progress')?.classList.toggle('fabtn-hidden', height <= 0 || progress < 0 || progress > 1);
       if ($('#fabtn_reading_progress_details')) $('#fabtn_reading_progress_details').textContent = `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%`;
       if ($('#fabtn_reading_progress_bar')) $('#fabtn_reading_progress_bar').style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;

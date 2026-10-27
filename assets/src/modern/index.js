@@ -2,6 +2,7 @@ import '../styles/theme-foundation.scss';
 import '../style.scss';
 import './modern.css';
 import '../styles/design.css';
+import '../styles/safe-area.css';
 import { initUI } from './ui.js';
 import { initComments, enhanceComments } from './comments.js';
 import { enhanceContent } from './content.js';

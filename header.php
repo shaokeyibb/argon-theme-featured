@@ -72,7 +72,7 @@
 ?>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<?php if (argon_should_render_seo_metadata()) : ?>
 	<meta property="og:site_name" content="<?php echo esc_attr(get_bloginfo('name'));?>">
 	<meta property="og:title" content="<?php echo esc_attr(wp_get_document_title());?>">
@@ -267,6 +267,7 @@
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<div id="argon-viewport-top-surface" aria-hidden="true"></div>
 <a class="skip-link" href="#main"><?php esc_html_e('跳转到内容', 'argon'); ?></a>
 <div id="toolbar">
 	<header class="header-global">
