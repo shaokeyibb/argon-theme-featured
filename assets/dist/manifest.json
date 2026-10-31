@@ -291,20 +291,17 @@
     "isEntry": true
   },
   "src/modern/highlight.js": {
-    "file": "highlight-CF7bQzA9.js",
+    "file": "highlight-D8uM96E2.js",
     "name": "highlight",
     "src": "src/modern/highlight.js",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-BWaJ3C7D.js",
       "_dom-Dz1tpV9y.js"
-    ],
-    "css": [
-      "highlight-CtOyLyIc.css"
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-BkmF5OdD.js",
+    "file": "theme-CCLv2Euf.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
@@ -320,7 +317,7 @@
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-DJtJFyf-.css"
+      "theme-D69vMMmJ.css"
     ]
   },
   "src/modern/math.js": {

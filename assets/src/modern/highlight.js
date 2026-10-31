@@ -1,5 +1,4 @@
 import hljs from 'highlight.js/lib/common';
-import './highlight-night.scss';
 import { $, $$, config, __, button, copyText } from './dom.js';
 
 function addGutter(pre, code, source) {
@@ -25,6 +24,16 @@ function addGutter(pre, code, source) {
   const update = () => {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
+      // Cover the entire real left padding, including native block wrappers.
+      // Keep the mask stationary while code scrolls underneath it.
+      const box = code.getBoundingClientRect(), parent = pre.getBoundingClientRect();
+      const style = getComputedStyle(code), paddingTop = parseFloat(style.paddingTop), paddingBottom = parseFloat(style.paddingBottom);
+      Object.assign(gutter.style, {
+        left: `${box.left - parent.left - pre.clientLeft + code.clientLeft}px`,
+        width: style.paddingLeft,
+        top: `${box.top - parent.top - pre.clientTop + code.clientTop + paddingTop}px`,
+        height: `${Math.max(0, code.clientHeight - paddingTop - paddingBottom)}px`, bottom: 'auto'
+      });
       const top = gutter.getBoundingClientRect().top;
       for (const {range, number} of lines) number.style.top = `${range.getBoundingClientRect().top - top}px`;
     });
@@ -52,11 +61,6 @@ export function highlight() {
     if (language && !hljs.getLanguage(language)) { code.classList.remove(`language-${language}`); code.classList.add('language-plaintext'); }
     hljs.highlightElement(code);
     pre.classList.add('hljs-codeblock'); code.setAttribute('hljs-codeblock-inner', '');
-    // Preserve the configured palette in daylight and all existing dark themes.
-    // Only light backgrounds need the original default dark palette at night.
-    const background = getComputedStyle(code).backgroundColor;
-    const rgb = background.match(/[\d.]+/g)?.map(Number);
-    pre.classList.toggle('argon-code-light-theme', !!rgb && (rgb[3] ?? 1) > 0 && rgb[0] * .299 + rgb[1] * .587 + rgb[2] * .114 > 128);
     const options = config.code_highlight || {};
     for (const [key, name] of [['hide_linenumber', 'hljs-hide-linenumber'], ['transparent_linenumber', 'hljs-transparent-linenumber'], ['break_line', 'hljs-break-line']]) pre.classList.toggle(name, !!options[key]);
     const updateGutter = addGutter(pre, code, source);
@@ -77,6 +81,13 @@ export function highlight() {
       control.append(icon); controls.append(control);
     }
     pre.append(controls);
-    pre.style.setProperty('--hljs-background-color', background);
+    // Highlighting removes the plain-code colors. Finish only those initial
+    // transitions before sampling the selected palette for the external gutter.
+    for (const animation of code.getAnimations()) {
+      if (['background-color', 'color'].includes(animation.transitionProperty)) animation.finish();
+    }
+    const palette = getComputedStyle(code);
+    pre.style.setProperty('--hljs-background-color', palette.backgroundColor);
+    pre.style.setProperty('--hljs-foreground-color', palette.color);
   });
 }

@@ -21,8 +21,8 @@ html.history-navigation .card { animation: none; }
 .argon-masonry { column-count: var(--columns, 1); column-gap: 10px; }
 .argon-masonry > article, .argon-masonry > .shuoshuo-preview-container { break-inside: avoid; }
 .argon-masonry > nav { column-span: all; }
-.argon-code-gutter { position: absolute; top: 55px; bottom: 22px; left: 0; width: 50px; font: inherit; font-size: 16px; line-height: 1.5; pointer-events: none; user-select: none; overflow: hidden; background: var(--hljs-background-color); }
-.argon-code-gutter > span { position: absolute; right: 10px; opacity: .55; }
+.argon-code-gutter { position: absolute; top: 55px; bottom: 22px; left: 0; width: 55px; z-index: 1; font: inherit; font-size: 16px; line-height: 1.5; pointer-events: none; user-select: none; overflow: hidden; color: var(--hljs-foreground-color, inherit); background: var(--hljs-background-color); }
+.argon-code-gutter > span { position: absolute; right: 15px; opacity: .55; }
 .hljs-transparent-linenumber .argon-code-gutter { background: transparent; }
 .hljs-codeblock > code[hljs-codeblock-inner] { padding-left: 55px !important; }
 .hljs-codeblock.hljs-hide-linenumber > code[hljs-codeblock-inner] { padding-left: 20px !important; }

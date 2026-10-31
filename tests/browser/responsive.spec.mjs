@@ -221,7 +221,7 @@ test('article, native blocks and HTML documents fit every layout around all brea
         });
         expect(bad.boxes, `${post}, ${layout}, ${width}px`).toEqual([]);
         expect(bad.overflow, `${post}, ${layout}, ${width}px`).toBeLessThanOrEqual(1);
-        if (layout === 'triple-column' && width > 900) {
+        if (layout === 'triple-column' && await page.evaluate(() => matchMedia('(width > 900px)').matches)) {
           const unused = await page.evaluate(() => {
             const content = document.querySelector('#content'), primary = document.querySelector('#primary');
             const style = getComputedStyle(content);
@@ -296,6 +296,8 @@ test('detail cover corners match the card on mobile without clipping the article
     for (const width of [250, 320, 390, 600, 601, 844, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await frames(page);
+      const square = await page.evaluate(() => matchMedia('(max-width: 600px)').matches);
+      await expect(card, `${width}px viewport`).toHaveCSS('border-top-left-radius', square ? '0px' : '28px');
       await header.evaluate(el => scrollTo({ top: scrollY + el.getBoundingClientRect().top - 110, behavior: 'instant' }));
       const geometry = await header.evaluate(el => {
         const card = el.parentElement, h = getComputedStyle(el), c = getComputedStyle(card), box = el.getBoundingClientRect();
@@ -306,7 +308,7 @@ test('detail cover corners match the card on mobile without clipping the article
       });
       expect(geometry.coverLeft).toBe(geometry.cardLeft); expect(geometry.coverRight).toBe(geometry.cardRight);
       expect(geometry.coverBottom).toBe('0px'); expect(geometry.bodyOverflow).toBe('visible');
-      if (width <= 600) { expect(geometry.cardLeft).toBe('0px'); expect(geometry.cornersCovered).toBe(true); }
+      if (square) { expect(geometry.cardLeft).toBe('0px'); expect(geometry.cornersCovered).toBe(true); }
       else expect(geometry.cardLeft).toBe('28px');
     }
   }
