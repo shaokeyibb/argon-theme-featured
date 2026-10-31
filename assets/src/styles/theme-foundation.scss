@@ -206,7 +206,21 @@ a.btn-icon-only { line-height: 2.5; }
 .custom-toggle input:focus-visible + .custom-toggle-slider { outline: 3px solid var(--themecolor, #5e72e4); outline-offset: 3px; }
 .close { float: right; padding: 0; color: inherit; font-size: 1.5rem; font-weight: 700; line-height: 1; border: 0; background: transparent; opacity: .6; }
 .modal-header .close { margin-left: auto; }
-.navbar-transparent { --bs-navbar-color: #ffffffeb; --bs-navbar-hover-color: #fff; --bs-navbar-active-color: #fff; --bs-navbar-brand-color: #fff; --bs-navbar-brand-hover-color: #fff; }
+.navbar-transparent { --bs-navbar-color: rgba(255, 255, 255, .95); --bs-navbar-hover-color: rgba(255, 255, 255, .65); --bs-navbar-active-color: rgba(255, 255, 255, .65); --bs-navbar-disabled-color: rgba(255, 255, 255, .25); --bs-navbar-brand-color: #fff; --bs-navbar-brand-hover-color: #fff; }
+// Preserve the original Argon colors and selector specificity: the generic
+// dark-mode anchor rules must not replace navbar colors or their hover states.
+.navbar-transparent .navbar-brand { color: var(--bs-navbar-brand-color); }
+.navbar-transparent .navbar-nav .nav-link { color: var(--bs-navbar-color); }
+.navbar-transparent .navbar-nav .nav-link:hover,
+.navbar-transparent .navbar-nav .nav-link:focus { color: var(--bs-navbar-hover-color); }
+.navbar-transparent .navbar-nav .nav-link.disabled { color: var(--bs-navbar-disabled-color); }
+.navbar-transparent .navbar-nav .show > .nav-link,
+.navbar-transparent .navbar-nav .active > .nav-link,
+.navbar-transparent .navbar-nav .nav-link.show,
+.navbar-transparent .navbar-nav .nav-link.active { color: var(--bs-navbar-active-color); }
+@media (min-width: 768px) {
+  .navbar-transparent { --bs-navbar-brand-color: rgba(255, 255, 255, .95); }
+}
 .navbar-brand { display: inline-block; font-weight: 600; letter-spacing: .05px; }
 .navbar-nav .nav-link { font-size: .9rem; font-weight: 400; }
 .navbar-nav .nav-link .nav-link-inner--text { margin-left: .25rem; }
@@ -226,7 +240,7 @@ a.btn-icon-only { line-height: 2.5; }
   .navbar-nav .nav-link { padding: .625rem 0; }
   .navbar-collapse-header { display: block; padding-bottom: 1rem; }
   #navbar_global { position: absolute; z-index: 1050; top: 0; left: 0; right: 0; width: calc(100% - 1.4rem); margin: .7rem; padding: 1.5rem; border-radius: .25rem; background: var(--color-foreground, #fff); box-shadow: 0 50px 100px #32325d1a, 0 15px 35px #32325d26, 0 5px 15px #0000001a; }
-  #navbar_global .nav-link { color: var(--themecolor, #5e72e4); }
+  #navbar_global .nav-link { color: #172b4d; }
   #navbar_global .dropdown-menu { min-width: auto; box-shadow: none; }
   .navbar-collapse .collapse-close { text-align: right; }
   .navbar-collapse .navbar-toggler { position: relative; display: inline-block; width: 20px; height: 20px; padding: 0; }

@@ -1,5 +1,5 @@
 {
-  "name": "@argon/blocks", "version": "3.0.11", "private": true,
+  "name": "@argon/blocks", "version": "3.0.12", "private": true,
   "scripts": { "prebuild": "node generate-metadata.mjs", "build": "wp-scripts build src/blocks.js --output-path=build", "prestart": "node generate-metadata.mjs", "start": "wp-scripts start src/blocks.js --output-path=build" },
   "dependencies": { "is-whitespace-character": "^2.0.0" }
 }

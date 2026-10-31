@@ -3,6 +3,69 @@ import { test, expect } from '@playwright/test';
 const transparent = /rgba\(\d+, \d+, \d+, 0\)/;
 const themeScripts = /\/assets\/dist\/[^/]+\.js(?:\?.*)?$/;
 
+// Color baselines measured from e789d48's built assets/dist/argon-theme.css,
+// before the Bootstrap 5 migration (including the visible mobile text).
+for (const width of [1440, 844, 390]) {
+  test(`header preserves original colors and hover states (${width}px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.addStyleTag({ content: '* { transition: none !important; }' });
+    // The shared site has no toolbar menu. Use the markup emitted by its walker.
+    await page.locator('#navbar_global').evaluate(menu => menu.insertAdjacentHTML('afterbegin', `
+      <ul class="navbar-nav navbar-nav-hover"><li class="nav-item dropdown">
+        <a id="header-color-link" class="nav-link" href="#content"><span class="nav-link-inner--text">Menu</span></a>
+        <div class="dropdown-menu"><a id="header-color-child" class="dropdown-item" href="#content">Child</a></div>
+      </li></ul>`));
+    const brand = page.locator('#navbar-main .navbar-title');
+    const menu = page.locator('#navbar_global');
+    const link = page.locator('#header-color-link');
+    const white = 'rgb(255, 255, 255)';
+    const normalWhite = 'rgba(255, 255, 255, 0.95)';
+    const hoverWhite = 'rgba(255, 255, 255, 0.65)';
+    for (const mode of ['', 'darkmode', 'darkmode amoled-dark', '']) {
+      await page.evaluate(mode => {
+        document.documentElement.classList.remove('darkmode', 'amoled-dark');
+        if (mode) document.documentElement.classList.add(...mode.split(' '));
+        document.body.style.minHeight = '3000px';
+      }, mode);
+      for (const top of [0, 700]) {
+        await page.evaluate(top => scrollTo({ top, behavior: 'instant' }), top);
+        await menu.evaluate(menu => menu.classList.remove('show'));
+        await page.mouse.move(0, 843);
+        await expect(brand).toHaveCSS('color', width >= 768 ? normalWhite : white);
+        await brand.hover();
+        await expect(brand).toHaveCSS('color', white);
+        await page.mouse.move(0, 843);
+        await brand.focus();
+        await expect(brand).toHaveCSS('color', white);
+        await brand.evaluate(el => el.blur());
+
+        if (width < 900) await menu.evaluate(menu => menu.classList.add('show'));
+        const normal = width >= 900 ? normalWhite : mode ? 'rgb(238, 238, 238)' : 'rgb(23, 43, 77)';
+        const hover = width >= 900 ? hoverWhite : normal;
+        const text = width < 900 && mode ? 'rgb(238, 238, 238)' : normal;
+        await expect(link).toHaveCSS('color', normal);
+        await expect(link.locator('span')).toHaveCSS('color', text);
+        await link.hover();
+        await expect(link).toHaveCSS('color', hover);
+        await expect(link.locator('span')).toHaveCSS('color', width < 900 ? text : hover);
+        await page.mouse.move(0, 843);
+        await link.focus();
+        await expect(link).toHaveCSS('color', hover);
+        await link.evaluate(el => el.blur());
+        if (mode) await expect(page.locator('#header-color-child')).toHaveCSS('color', 'rgb(238, 238, 238)');
+      }
+      if (width >= 900) {
+        for (const [state, color] of [['active', hoverWhite], ['show', hoverWhite], ['disabled', 'rgba(255, 255, 255, 0.25)']]) {
+          await link.evaluate((el, state) => el.classList.add(state), state);
+          await expect(link).toHaveCSS('color', color);
+          await link.evaluate((el, state) => el.classList.remove(state), state);
+        }
+      }
+    }
+  });
+}
+
 // Desktop engines report zero hardware insets. Override only their CSS inputs;
 // all layout, scrolling and interactions still use the real theme and browser.
 const setInsets = (page, { top = 0, right = 0, bottom = 0, left = 0 }) => page.evaluate(insets => {
