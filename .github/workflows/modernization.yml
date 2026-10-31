@@ -3,7 +3,8 @@ on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
-  browser-and-build:
+  # Keep audit failures visible without preventing functional verification.
+  dependency-audit:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
@@ -14,6 +15,16 @@ jobs:
       - run: npm install --global npm@11.16.0
       - run: npm ci
       - run: npm audit
+  browser-and-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm install --global npm@11.16.0
+      - run: npm ci
       - run: npm run build
       - run: npm test
       - run: npx playwright install --with-deps chromium firefox webkit

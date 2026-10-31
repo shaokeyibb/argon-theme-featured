@@ -121,3 +121,5 @@ npm run test:package
 完整发布 PHP 与编译资源后清理页面和 CDN 缓存。3.0.1 的公共 AJAX 会先取得当前访客的有效 nonce，服务器须保持 admin-ajax.php POST 响应不被缓存。原始 HTML/CSS 仍要求 `unfiltered_html`，公开计数/点赞 nonce 仍只是请求校验，并不提供反刷限流。
 
 2026-10-21 的旧验证针对重构前版本（Composer、pnpm、PHP 8.1）；其依赖安装方式与基线已被本文替代。原有 96 项安全检查和 50 项 HTML 文档检查仍保留并持续执行。
+
+安全审计在 `dependency-audit` 独立作业中执行完整的 `npm audit`，发现问题仍令工作流失败；构建、浏览器与 PHP 作业可以同时运行，避免安全公告阻断所有功能验证。2026-11-01 最近失败来自 [deepmerge 原型污染公告](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) 和 [minimatch 模式放大公告](https://github.com/advisories/GHSA-g3hv-75wg-m249)，共 3 个低危、29 个中危（包含依赖链传播），不是 32 个独立公告。deepmerge 4.3.1 尚无上游修复版；minimatch 修复位于 11.x，现有多个调用方仍依赖旧主版本 API，不能直接全局强制覆盖。审计没有加入例外或降低失败级别；依赖修复仍需跟进。
