@@ -301,7 +301,7 @@
     ]
   },
   "src/modern/index.js": {
-    "file": "theme-DHg2pcJO.js",
+    "file": "theme-CwAE7fGS.js",
     "name": "theme",
     "src": "src/modern/index.js",
     "isEntry": true,
@@ -317,7 +317,7 @@
       "../node_modules/qrcode/lib/browser.js"
     ],
     "css": [
-      "theme-B8LuGllO.css"
+      "theme-5-NgQFq3.css"
     ]
   },
   "src/modern/math.js": {

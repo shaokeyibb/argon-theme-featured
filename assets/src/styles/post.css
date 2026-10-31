@@ -69,6 +69,12 @@
 	overflow: hidden;
 	position: relative;
 }
+/* Detail cards become square and full-width on small screens. Match their
+   top corners so a rounded cover cannot expose the card background. */
+.post-full > .post-header.post-header-with-thumbnail {
+	border-top-left-radius: inherit;
+	border-top-right-radius: inherit;
+}
 @media screen and (max-width: 600px) {
 	.post-header.post-header-with-thumbnail {
 		margin: -30px -20px 25px -20px;

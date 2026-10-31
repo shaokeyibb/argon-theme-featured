@@ -273,3 +273,39 @@ test('pagination wraps without stretching very narrow homepages or shrinking cir
   await link.focus(); await expect(link).toBeFocused();
   await expect(link).toHaveAttribute('href', '?paged=49');
 });
+
+
+test('detail cover corners match the card on mobile without clipping the article body', async ({ page }) => {
+  await page.goto(`/?p=${fixture().normal}`, { waitUntil: 'domcontentloaded' });
+  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' });
+  const card = page.locator('article.post-full').first(), header = card.locator(':scope > .post-header');
+  await header.evaluate(el => {
+    const image = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="600"%3E%3Crect width="1200" height="600" fill="teal"/%3E%3C/svg%3E';
+    el.classList.add('post-header-with-thumbnail');
+    el.innerHTML = `<picture><img class="post-thumbnail" width="1200" height="600" src='${image}'></picture><div class="post-header-text-container">${el.innerHTML}</div>`;
+  });
+  await header.locator('img').evaluate(el => el.decode());
+  await page.evaluate(() => document.fonts.ready);
+  for (const dark of [false, true]) {
+    await page.evaluate(dark => {
+      document.documentElement.classList.toggle('darkmode', dark);
+      document.documentElement.style.setProperty('--card-radius', '28px');
+    }, dark);
+    for (const width of [250, 320, 390, 600, 601, 844, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await frames(page);
+      await header.evaluate(el => scrollTo({ top: scrollY + el.getBoundingClientRect().top - 110, behavior: 'instant' }));
+      const geometry = await header.evaluate(el => {
+        const card = el.parentElement, h = getComputedStyle(el), c = getComputedStyle(card), box = el.getBoundingClientRect();
+        return { cardLeft: c.borderTopLeftRadius, cardRight: c.borderTopRightRadius,
+          coverLeft: h.borderTopLeftRadius, coverRight: h.borderTopRightRadius, coverBottom: h.borderBottomLeftRadius,
+          bodyOverflow: c.overflow,
+          cornersCovered: [box.left + 1, box.right - 1].every(x => el.contains(document.elementFromPoint(x, box.top + 1))) };
+      });
+      expect(geometry.coverLeft).toBe(geometry.cardLeft); expect(geometry.coverRight).toBe(geometry.cardRight);
+      expect(geometry.coverBottom).toBe('0px'); expect(geometry.bodyOverflow).toBe('visible');
+      if (width <= 600) { expect(geometry.cardLeft).toBe('0px'); expect(geometry.cornersCovered).toBe(true); }
+      else expect(geometry.cardLeft).toBe('28px');
+    }
+  }
+});
