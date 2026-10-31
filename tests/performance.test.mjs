@@ -8,8 +8,8 @@ test('initial theme assets stay within the measured CSS and JavaScript budgets',
   // Lazy features such as math/highlighting keep their independent bundles.
   for (const [key, limit] of Object.entries({
     frontendCSS: { bytes: 440000, gzip: 82000 },
-    // Content-aware toolbar sizing adds a small initial controller.
-    frontendJS: { bytes: 131000, gzip: 42000 },
+    // Content-aware overflow, node restoration and keyboard focus share the initial controller.
+    frontendJS: { bytes: 134000, gzip: 43500 },
     editorCSS: { bytes: 18000, gzip: 4000 },
     editorTotalCSS: { bytes: 125000, gzip: 31000 }
   })) {

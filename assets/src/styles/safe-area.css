@@ -53,8 +53,8 @@
 	}
 	#navbar-main {
 		padding-top: calc(.5rem + var(--argon-safe-top));
-		padding-left: var(--argon-safe-left);
-		padding-right: var(--argon-safe-right);
+		padding-left: calc(1rem + var(--argon-safe-left));
+		padding-right: calc(1rem + var(--argon-safe-right));
 	}
 	#navbar-main.navbar-ontop {
 		padding-top: calc(1rem + var(--argon-safe-top));
@@ -99,7 +99,7 @@
 	}
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 899.98px) {
 	#navbar-main {
 		padding-left: calc(10px + var(--argon-safe-left));
 		padding-right: calc(10px + var(--argon-safe-right));

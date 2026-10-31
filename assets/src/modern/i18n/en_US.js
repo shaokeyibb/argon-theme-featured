@@ -1,4 +1,5 @@
 export default {
+	"更多": "More",
 	"查看大图": "View full image",
 	"展开完整图片": "Expand image",
 	"收起图片": "Collapse image",

@@ -1,7 +1,9 @@
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 899.98px) {
 	#navbar_global {
 		background: var(--color-foreground);
 	}
+}
+@media screen and (max-width: 900px) {
 	#float_action_buttons #fabtn_open_sidebar {
 		display: block;
 	}
@@ -171,7 +173,7 @@
 		height: 20px;
 	}
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 899.98px) {
 	.navbar-toggler {
 		outline: none !important;
 	}

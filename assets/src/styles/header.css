@@ -41,8 +41,12 @@
 	flex-wrap: nowrap;
 }
 .navbar-measure input.form-control {
-	width: 200px !important;
+	width: 0 !important;
 	flex: none;
+	padding: 0 !important;
+}
+.navbar-measure .open input.form-control {
+	width: 200px !important;
 	padding: .625rem .75rem !important;
 }
 .navbar-measure .navbar-search .fa {
@@ -68,7 +72,7 @@ html.darkmode #navbar-main {
 	--toolbar-color: var(--color-darkmode-toolbar);
 	--argon-navbar-menu-color: #eee;
 }
-/* Keep each desktop item intact; use the compact menu when the row cannot fit. */
+/* Keep desktop items intact; trailing entries use the More dropdown. */
 #navbar-main > .container {
 	flex-wrap: nowrap;
 }
@@ -112,66 +116,6 @@ html.darkmode #navbar-main {
 	#navbar-main .navbar-nav > .nav-item {
 		flex-shrink: 0;
 	}
-	/* Reuse the existing mobile search/menu without changing the page columns. */
-	#navbar-main.navbar-compact .navbar-toggler:not(#open_sidebar) {
-		display: block;
-		position: relative;
-		z-index: 1051;
-	}
-	#navbar-main.navbar-compact #navbar_global {
-		display: none !important;
-		position: absolute;
-		top: 100%;
-		left: auto;
-		right: var(--argon-safe-right, 0px);
-		width: min(28rem, calc(100% - 1.4rem - var(--argon-safe-left, 0px) - var(--argon-safe-right, 0px)));
-		max-height: calc(100dvh - var(--argon-safe-top, 0px) - var(--argon-safe-bottom, 0px) - 6rem);
-		overflow-y: auto;
-		margin: .7rem;
-		padding: 1.5rem;
-		border-radius: .25rem;
-		background: var(--color-foreground);
-		box-shadow: 0 15px 35px #0003;
-		z-index: 1050;
-	}
-	#navbar-main.navbar-compact #navbar_global:is(.show, .collapsing) {
-		display: block !important;
-	}
-	#navbar-main.navbar-compact .navbar-collapse-header {
-		display: block;
-	}
-	#navbar-main.navbar-compact .navbar-nav {
-		flex-direction: column;
-		align-items: stretch;
-	}
-	#navbar-main.navbar-compact #navbar_search_container {
-		display: none;
-	}
-	#navbar-main.navbar-compact #navbar_global .nav-link {
-		padding: .625rem 0;
-		white-space: normal;
-		overflow-wrap: anywhere;
-		color: var(--argon-navbar-menu-color, #172b4d);
-	}
-	#navbar-main.navbar-compact .d-lg-none {
-		display: inline-block !important;
-	}
-	#navbar-main.navbar-compact .navbar-nav .dropdown-menu {
-		position: static;
-		min-width: 0;
-		box-shadow: none;
-	}
-	#navbar-main.navbar-compact .dropdown-menu::before {
-		display: none;
-	}
-	#navbar-main.navbar-compact #navbar_global.show + #navbar_menu_mask {
-		display: block;
-		position: fixed;
-		inset: 0;
-		width: 100vw;
-		height: 100dvh;
-		z-index: 1049;
-	}
 }
 @media (min-width: 1700px) {
 	.navbar-main .container {
@@ -193,10 +137,12 @@ html.darkmode #navbar-main {
 		align-items: center;
 	}
 }
-.navbar-nav > .nav-item.dropdown .nav-link-inner--text i.fa-caret-down:last-child {
+.navbar-more-menu > .nav-item.dropdown > .nav-link > .nav-link-inner--text i.fa-caret-down:last-child,
+.navbar-nav > .nav-item.dropdown > .nav-link > .nav-link-inner--text i.fa-caret-down:last-child {
 	display: none;
 }
-.navbar-nav > .nav-item.dropdown .nav-link-inner--text::after {
+.navbar-more-menu > .nav-item.dropdown > .nav-link > .nav-link-inner--text::after,
+.navbar-nav > .nav-item.dropdown > .nav-link > .nav-link-inner--text::after {
 	content: "\f0d7";
 	margin-left: .35em;
 	font: normal normal normal 14px/1 FontAwesome;
@@ -204,6 +150,38 @@ html.darkmode #navbar-main {
 	font-size: inherit;
 	text-rendering: auto;
 	font-smoothing: antialiased;
+}
+#navbar-main .navbar-more-menu {
+	left: auto;
+	right: 0;
+	width: max-content;
+	min-width: 10rem;
+	max-width: min(22rem, calc(100vw - 2rem - var(--argon-safe-left, 0px) - var(--argon-safe-right, 0px)));
+	max-height: calc(100dvh - 6rem - var(--argon-safe-top, 0px) - var(--argon-safe-bottom, 0px));
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+#navbar-main .navbar-more-menu::before {
+	left: auto;
+	right: 1rem;
+}
+#navbar-main .navbar-more-menu > .nav-item {
+	margin: 0;
+}
+#navbar-main .navbar-more-menu .nav-link {
+	padding: .625rem 1rem;
+	color: var(--argon-navbar-menu-color, #172b4d);
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+#navbar-main .navbar-more-menu .dropdown-menu {
+	position: static !important;
+	min-width: 0;
+	margin: 0 .5rem .5rem;
+	box-shadow: none;
+}
+#navbar-main .navbar-more-menu .dropdown-menu::before {
+	display: none;
 }
 .navbar-search{
 	margin-left: auto;

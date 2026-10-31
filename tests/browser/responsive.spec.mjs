@@ -11,7 +11,7 @@ async function toolbar(page) {
   await page.locator('#navbar-main .navbar-title').evaluate(el => { el.textContent = "HikariLan's Blog"; });
   // Match the seven icon + Chinese label entries from the reported real site.
   await page.locator('#navbar_global .navbar-search').evaluate(search => search.insertAdjacentHTML('beforebegin', `<ul id="responsive-menu" class="navbar-nav navbar-nav-hover">
-    ${['主页', '博客', '时光轴', '朋友们', '留言板', '关于我', '开往'].map((label, index) => `<li class="nav-item ${index === 6 ? 'dropdown' : ''}">
+    ${['主页', '博客', '时光轴', '朋友们', '留言板', '关于我', '开往'].map((label, index) => `<li data-menu-index="${index}" class="nav-item ${index === 6 ? 'dropdown' : ''}">
       <a class="nav-link" href="#content" ${index === 6 ? 'data-bs-toggle="dropdown"' : ''}><i class="fa fa-home"></i><span class="nav-link-inner--text">${label}</span></a>
       ${index === 6 ? '<div class="dropdown-menu"><a class="dropdown-item" href="#content">Archive</a></div>' : ''}</li>`).join('')}
     </ul>`));
@@ -22,16 +22,19 @@ test('toolbar stays on one line through intermediate widths, search expansion an
   test.setTimeout(180000);
   await toolbar(page);
   const widths = [...new Set([...boundaries, ...Array.from({ length: 58 }, (_, i) => 280 + i * 40)])].sort((a, b) => a - b);
-  let compact = 0, expanded = 0;
+  let overflow = 0, expanded = 0;
   for (const font of [16, 24]) {
     await page.evaluate(font => { document.documentElement.style.fontSize = `${font}px`; }, font);
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 });
       await frames(page);
       const nav = page.locator('#navbar-main');
-      const folded = width < 900 || await nav.evaluate(el => el.classList.contains('navbar-compact'));
-      if (folded) compact++; else expanded++;
-      if (!folded) await page.locator('#navbar_search_input_container').evaluate(el => el.classList.add('open'));
+      const folded = width < 900;
+      if (!folded) {
+        await page.locator('#navbar_search_input_container').evaluate(el => el.classList.add('open'));
+        await frames(page);
+        if (await page.locator('#navbar_more').evaluate(el => !el.hidden)) overflow++; else expanded++;
+      }
       const geometry = await nav.evaluate(nav => {
         const line = el => {
           const style = getComputedStyle(el);
@@ -52,7 +55,7 @@ test('toolbar stays on one line through intermediate widths, search expansion an
       if (!folded) expect(geometry.titleClipped, `${width}px`).toBe(false);
     }
   }
-  expect(compact).toBeGreaterThan(0);
+  expect(overflow).toBeGreaterThan(0);
   expect(expanded).toBeGreaterThan(0);
 });
 
@@ -77,56 +80,97 @@ test('reader settings fit narrow screens and scroll within short viewports', asy
   }
 });
 
-test('compact desktop menu supports search, dropdowns, Escape, safe areas and focus across resize', async ({ page }) => {
+test('desktop keeps visible links, authored icons, search and gutters while only overflow moves to More', async ({ page }) => {
+  await toolbar(page);
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '24px'; });
+  const nav = page.locator('#navbar-main'), main = page.locator('#responsive-menu');
+  const panel = page.locator('#navbar_more_menu'), more = page.locator('#navbar_more_toggle');
+  const search = page.locator('#navbar_search_input');
+  const original = await nav.locator('[data-menu-index] > .nav-link').evaluateAll(els => { window.originalNavLinks = els; return els.map(el => el.textContent); });
+  await expect(more).toBeVisible();
+  const gutter = async () => nav.evaluate(el => ({
+    title: el.querySelector('.navbar-title').getBoundingClientRect().left,
+    search: el.querySelector('#navbar_search_input_container').getBoundingClientRect().right
+  }));
+  const before = await gutter();
+  expect(before.title).toBeGreaterThanOrEqual(28);
+  const visible = await main.locator(':scope > [data-menu-index]').count();
+  expect(visible).toBeGreaterThan(0); expect(visible).toBeLessThan(7);
+  for (const dark of [false, true]) {
+    await page.evaluate(dark => document.documentElement.classList.toggle('darkmode', dark), dark);
+    await more.click();
+    await expect(panel).toBeVisible();
+    await expect(page.locator('#navbar_search_container')).toBeVisible();
+    await expect(panel.locator('input')).toHaveCount(0);
+    await expect(panel.locator('.nav-link').first()).toHaveCSS('color', dark ? 'rgb(238, 238, 238)' : 'rgb(23, 43, 77)');
+    const links = panel.locator('[data-menu-index] > .nav-link');
+    expect(await links.evaluateAll(els => els.every(el => el.querySelectorAll('i').length === 1 && el.querySelector('i').className === 'fa fa-home'))).toBe(true);
+    await panel.locator('[data-bs-toggle="dropdown"]').click();
+    await expect(panel.locator('.dropdown-menu .dropdown-item')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(panel.locator('.dropdown-menu')).toBeHidden();
+    await expect(panel).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+    await expect(more).toBeFocused();
+  }
+  await page.locator('#navbar_search_input_container').click();
+  await search.fill('搜索保持原样');
+  await expect(search).toBeFocused();
+  await expect(search).toHaveValue('搜索保持原样');
+  await expect.poll(() => main.locator(':scope > [data-menu-index]').count()).toBeLessThan(visible);
+  expect((await gutter()).title).toBeCloseTo(before.title, 1);
+  expect((await gutter()).search).toBeCloseTo(before.search, 1);
+  await search.press('Tab');
+  await expect.poll(() => search.evaluate(el => el.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  await expect.poll(() => main.locator(':scope > [data-menu-index]').count()).toBe(visible);
+  await page.evaluate(() => { document.documentElement.style.cssText = ''; });
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await expect(more).toBeHidden();
+  await expect(main.locator(':scope > [data-menu-index]')).toHaveCount(7);
+  expect(await main.locator(':scope > [data-menu-index] > .nav-link').evaluateAll(els => els.every((el, i) => el === window.originalNavLinks[i]))).toBe(true);
+  expect(await main.locator(':scope > [data-menu-index] > .nav-link').allTextContents()).toEqual(original);
+});
+
+test('overflow links restore to the original mobile menu and keep search and keyboard focus', async ({ page }) => {
   await toolbar(page);
   await page.setViewportSize({ width: 1000, height: 700 });
   await page.evaluate(() => { document.documentElement.style.fontSize = '24px'; });
-  const nav = page.locator('#navbar-main');
-  const menu = page.locator('#navbar_global');
-  const toggle = nav.locator('button[data-target="#navbar_global"]').last();
-  await expect(nav).toHaveClass(/navbar-compact/);
-  for (const dark of [false, true]) {
-    await page.evaluate(dark => document.documentElement.classList.toggle('darkmode', dark), dark);
-    await toggle.click();
-    await expect(menu).toBeVisible();
-    await expect(menu.locator('.nav-link').first()).toHaveCSS('color', dark ? 'rgb(238, 238, 238)' : 'rgb(23, 43, 77)');
-    await menu.locator('[data-bs-toggle="dropdown"]').click();
-    await expect(menu.locator('.dropdown-item')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(menu.locator('.dropdown-item')).toBeHidden();
-    await expect(menu).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(menu).toBeHidden();
-    await expect(toggle).toBeFocused();
-  }
+  const nav = page.locator('#navbar-main'), menu = page.locator('#navbar_global');
+  const more = page.locator('#navbar_more_toggle'), panel = page.locator('#navbar_more_menu');
+  await expect(more).toBeVisible();
   await page.evaluate(() => {
     for (const [side, value] of Object.entries({ top: 59, right: 47, bottom: 21, left: 47 })) document.documentElement.style.setProperty(`--argon-safe-${side}`, `${value}px`);
   });
-  await toggle.click();
-  const bounds = await menu.boundingBox();
-  expect(bounds.x).toBeGreaterThanOrEqual(47);
-  expect(bounds.x + bounds.width).toBeLessThanOrEqual(953);
-  expect(bounds.y + bounds.height).toBeLessThanOrEqual(679);
-  await page.locator('#navbar_menu_mask').click({ position: { x: 1, y: 650 } });
-  await expect(menu).toBeHidden();
+  await more.click();
+  const box = await panel.boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(47);
+  expect(box.x + box.width).toBeLessThanOrEqual(953);
+  expect(box.y + box.height).toBeLessThanOrEqual(679);
+  await page.locator('#banner').click({ position: { x: 1, y: 500 } });
+  await expect(panel).toBeHidden();
   await page.evaluate(() => { document.documentElement.style.cssText = ''; });
   await page.setViewportSize({ width: 1920, height: 900 });
-  await expect(nav).not.toHaveClass(/navbar-compact/);
+  await expect(more).toBeHidden();
   await page.locator('#navbar_search_input_container').click();
   const search = page.locator('#navbar_search_input'), mobile = page.locator('#navbar_search_input_mobile');
   await search.fill('保留搜索内容');
-  await page.setViewportSize({ width: 901, height: 900 });
-  await expect(nav).toHaveClass(/navbar-compact/);
-  await expect(mobile).toBeFocused();
-  await expect(mobile).toHaveValue('保留搜索内容');
+  await page.setViewportSize({ width: 390, height: 900 });
+  await expect(more).toBeHidden();
+  await expect(page.locator('#responsive-menu > [data-menu-index]')).toHaveCount(7);
+  await expect(mobile).toBeFocused(); await expect(mobile).toHaveValue('保留搜索内容');
   await page.setViewportSize({ width: 1920, height: 900 });
-  await expect(search).toBeFocused();
-  await expect(search).toHaveValue('保留搜索内容');
-  const first = menu.locator('.nav-link').first();
-  await first.focus();
-  await page.setViewportSize({ width: 901, height: 900 });
-  await expect(first).toBeVisible();
-  await expect(first).toBeFocused();
+  await expect(search).toBeFocused(); await expect(search).toHaveValue('保留搜索内容');
+  await expect(more).toBeHidden();
+  const last = nav.locator('[data-menu-index="6"] > .nav-link');
+  await last.focus();
+  await expect(last).toBeFocused();
+  await page.evaluate(() => { document.documentElement.style.fontSize = '24px'; });
+  await page.setViewportSize({ width: 900, height: 900 });
+  await expect(panel).toBeVisible(); await expect(last).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden(); await expect(more).toBeFocused();
 });
 
 test('long toolbar titles and oversized configured or WordPress logos fit small screens', async ({ page }) => {
@@ -141,7 +185,7 @@ test('long toolbar titles and oversized configured or WordPress logos fit small 
       await page.setViewportSize({ width, height: 900 });
       await frames(page);
       expect(await page.locator('#navbar-main').evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
-      const toggle = page.locator('#navbar-main button[data-target="#navbar_global"]').last();
+      const toggle = width < 900 ? page.locator('#navbar-main button[data-target="#navbar_global"]').last() : page.locator('#navbar_search_input_container');
       const box = await toggle.boundingBox();
       expect(box.x + box.width).toBeLessThanOrEqual(width);
       expect(await brand.evaluate(el => el.getBoundingClientRect().right)).toBeLessThanOrEqual(box.x);

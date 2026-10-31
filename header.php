@@ -329,14 +329,12 @@
 										$output .= "\n
 										<li class='nav-item dropdown'>
 											<a href='" . $object -> url . "' class='nav-link' data-toggle='dropdown' no-pjax onclick='return false;' title='" . $object -> description . "'>
-												<i class='fa fa-bookmark d-lg-none' aria-hidden='true'></i>
 												<span class='nav-link-inner--text'>" . $object -> title . "</span>
 										  </a>";
 									}else{
 										$output .= "\n
 										<li class='nav-item'>
 											<a href='" . $object -> url . "' class='nav-link' target='" . $object -> target . "' title='" . $object -> description . "'>
-												<i class='fa fa-bookmark d-lg-none' aria-hidden='true'></i>
 												<span class='nav-link-inner--text'>" . $object -> title . "</span>
 										  </a>";
 									}
