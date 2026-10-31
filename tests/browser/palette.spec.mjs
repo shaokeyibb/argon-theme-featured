@@ -111,3 +111,58 @@ test('comment upvote icon follows the site color before and after a real vote', 
   await expect(button).toHaveClass(/upvoted/);
   await expect(icon).toHaveCSS('color', 'rgb(255, 255, 255)');
 });
+
+for (const initialDark of [false, true]) {
+  test(`light code palettes follow dark mode from startup ${initialDark} and through fullscreen`, async ({ page }) => {
+    await page.addInitScript(dark => {
+      sessionStorage.setItem('Argon_Enable_Dark_Mode', String(dark));
+      Element.prototype.requestFullscreen = async () => { throw new Error('Unavailable'); };
+    }, initialDark);
+    let themeRequests = 0;
+    await page.route('**/assets/dist/highlight/vs2015.css*', async route => {
+      themeRequests++;
+      await route.fulfill({ path: 'assets/dist/highlight/idea.css', contentType: 'text/css' });
+    });
+    const fixture = JSON.parse(readFileSync('temp/browser-fixture.json', 'utf8'));
+    await page.goto(`/?p=${fixture.normal}`, { waitUntil: 'domcontentloaded' });
+    const pre = page.locator('pre.hljs-codeblock').first(), code = pre.locator(':scope > code');
+    await expect(code).toHaveAttribute('data-highlighted', 'yes');
+    expect(themeRequests).toBe(1);
+    await expect(pre).toHaveClass(/argon-code-light-theme/);
+    const source = await code.textContent();
+    const paintedToken = code.locator('.hljs-number').first();
+    await paintedToken.evaluate(el => el.classList.add('hljs-tag'));
+    for (const dark of [initialDark, !initialDark, initialDark, false]) {
+      await page.evaluate(dark => window.setDarkmode(dark), dark);
+      const background = dark ? 'rgb(30, 30, 30)' : 'rgb(255, 255, 255)';
+      await expect(code).toHaveCSS('background-color', background);
+      await expect(code).toHaveCSS('color', dark ? 'rgb(220, 220, 220)' : 'rgb(0, 0, 0)');
+      await expect(code.locator('.hljs-keyword').first()).toHaveCSS('color', dark ? 'rgb(86, 156, 214)' : 'rgb(0, 0, 128)');
+      await expect(paintedToken).toHaveCSS('background-color', dark ? 'rgba(0, 0, 0, 0)' : 'rgb(239, 239, 239)');
+      await expect(pre.locator('.argon-code-gutter')).toHaveCSS('background-color', background);
+      await expect(pre.locator('.hljs-control')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await pre.hover(); await pre.locator('.hljs-control-fullscreen').click();
+      await expect(pre).toHaveClass(/hljs-codeblock-fullscreen/);
+      await expect(pre).toHaveCSS('background-color', background);
+      await page.keyboard.press('Escape'); await expect(pre).not.toHaveClass(/hljs-codeblock-fullscreen/);
+      expect(await code.textContent()).toBe(source);
+    }
+    await pre.evaluate(el => el.classList.add('hljs-transparent-linenumber'));
+    await page.evaluate(() => window.setDarkmode(true));
+    await expect(pre.locator('.argon-code-gutter')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  });
+}
+
+test('configured dark syntax palettes retain their colors in both page modes', async ({ page }) => {
+  const fixture = JSON.parse(readFileSync('temp/browser-fixture.json', 'utf8'));
+  await page.goto(`/?p=${fixture.normal}`, { waitUntil: 'domcontentloaded' });
+  const pre = page.locator('pre.hljs-codeblock').first(), code = pre.locator(':scope > code');
+  await expect(code).toHaveAttribute('data-highlighted', 'yes');
+  await expect(pre).not.toHaveClass(/argon-code-light-theme/);
+  for (const dark of [true, false]) {
+    await page.evaluate(dark => window.setDarkmode(dark), dark);
+    await expect(code).toHaveCSS('background-color', 'rgb(30, 30, 30)');
+    await expect(code.locator('.hljs-keyword').first()).toHaveCSS('color', 'rgb(86, 156, 214)');
+    await expect(pre.locator('.argon-code-gutter')).toHaveCSS('background-color', 'rgb(30, 30, 30)');
+  }
+});

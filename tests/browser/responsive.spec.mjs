@@ -93,6 +93,8 @@ test('desktop keeps visible links, authored icons, search and gutters while only
     title: el.querySelector('.navbar-title').getBoundingClientRect().left,
     search: el.querySelector('#navbar_search_input_container').getBoundingClientRect().right
   }));
+  // Wait for the navbar padding transition after the reader font changes.
+  await expect(nav).toHaveCSS('padding-left', '24px');
   const before = await gutter();
   expect(before.title).toBeGreaterThanOrEqual(28);
   const visible = await main.locator(':scope > [data-menu-index]').count();
@@ -306,6 +308,25 @@ test('detail cover corners match the card on mobile without clipping the article
       expect(geometry.coverBottom).toBe('0px'); expect(geometry.bodyOverflow).toBe('visible');
       if (width <= 600) { expect(geometry.cardLeft).toBe('0px'); expect(geometry.cornersCovered).toBe(true); }
       else expect(geometry.cardLeft).toBe('28px');
+    }
+  }
+});
+
+test('nested comment names and timestamps wrap without widening narrow article pages', async ({ page }) => {
+  await page.goto(`/?p=${fixture().normal}`, { waitUntil: 'domcontentloaded' });
+  const item = name => `<li class="comment-item"><div class="comment-item-left-wrapper"><span class="avatar">M</span></div><div class="comment-item-inner"><div class="comment-item-title"><div class="comment-name"><span class="comment-author">${name}</span><span class="badge badge-pinned">Pinned</span><div class="comment-info"><div>Windows 11 Edge 140.0.3485.81</div></div></div><div class="comment-info"><div class="comment-edited">Edited</div><div class="comment-time"><span class="human-time">3 minutes ago</span></div></div></div><div class="comment-item-text"><p>A nested reply</p></div></div></li>`;
+  await page.locator('#comments .comment-list').first().evaluate((list, html) => { list.innerHTML = html; }, `${item('Modern browser reader')}<li><ul class="children">${item('Modern browser reader')}<li><ul class="children">${item('LongUnbrokenAuthorName'.repeat(4))}</ul></li></ul></li>`);
+  await page.evaluate(() => document.fonts.ready);
+  for (const font of [16, 24]) {
+    await page.evaluate(font => { document.documentElement.style.fontSize = `${font}px`; }, font);
+    for (const width of [250, 280, 320, 390, 600, 900, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await frames(page);
+      const geometry = await page.locator('#comments').evaluate(el => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        outside: [...el.querySelectorAll('.comment-author, .comment-info, .human-time')].filter(node => node.getBoundingClientRect().right > document.documentElement.clientWidth + 1).map(node => node.className)
+      }));
+      expect(geometry, `${width}px, font ${font}px`).toEqual({ overflow: 0, outside: [] });
     }
   }
 });

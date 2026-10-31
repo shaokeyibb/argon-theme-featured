@@ -1,4 +1,5 @@
 import hljs from 'highlight.js/lib/common';
+import './highlight-night.scss';
 import { $, $$, config, __, button, copyText } from './dom.js';
 
 function addGutter(pre, code, source) {
@@ -51,6 +52,11 @@ export function highlight() {
     if (language && !hljs.getLanguage(language)) { code.classList.remove(`language-${language}`); code.classList.add('language-plaintext'); }
     hljs.highlightElement(code);
     pre.classList.add('hljs-codeblock'); code.setAttribute('hljs-codeblock-inner', '');
+    // Preserve the configured palette in daylight and all existing dark themes.
+    // Only light backgrounds need the original default dark palette at night.
+    const background = getComputedStyle(code).backgroundColor;
+    const rgb = background.match(/[\d.]+/g)?.map(Number);
+    pre.classList.toggle('argon-code-light-theme', !!rgb && (rgb[3] ?? 1) > 0 && rgb[0] * .299 + rgb[1] * .587 + rgb[2] * .114 > 128);
     const options = config.code_highlight || {};
     for (const [key, name] of [['hide_linenumber', 'hljs-hide-linenumber'], ['transparent_linenumber', 'hljs-transparent-linenumber'], ['break_line', 'hljs-break-line']]) pre.classList.toggle(name, !!options[key]);
     const updateGutter = addGutter(pre, code, source);
@@ -71,6 +77,6 @@ export function highlight() {
       control.append(icon); controls.append(control);
     }
     pre.append(controls);
-    pre.style.setProperty('--hljs-background-color', getComputedStyle(code).backgroundColor);
+    pre.style.setProperty('--hljs-background-color', background);
   });
 }
