@@ -1,0 +1,191 @@
+import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+const fixture = () => JSON.parse(readFileSync('temp/browser-fixture.json', 'utf8'));
+const frames = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve)))));
+const boundaries = [280, 320, 390, 450, 575, 576, 600, 601, 767, 768, 844, 899, 900, 901, 1000, 1099, 1100, 1101, 1199, 1200, 1201, 1440, 1699, 1700, 1701, 1920, 2560];
+
+async function toolbar(page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.locator('#navbar-main .navbar-title').evaluate(el => { el.textContent = "HikariLan's Blog"; });
+  // Match the seven icon + Chinese label entries from the reported real site.
+  await page.locator('#navbar_global .navbar-search').evaluate(search => search.insertAdjacentHTML('beforebegin', `<ul id="responsive-menu" class="navbar-nav navbar-nav-hover">
+    ${['主页', '博客', '时光轴', '朋友们', '留言板', '关于我', '开往'].map((label, index) => `<li class="nav-item ${index === 6 ? 'dropdown' : ''}">
+      <a class="nav-link" href="#content" ${index === 6 ? 'data-bs-toggle="dropdown"' : ''}><i class="fa fa-home"></i><span class="nav-link-inner--text">${label}</span></a>
+      ${index === 6 ? '<div class="dropdown-menu"><a class="dropdown-item" href="#content">Archive</a></div>' : ''}</li>`).join('')}
+    </ul>`));
+  await page.evaluate(() => document.fonts.ready);
+}
+
+test('toolbar stays on one line through intermediate widths, search expansion and larger fonts', async ({ page }) => {
+  test.setTimeout(180000);
+  await toolbar(page);
+  const widths = [...new Set([...boundaries, ...Array.from({ length: 58 }, (_, i) => 280 + i * 40)])].sort((a, b) => a - b);
+  let compact = 0, expanded = 0;
+  for (const font of [16, 24]) {
+    await page.evaluate(font => { document.documentElement.style.fontSize = `${font}px`; }, font);
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      await frames(page);
+      const nav = page.locator('#navbar-main');
+      const folded = width < 900 || await nav.evaluate(el => el.classList.contains('navbar-compact'));
+      if (folded) compact++; else expanded++;
+      if (!folded) await page.locator('#navbar_search_input_container').evaluate(el => el.classList.add('open'));
+      const geometry = await nav.evaluate(nav => {
+        const line = el => {
+          const style = getComputedStyle(el);
+          return el.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) <= parseFloat(style.lineHeight) + 2;
+        };
+        const title = nav.querySelector('.navbar-title').getBoundingClientRect();
+        return {
+          overflow: nav.scrollWidth - nav.clientWidth,
+          lines: [...nav.querySelectorAll('#responsive-menu .nav-link')].filter(el => el.getClientRects().length).every(line),
+          titleFits: title.left >= 0 && title.right <= document.documentElement.clientWidth,
+          titleClipped: nav.querySelector('.navbar-title').scrollWidth > nav.querySelector('.navbar-title').clientWidth + 1,
+          pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        };
+      });
+      expect(geometry, `font ${font}px, viewport ${width}px`).toMatchObject({ lines: true, titleFits: true });
+      expect(geometry.overflow, `${width}px`).toBeLessThanOrEqual(1);
+      expect(geometry.pageOverflow, `${width}px`).toBeLessThanOrEqual(1);
+      if (!folded) expect(geometry.titleClipped, `${width}px`).toBe(false);
+    }
+  }
+  expect(compact).toBeGreaterThan(0);
+  expect(expanded).toBeGreaterThan(0);
+});
+
+test('reader settings fit narrow screens and scroll within short viewports', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.locator('#fabtn_toggle_blog_settings_popup').click();
+  const panel = page.locator('#fabtn_blog_settings_popup');
+  for (const font of [16, 24]) {
+    await page.evaluate(font => { document.documentElement.style.fontSize = `${font}px`; }, font);
+    for (const width of [280, 320, 390, 450, 600, 899, 900, 901, 1100, 1440, 1920, 2560]) {
+      await page.setViewportSize({ width, height: 360 });
+      await frames(page);
+      const box = await panel.boundingBox();
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+      expect(box.y + box.height).toBeLessThanOrEqual(361);
+      await expect(panel).toHaveCSS('overflow-y', 'auto');
+      expect(await panel.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test('compact desktop menu supports search, dropdowns, Escape, safe areas and focus across resize', async ({ page }) => {
+  await toolbar(page);
+  await page.setViewportSize({ width: 1000, height: 700 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '24px'; });
+  const nav = page.locator('#navbar-main');
+  const menu = page.locator('#navbar_global');
+  const toggle = nav.locator('button[data-target="#navbar_global"]').last();
+  await expect(nav).toHaveClass(/navbar-compact/);
+  for (const dark of [false, true]) {
+    await page.evaluate(dark => document.documentElement.classList.toggle('darkmode', dark), dark);
+    await toggle.click();
+    await expect(menu).toBeVisible();
+    await expect(menu.locator('.nav-link').first()).toHaveCSS('color', dark ? 'rgb(238, 238, 238)' : 'rgb(23, 43, 77)');
+    await menu.locator('[data-bs-toggle="dropdown"]').click();
+    await expect(menu.locator('.dropdown-item')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu.locator('.dropdown-item')).toBeHidden();
+    await expect(menu).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(toggle).toBeFocused();
+  }
+  await page.evaluate(() => {
+    for (const [side, value] of Object.entries({ top: 59, right: 47, bottom: 21, left: 47 })) document.documentElement.style.setProperty(`--argon-safe-${side}`, `${value}px`);
+  });
+  await toggle.click();
+  const bounds = await menu.boundingBox();
+  expect(bounds.x).toBeGreaterThanOrEqual(47);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(953);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(679);
+  await page.locator('#navbar_menu_mask').click({ position: { x: 1, y: 650 } });
+  await expect(menu).toBeHidden();
+  await page.evaluate(() => { document.documentElement.style.cssText = ''; });
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await expect(nav).not.toHaveClass(/navbar-compact/);
+  await page.locator('#navbar_search_input_container').click();
+  const search = page.locator('#navbar_search_input'), mobile = page.locator('#navbar_search_input_mobile');
+  await search.fill('保留搜索内容');
+  await page.setViewportSize({ width: 901, height: 900 });
+  await expect(nav).toHaveClass(/navbar-compact/);
+  await expect(mobile).toBeFocused();
+  await expect(mobile).toHaveValue('保留搜索内容');
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await expect(search).toBeFocused();
+  await expect(search).toHaveValue('保留搜索内容');
+  const first = menu.locator('.nav-link').first();
+  await first.focus();
+  await page.setViewportSize({ width: 901, height: 900 });
+  await expect(first).toBeVisible();
+  await expect(first).toBeFocused();
+});
+
+test('long toolbar titles and oversized configured or WordPress logos fit small screens', async ({ page }) => {
+  await toolbar(page);
+  const brand = page.locator('#navbar-main > .container > .navbar-brand');
+  for (const wordpress of [false, true]) {
+    await brand.evaluate((el, wordpress) => {
+      const logo = '<img width="1200" height="400" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%271200%27 height=%27400%27/%3E">';
+      el.innerHTML = wordpress ? `<a href="#" class="custom-logo-link">${logo.replace('<img ', '<img class="custom-logo" ')}</a>` : `<a href="#" class="navbar-brand navbar-icon">${logo}</a><a href="#" class="navbar-brand navbar-title">A very long site title that should not cover the navigation controls</a>`;
+    }, wordpress);
+    for (const width of [280, 320, 390, 844, 900]) {
+      await page.setViewportSize({ width, height: 900 });
+      await frames(page);
+      expect(await page.locator('#navbar-main').evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+      const toggle = page.locator('#navbar-main button[data-target="#navbar_global"]').last();
+      const box = await toggle.boundingBox();
+      expect(box.x + box.width).toBeLessThanOrEqual(width);
+      expect(await brand.evaluate(el => el.getBoundingClientRect().right)).toBeLessThanOrEqual(box.x);
+    }
+  }
+});
+
+test('article, native blocks and HTML documents fit every layout around all breakpoints', async ({ page }) => {
+  test.setTimeout(180000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const post of ['normal', 'design', 'html']) {
+    await page.goto(`/?p=${fixture()[post]}`, { waitUntil: 'domcontentloaded' });
+    await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' });
+    for (const layout of ['', 'single-column', 'double-column-reverse', 'triple-column']) {
+      await page.evaluate(layout => {
+        document.documentElement.classList.remove('single-column', 'double-column-reverse', 'triple-column');
+        document.querySelector('#rightbar')?.remove();
+        if (layout) document.documentElement.classList.add(layout);
+        if (layout === 'triple-column') document.querySelector('#content').insertAdjacentHTML('beforeend', '<aside id="rightbar"><section class="card">Right sidebar widget</section></aside>');
+      }, layout);
+      for (const width of boundaries) {
+        await page.setViewportSize({ width, height: 900 });
+        await frames(page);
+        const bad = await page.evaluate(() => {
+          const width = document.documentElement.clientWidth;
+          const boxes = [...document.querySelectorAll('#primary, #main, .post-content, .post-full, #post_comment, #footer, #rightbar')]
+            .filter(el => el.getClientRects().length)
+            .map(el => ({ name: el.id || el.className, left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right }))
+            .filter(box => box.left < -1 || box.right > width + 1);
+          return { overflow: document.documentElement.scrollWidth - width, boxes };
+        });
+        expect(bad.boxes, `${post}, ${layout}, ${width}px`).toEqual([]);
+        expect(bad.overflow, `${post}, ${layout}, ${width}px`).toBeLessThanOrEqual(1);
+        if (layout === 'triple-column' && width > 900) {
+          const unused = await page.evaluate(() => {
+            const content = document.querySelector('#content'), primary = document.querySelector('#primary');
+            const style = getComputedStyle(content);
+            const width = content.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            const sidebar = id => document.querySelector(id).getBoundingClientRect().width;
+            return Math.abs(width - sidebar('#leftbar') - sidebar('#rightbar') - primary.getBoundingClientRect().width);
+          });
+          expect(unused, `triple-column at ${width}px`).toBeLessThanOrEqual(1);
+        }
+      }
+    }
+  }
+});

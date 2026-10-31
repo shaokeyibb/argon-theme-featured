@@ -6,6 +6,7 @@ import Popover from 'bootstrap/js/dist/popover';
 import { $, $$, on, config, __, storage, setCookie, scrollToElement, safeAreaTop, reducedMotion } from './dom.js';
 import { hex2rgb, rgb2hsl, rgb2gray } from './color.js';
 import { slide } from './motion.js';
+import { initNavbar } from './navbar.js';
 
 export { Modal };
 
@@ -21,6 +22,7 @@ export function initUI() {
   $$('[data-bs-toggle="dropdown"]').forEach(el => Dropdown.getOrCreateInstance(el));
   $$('[data-bs-toggle="tab"]').forEach(el => Tab.getOrCreateInstance(el));
   $$('.collapse').forEach(el => Collapse.getOrCreateInstance(el, { toggle: false }));
+  initNavbar();
   $$('[tooltip]').forEach(el => { if (!el.title) el.title = el.getAttribute('tooltip'); });
   $$('sup.reference[data-content]').forEach(el => Popover.getOrCreateInstance(el, {
     content: el.dataset.content, html: true, sanitize: true, trigger: 'hover focus', container: 'body'

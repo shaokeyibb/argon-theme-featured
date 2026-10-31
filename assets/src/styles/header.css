@@ -1,3 +1,57 @@
+/* Intrinsic desktop size, independent of the live menu's collapsed state. */
+.navbar-measure {
+	position: fixed !important;
+	top: 0;
+	left: -100000px;
+	width: max-content !important;
+	max-width: none !important;
+	padding: 0;
+	flex-wrap: nowrap;
+	visibility: hidden;
+	pointer-events: none;
+}
+.navbar-measure,
+.navbar-measure * {
+	transition: none !important;
+	animation: none !important;
+}
+.navbar-measure > .navbar-brand {
+	display: flex;
+	align-items: center;
+}
+.navbar-measure .navbar-brand,
+.navbar-measure .navbar-nav,
+.navbar-measure .nav-item {
+	flex: none;
+}
+.navbar-measure .navbar-collapse {
+	display: flex !important;
+	flex: none;
+	height: auto !important;
+	overflow: visible !important;
+}
+.navbar-measure .navbar-nav {
+	flex-direction: row;
+}
+.navbar-measure .nav-link {
+	white-space: nowrap;
+}
+.navbar-measure .input-group {
+	width: max-content;
+	flex-wrap: nowrap;
+}
+.navbar-measure input.form-control {
+	width: 200px !important;
+	flex: none;
+	padding: .625rem .75rem !important;
+}
+.navbar-measure .navbar-search .fa {
+	font-size: 16px;
+}
+.navbar-measure .navbar-icon img {
+	height: 30px;
+	width: auto;
+}
 #navbar-main {
 	--toolbar-color: var(--themecolor-rgbstr);
 	position: fixed;
@@ -12,13 +66,119 @@
 }
 html.darkmode #navbar-main {
 	--toolbar-color: var(--color-darkmode-toolbar);
+	--argon-navbar-menu-color: #eee;
+}
+/* Keep each desktop item intact; use the compact menu when the row cannot fit. */
+#navbar-main > .container {
+	flex-wrap: nowrap;
+}
+#navbar-main > .container > .navbar-brand {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+#navbar-main .navbar-title {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#navbar-main .navbar-icon,
+#navbar-main .custom-logo-link {
+	min-width: 0;
+}
+#navbar-main .custom-logo {
+	max-width: min(300px, 60vw, 100%);
+}
+#navbar-main .navbar-icon img {
+	max-height: 30px;
+	max-width: 100%;
+	width: auto;
+	object-fit: contain;
+}
+#navbar-main .navbar-toggler,
+#navbar-main .navbar-search {
+	flex-shrink: 0;
+}
+#navbar-main .nav-link {
+	white-space: nowrap;
+}
+@media (max-width: 899.98px) {
+	#navbar-main #navbar_global .nav-link {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+}
+@media (min-width: 900px) {
+	#navbar-main .navbar-nav > .nav-item {
+		flex-shrink: 0;
+	}
+	/* Reuse the existing mobile search/menu without changing the page columns. */
+	#navbar-main.navbar-compact .navbar-toggler:not(#open_sidebar) {
+		display: block;
+		position: relative;
+		z-index: 1051;
+	}
+	#navbar-main.navbar-compact #navbar_global {
+		display: none !important;
+		position: absolute;
+		top: 100%;
+		left: auto;
+		right: var(--argon-safe-right, 0px);
+		width: min(28rem, calc(100% - 1.4rem - var(--argon-safe-left, 0px) - var(--argon-safe-right, 0px)));
+		max-height: calc(100dvh - var(--argon-safe-top, 0px) - var(--argon-safe-bottom, 0px) - 6rem);
+		overflow-y: auto;
+		margin: .7rem;
+		padding: 1.5rem;
+		border-radius: .25rem;
+		background: var(--color-foreground);
+		box-shadow: 0 15px 35px #0003;
+		z-index: 1050;
+	}
+	#navbar-main.navbar-compact #navbar_global:is(.show, .collapsing) {
+		display: block !important;
+	}
+	#navbar-main.navbar-compact .navbar-collapse-header {
+		display: block;
+	}
+	#navbar-main.navbar-compact .navbar-nav {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	#navbar-main.navbar-compact #navbar_search_container {
+		display: none;
+	}
+	#navbar-main.navbar-compact #navbar_global .nav-link {
+		padding: .625rem 0;
+		white-space: normal;
+		overflow-wrap: anywhere;
+		color: var(--argon-navbar-menu-color, #172b4d);
+	}
+	#navbar-main.navbar-compact .d-lg-none {
+		display: inline-block !important;
+	}
+	#navbar-main.navbar-compact .navbar-nav .dropdown-menu {
+		position: static;
+		min-width: 0;
+		box-shadow: none;
+	}
+	#navbar-main.navbar-compact .dropdown-menu::before {
+		display: none;
+	}
+	#navbar-main.navbar-compact #navbar_global.show + #navbar_menu_mask {
+		display: block;
+		position: fixed;
+		inset: 0;
+		width: 100vw;
+		height: 100dvh;
+		z-index: 1049;
+	}
 }
 @media (min-width: 1700px) {
 	.navbar-main .container {
 		max-width: 1500px !important;
 	}
 }
-@media (min-width: 1200px) and (max-width: 1700px) {
+@media (min-width: 1200px) and (width < 1700px) {
 	.navbar-main .container {
 		max-width: 1200px !important;
 	}

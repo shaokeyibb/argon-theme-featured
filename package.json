@@ -1,6 +1,6 @@
 {
   "name": "argon-theme-featured",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "private": true,
   "engines": {
     "node": ">=24.18.0",

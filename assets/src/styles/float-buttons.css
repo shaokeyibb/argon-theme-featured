@@ -159,9 +159,11 @@ html.darkmode #fabtn_toggle_darkmode i.fa-lightbulb {
 	padding: 10px 25px;
 	opacity: 0;
 	width: max-content;
-	min-width: 350px;
+	min-width: min(350px, 100vw);
 	max-width: calc(100vw - 170px);
-	max-height: calc(100vh - 70px);
+	max-height: calc(100dvh - 70px - var(--argon-safe-top, 0px) - var(--argon-safe-bottom, 0px));
+	overflow-y: auto;
+	overscroll-behavior: contain;
 	pointer-events: none;
 	transform: translateX(10px);
 	transition: all 0.3s ease;
