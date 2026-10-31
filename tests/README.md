@@ -123,3 +123,5 @@ npm run test:package
 2026-10-21 的旧验证针对重构前版本（Composer、pnpm、PHP 8.1）；其依赖安装方式与基线已被本文替代。原有 96 项安全检查和 50 项 HTML 文档检查仍保留并持续执行。
 
 安全审计在 `dependency-audit` 独立作业中执行完整的 `npm audit`，发现问题仍令工作流失败；构建、浏览器与 PHP 作业可以同时运行，避免安全公告阻断所有功能验证。2026-11-01 最近失败来自 [deepmerge 原型污染公告](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) 和 [minimatch 模式放大公告](https://github.com/advisories/GHSA-g3hv-75wg-m249)，共 3 个低危、29 个中危（包含依赖链传播），不是 32 个独立公告。deepmerge 4.3.1 尚无上游修复版；minimatch 修复位于 11.x，现有多个调用方仍依赖旧主版本 API，不能直接全局强制覆盖。审计没有加入例外或降低失败级别；依赖修复仍需跟进。
+
+分页响应式回归覆盖 200–1440px 和正常 / 150% 字号，以中间页九个分页控件验证居中换行、页面无横向溢出、36px 圆形按钮及键盘链接保留。线上修复前 250px 视口被移动分页撑至 301px，隐藏分页后恢复 250px。

@@ -233,3 +233,43 @@ test('article, native blocks and HTML documents fit every layout around all brea
     }
   }
 });
+
+
+test('pagination wraps without stretching very narrow homepages or shrinking circular controls', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  // Middle pages have the most controls: first/previous, five numbers, next/last.
+  await page.locator('.pagination').evaluateAll(lists => lists.forEach(list => {
+    list.innerHTML = ['«', '‹', '48', '49', '50', '51', '52', '›', '»'].map(label =>
+      `<li class="page-item${label === '50' ? ' active' : ''}"><a class="page-link" href="?paged=49">${label}</a></li>`).join('');
+  }));
+  await page.evaluate(() => document.fonts.ready);
+  for (const font of [16, 24]) {
+    await page.evaluate(font => { document.documentElement.style.fontSize = `${font}px`; }, font);
+    for (const width of [200, 220, 250, 280, 320, 390, 600, 601, 900, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      await frames(page);
+      const geometry = await page.locator('.pagination:visible').evaluate(list => {
+        const box = list.getBoundingClientRect();
+        return { left: box.left, right: box.right,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          rows: new Set([...list.children].map(el => Math.round(el.getBoundingClientRect().top))).size,
+          links: [...list.querySelectorAll('.page-link')].map(el => {
+            const rect = el.getBoundingClientRect();
+            return { left: rect.left, right: rect.right, width: rect.width, height: rect.height, radius: getComputedStyle(el).borderRadius };
+          }) };
+      });
+      expect(geometry.overflow, `${width}px, font ${font}px`).toBeLessThanOrEqual(1);
+      expect(geometry.left).toBeGreaterThanOrEqual(0); expect(geometry.right).toBeLessThanOrEqual(width + 1);
+      for (const link of geometry.links) {
+        expect(link.left).toBeGreaterThanOrEqual(0); expect(link.right).toBeLessThanOrEqual(width + 1);
+        expect(link.width).toBe(36); expect(link.height).toBe(36); expect(link.radius).toBe('50%');
+      }
+      if (width <= 250) expect(geometry.rows).toBeGreaterThan(1);
+      if (width >= 900) expect(geometry.rows).toBe(1);
+    }
+  }
+  const link = page.locator('.pagination:visible .page-link').first();
+  await link.focus(); await expect(link).toBeFocused();
+  await expect(link).toHaveAttribute('href', '?paged=49');
+});

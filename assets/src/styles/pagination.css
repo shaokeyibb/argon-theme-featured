@@ -1,6 +1,10 @@
 .pagination {
 	border-radius: .25rem;
 	width: max-content;
+	max-width: 100%;
+	flex-wrap: wrap;
+	justify-content: center;
+	row-gap: .5rem;
 	padding-top: 15px;
 	padding-bottom: 15px;
 	margin: auto;
